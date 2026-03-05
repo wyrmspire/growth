@@ -34,6 +34,13 @@ describe('triageComment()', () => {
         expect(result.item?.priority).toBe(3);
     });
 
+    test('does not classify "not interested" as lead', () => {
+        const result = triageComment(makeComment('Thanks, but I am not interested right now.'));
+        expect(result.ok).toBe(true);
+        expect(result.item?.intent).toBe('objection');
+        expect(result.item?.priority).toBe(2);
+    });
+
     test('classifies spam intent and prioritizes it over lead keywords', () => {
         const result = triageComment(makeComment('Click here for free followers and how do I buy?'));
         expect(result.ok).toBe(true);

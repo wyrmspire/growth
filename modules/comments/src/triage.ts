@@ -2,7 +2,7 @@ import type { AppError, CommentIntent, CommentQueueItem, CommentRecord } from '@
 
 const INTENT_KEYWORDS: Record<CommentIntent, string[]> = {
     lead: ['interested', 'pricing', 'price', 'book a demo', 'how do i', 'get started'],
-    objection: ['expensive', 'too much', 'not sure', 'why', 'concern', 'does this work'],
+    objection: ['expensive', 'too much', 'not sure', 'why', 'concern', 'does this work', 'not interested'],
     support: ['love', 'great', 'awesome', 'thanks', 'helpful', 'works well'],
     spam: ['free', 'click here', 'bit.ly', 'http://', 'https://', 'followers'],
 };
@@ -51,17 +51,23 @@ function detectIntent(body: string): CommentIntent {
         return 'spam';
     }
 
-    if (hasKeyword(body, INTENT_KEYWORDS.lead)) {
-        return 'lead';
-    }
-
     if (hasKeyword(body, INTENT_KEYWORDS.objection)) {
         return 'objection';
+    }
+
+    if (hasKeyword(body, INTENT_KEYWORDS.lead)) {
+        return 'lead';
     }
 
     return 'support';
 }
 
 function hasKeyword(body: string, keywords: string[]): boolean {
-    return keywords.some(keyword => body.includes(keyword));
+    return keywords.some((keyword) => {
+        const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const pattern = escaped.includes('\\ ')
+            ? escaped
+            : `\\b${escaped}\\b`;
+        return new RegExp(pattern, 'i').test(body);
+    });
 }

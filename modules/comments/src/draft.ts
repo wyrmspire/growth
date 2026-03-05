@@ -12,6 +12,7 @@ const CONFIDENCE: Record<Exclude<CommentQueueItem['intent'], 'spam'>, number> = 
     objection: 0.78,
     support: 0.88,
 };
+const ELLIPSIS_LENGTH = 3;
 
 export interface DraftReplyResult {
     ok: boolean;
@@ -85,9 +86,9 @@ function applyMaxLength(input: string, maxLength: number): string {
         return input;
     }
 
-    if (maxLength <= 3) {
+    if (maxLength <= ELLIPSIS_LENGTH) {
         return '.'.repeat(maxLength);
     }
 
-    return `${input.slice(0, maxLength - 3).trimEnd()}...`;
+    return `${input.slice(0, maxLength - ELLIPSIS_LENGTH).trimEnd()}...`;
 }

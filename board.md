@@ -156,17 +156,17 @@ Depends on: core, analytics, adapters
 ---
 
 ### Module: copylab
-Owner: agent-3
+Owner: copilot (Lane A, 2026-03-05T15:24:00Z)
 Layer: domain
 Depends on: core, funnel
 
-#### Lane A - Variant Generation [READY]
-- [ ] COPY-A1 [READY] Implement `generateVariants()` using funnel stage inputs and channel policy. Tests: `modules/copylab/src/__tests__/generate.test.ts` -> `modules/copylab/src/generate.ts`
-- [ ] COPY-A2 [READY] Create policy schema and default policy set versioning. Tests: `modules/copylab/src/__tests__/policy.test.ts` -> `modules/copylab/src/policy.ts`
+#### Lane A - Variant Generation [DONE]
+- [x] COPY-A1 [DONE] Implement `generateVariants()` using funnel stage inputs and channel policy. Tests: `modules/copylab/src/__tests__/generate.test.ts` -> `modules/copylab/src/generate.ts` | owner: copilot | done: 2026-03-05T15:27:00Z
+- [x] COPY-A2 [DONE] Create policy schema and default policy set versioning. Tests: `modules/copylab/src/__tests__/policy.test.ts` -> `modules/copylab/src/policy.ts` | owner: copilot | done: 2026-03-05T15:27:00Z
 
-#### Lane B - Scoring and Formatting [READY]
-- [ ] COPY-B1 [READY] Implement deterministic `scoreVariants()` rule scoring. Tests: `modules/copylab/src/__tests__/score.test.ts` -> `modules/copylab/src/score.ts`
-- [ ] COPY-B2 [READY] Build channel formatter for Meta, LinkedIn, X text constraints. Tests: `modules/copylab/src/__tests__/format.test.ts` -> `modules/copylab/src/format.ts`
+#### Lane B - Scoring and Formatting [DONE]
+- [x] COPY-B1 [DONE] Implement deterministic `scoreVariants()` rule scoring. Tests: `modules/copylab/src/__tests__/score.test.ts` -> `modules/copylab/src/score.ts` | owner: copilot | done: 2026-03-05T15:27:00Z
+- [x] COPY-B2 [DONE] Build channel formatter for Meta, LinkedIn, X text constraints. Tests: `modules/copylab/src/__tests__/format.test.ts` -> `modules/copylab/src/format.ts` | owner: copilot | done: 2026-03-05T15:27:00Z
 
 ---
 
@@ -290,6 +290,8 @@ Depends on: core
 | 2026-03-05T06:15:00Z | antigravity | DONE CORE-A1/A2/A3/B1/B2: 87 tests pass. Full CONTRACT.md alignment confirmed, no gaps. |
 | 2026-03-05T06:15:00Z | antigravity | DONE STR-A1/A2 (production impls): 28 tests pass. DONE FUN-A1/A2: 23 tests pass. FUN-B1 + COPY-A1 unblocked. |
 | 2026-03-05T06:15:00Z | antigravity | DONE ADP-A1/A2(31) + PUB-A1(27). DONE BACK-6: offerStrategistFlow, copyCoachFlow, replyCoachFlow (mock-safe, Genkit 1.29). DONE BACK-8: genkit-gate.ts in core/src. Total: 223/223 tests pass. |
+| 2026-03-05T15:24:00Z | copilot | CLAIMED COPY-A1/COPY-A2/COPY-B1/COPY-B2 in Lane A. Implementing copylab generation, policy versioning, scoring, and channel formatter with focused tests. |
+| 2026-03-05T15:27:00Z | copilot | DONE COPY-A1/A2/B1/B2: added copylab generate/policy/score/format implementations and 15 focused tests. Full suite passing (238/238). |
 
 ## Refill Protocol
 

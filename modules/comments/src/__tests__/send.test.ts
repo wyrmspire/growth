@@ -65,10 +65,10 @@ describe('sendApprovedReply()', () => {
         expect(result.error?.code).toBe('APPROVAL_REQUIRED');
     });
 
-    test('returns APPROVAL_REQUIRED for empty replyId', () => {
+    test('returns SEND_FAILED for empty replyId', () => {
         const result = sendApprovedReply('' as EntityId, makeContext());
         expect(result.ok).toBe(false);
-        expect(result.error?.code).toBe('APPROVAL_REQUIRED');
+        expect(result.error?.code).toBe('SEND_FAILED');
     });
 
     test('includes externalId in successful result', () => {

@@ -24,7 +24,7 @@ Added 6 focused tests covering:
 | sends reply when approval exists | Happy path — approved reply dispatches successfully |
 | returns APPROVAL_REQUIRED when reply is not approved | Pending state blocks send |
 | returns APPROVAL_REQUIRED when reply was rejected | Rejected state blocks send |
-| returns APPROVAL_REQUIRED for empty replyId | Input validation |
+| returns SEND_FAILED for empty replyId | Input validation (empty ID cannot be sent) |
 | includes externalId in successful result | Response mapping |
 | maps reply id and approval outcome correctly | Audit data preservation |
 

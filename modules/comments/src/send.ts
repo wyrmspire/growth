@@ -36,7 +36,7 @@ export function sendApprovedReply(
     if (!replyId || replyId.trim() === '') {
         return {
             ok: false,
-            error: makeError('APPROVAL_REQUIRED', 'Reply ID is required.'),
+            error: makeError('SEND_FAILED', 'Reply ID is required.'),
         };
     }
 

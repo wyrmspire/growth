@@ -7,8 +7,8 @@ Depends on: core, approvals, adapters
 Key files:
 - CONTRACT.md
 - src/triage.ts
-- src/reply.ts
+- src/draft.ts
 
 Tests:
 - src/__tests__/triage.test.ts
-- src/__tests__/reply.test.ts
+- src/__tests__/draft.test.ts

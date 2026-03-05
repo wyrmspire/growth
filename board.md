@@ -215,13 +215,13 @@ Depends on: core, approvals, adapters
 ---
 
 ### Module: comments
-Owner: unassigned
+Owner: copilot (Lane C, 2026-03-05T15:25:00Z)
 Layer: domain
 Depends on: core, approvals, adapters
 
-#### Lane A - Triage and Draft [READY]
-- [ ] COM-A1 [READY] Implement `triageComment()` intent buckets (lead, objection, support, spam). Tests: `modules/comments/src/__tests__/triage.test.ts` -> `modules/comments/src/triage.ts`
-- [ ] COM-A2 [READY] Implement `draftReply()` with reply policy application. Tests: `modules/comments/src/__tests__/draft.test.ts` -> `modules/comments/src/draft.ts`
+#### Lane A - Triage and Draft [DONE]
+- [x] COM-A1 [DONE] Implement `triageComment()` intent buckets (lead, objection, support, spam). Tests: `modules/comments/src/__tests__/triage.test.ts` -> `modules/comments/src/triage.ts` | owner: copilot | 2026-03-05T15:25:00Z
+- [x] COM-A2 [DONE] Implement `draftReply()` with reply policy application. Tests: `modules/comments/src/__tests__/draft.test.ts` -> `modules/comments/src/draft.ts` | owner: copilot | 2026-03-05T15:25:00Z
 
 #### Lane B - Send Flow [READY]
 - [ ] COM-B1 [BLOCKED by APP-B1, ADP-B2] Implement `sendApprovedReply()` approval gate + adapter dispatch. Tests: `modules/comments/src/__tests__/send.test.ts` -> `modules/comments/src/send.ts`
@@ -290,6 +290,8 @@ Depends on: core
 | 2026-03-05T06:15:00Z | antigravity | DONE CORE-A1/A2/A3/B1/B2: 87 tests pass. Full CONTRACT.md alignment confirmed, no gaps. |
 | 2026-03-05T06:15:00Z | antigravity | DONE STR-A1/A2 (production impls): 28 tests pass. DONE FUN-A1/A2: 23 tests pass. FUN-B1 + COPY-A1 unblocked. |
 | 2026-03-05T06:15:00Z | antigravity | DONE ADP-A1/A2(31) + PUB-A1(27). DONE BACK-6: offerStrategistFlow, copyCoachFlow, replyCoachFlow (mock-safe, Genkit 1.29). DONE BACK-8: genkit-gate.ts in core/src. Total: 223/223 tests pass. |
+| 2026-03-05T15:25:00Z | copilot | CLAIMED COM-A1 and COM-A2 in Lane C. Starting comments module triage/draft implementation and tests. |
+| 2026-03-05T15:28:00Z | copilot | DONE COM-A1 + COM-A2. Added `triage.ts` and `draft.ts` with focused tests (10 tests passing). COM-B1 remains blocked pending Lane B dependencies (APP-B1, ADP-B2). |
 
 ## Refill Protocol
 

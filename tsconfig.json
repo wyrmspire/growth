@@ -1,0 +1,55 @@
+{
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "noEmit": true,
+        "declaration": true,
+        "jsx": "preserve",
+        "lib": [
+            "ES2022",
+            "DOM",
+            "DOM.Iterable"
+        ],
+        "baseUrl": ".",
+        "paths": {
+            "@core/*": [
+                "modules/core/src/*"
+            ],
+            "@funnel/*": [
+                "modules/funnel/src/*"
+            ],
+            "@strategy/*": [
+                "modules/strategy/src/*"
+            ],
+            "@copylab/*": [
+                "modules/copylab/src/*"
+            ],
+            "@approvals/*": [
+                "modules/approvals/src/*"
+            ],
+            "@adapters/*": [
+                "modules/adapters/src/*"
+            ],
+            "@publishing/*": [
+                "modules/publishing/src/*"
+            ],
+            "@comments/*": [
+                "modules/comments/src/*"
+            ],
+            "@analytics/*": [
+                "modules/analytics/src/*"
+            ]
+        }
+    },
+    "include": [
+        "src",
+        "modules"
+    ]
+}

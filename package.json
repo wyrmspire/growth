@@ -1,0 +1,24 @@
+{
+  "name": "growthops-os",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@vitest/ui": "^4.0.18",
+    "typescript": "^5.4.0",
+    "vite": "^5.4.0",
+    "vitest": "^4.0.18"
+  },
+  "dependencies": {
+    "@genkit-ai/google-genai": "^1.29.0",
+    "genkit": "^1.29.0",
+    "zod": "^4.3.6"
+  }
+}

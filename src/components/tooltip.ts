@@ -5,10 +5,8 @@ let hideTimeout: ReturnType<typeof setTimeout> | null = null;
 let showTimeout: ReturnType<typeof setTimeout> | null = null;
 
 export function supportsHoverTooltips(
-    mediaQuery:
-        | Pick<Window, 'matchMedia'>
-        | { matchMedia?: (query: string) => { matches: boolean } }
-        | undefined = typeof window === 'undefined' ? undefined : window,
+    mediaQuery: { matchMedia?: (query: string) => { matches: boolean } } | undefined =
+        typeof window === 'undefined' ? undefined : window,
 ): boolean {
     if (!mediaQuery || typeof mediaQuery.matchMedia !== 'function') return false;
     return mediaQuery.matchMedia('(hover: hover) and (pointer: fine)').matches;

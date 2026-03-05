@@ -58,6 +58,7 @@ export function renderCommentsPage(): string {
     <div class="card">
       ${commentItems.map(item => {
         const reply = replies.find(r => r.commentId === item.commentId);
+        const aiNote = engine.getAIReplyNote(item.commentId as string);
         return `
           <div class="comment-item">
             <div class="comment-avatar">${item.comment.authorName.charAt(0)}</div>
@@ -75,6 +76,11 @@ export function renderCommentsPage(): string {
                   <div style="margin-top: var(--space-xs); font-size: 11px; color: var(--text-muted)">
                     ${tip('confidence', 'Confidence')}: ${Math.round(reply.confidence * 100)}%
                   </div>
+                  ${aiNote ? `
+                  <div style="margin-top: var(--space-sm); padding: var(--space-sm); background: rgba(139, 92, 246, 0.05); border-radius: 6px; font-size: 12px">
+                    <strong>🤖 Strategy:</strong> <em>${aiNote.strategy}</em><br/>
+                    <strong>💡 Coaching:</strong> <em>${aiNote.coaching}</em>
+                  </div>` : ''}
                 </div>
                 <div class="comment-actions">
                   <button class="btn btn-success btn-sm">${tip('approve', '✓ Approve & Send')}</button>
@@ -101,6 +107,16 @@ export function renderCommentsPage(): string {
 }
 
 export function bindCommentsEvents(): void {
+    const pullBtn = document.getElementById('pull-comments-btn');
+    if (pullBtn) {
+        pullBtn.addEventListener('click', async () => {
+            pullBtn.textContent = '⏳ Pulling...';
+            (pullBtn as HTMLButtonElement).disabled = true;
+            await engine.pullCommentsAI();
+            window.dispatchEvent(new CustomEvent('navigate', { detail: 'comments' }));
+        });
+    }
+
     const sendAllBtn = document.getElementById('send-all-replies-btn');
     if (sendAllBtn) {
         sendAllBtn.addEventListener('click', () => {

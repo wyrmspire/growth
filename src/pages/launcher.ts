@@ -39,6 +39,13 @@ export function renderLauncherPage(): string {
       <p>${tip('campaign', 'Campaign')} for <strong>${brief.offerName}</strong> targeting <strong>${brief.audience}</strong></p>
     </div>
 
+    ${engine.getLastCoachMessage() ? `
+    <div class="card" style="border-color: var(--accent-purple); margin-bottom: var(--space-lg); background: rgba(139, 92, 246, 0.05)">
+      <div class="card-header"><span class="card-title">🤖 AI Copy Coach</span><span class="badge" style="background: var(--accent-purple); color: white">humanReviewRequired</span></div>
+      <p style="color: var(--text-secondary); font-size: 14px">${engine.getLastCoachMessage()}</p>
+      ${engine.getLastCopyLesson() ? `<p style="color: var(--text-muted); font-size: 13px; margin-top: var(--space-sm)"><strong>💡 Lesson:</strong> ${engine.getLastCopyLesson()}</p>` : ''}
+    </div>` : ''}
+
     ${plan ? renderFunnelPreview(plan) : ''}
     ${variants && scores.length ? renderVariantTable(variants, scores) : ''}
 
@@ -151,6 +158,10 @@ function renderVariantTable(
                 <td>${v.cta}</td>
                 <td style="font-weight: 700; color: ${scoreColor}">${scoreVal}</td>
               </tr>
+              ${engine.getAIVariantNote(v.id as string) ? `
+              <tr><td colspan="5" style="background: rgba(139, 92, 246, 0.04); font-size: 12px; color: var(--text-secondary); padding: var(--space-xs) var(--space-md)">
+                💡 <em>${engine.getAIVariantNote(v.id as string)}</em>
+              </td></tr>` : ''}
             `;
     }).join('')}
         </tbody>
@@ -162,14 +173,16 @@ function renderVariantTable(
 export function bindLauncherEvents(): void {
     const form = document.getElementById('launch-form');
     if (form) {
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const val = (id: string) => (document.getElementById(id) as HTMLInputElement)?.value || '';
+            const btn = form.querySelector('button[type=submit]') as HTMLButtonElement | null;
+            if (btn) { btn.disabled = true; btn.textContent = '⏳ Generating...'; }
 
             const checkedChannels = Array.from(form.querySelectorAll('input[type=checkbox]:checked'))
                 .map(c => (c as HTMLInputElement).value) as ('meta' | 'linkedin' | 'x' | 'email')[];
 
-            engine.createCampaign({
+            await engine.createCampaignAI({
                 offerName: val('launch-offer'),
                 audience: val('launch-audience'),
                 channels: checkedChannels,

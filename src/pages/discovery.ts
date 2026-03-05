@@ -72,8 +72,15 @@ function renderInterviewForm(): string {
 function renderHypotheses(hypotheses: ReturnType<typeof engine.getCurrentHypotheses>, locked: boolean): string {
     if (!hypotheses.length) return '';
 
+    const coachMsg = engine.getLastCoachMessage();
+
     return `
     <hr class="section-divider" />
+    ${coachMsg ? `
+    <div class="card" style="border-color: var(--accent-purple); margin-bottom: var(--space-lg); background: rgba(139, 92, 246, 0.05)">
+      <div class="card-header"><span class="card-title">🤖 AI Coach</span><span class="badge" style="background: var(--accent-purple); color: white">humanReviewRequired</span></div>
+      <p style="color: var(--text-secondary); font-size: 14px">${coachMsg}</p>
+    </div>` : ''}
     <h2 style="margin-bottom: var(--space-md)">${tip('offerHypothesis', '💡 Offer Suggestions')}</h2>
     <p style="color: var(--text-secondary); margin-bottom: var(--space-lg)">
       Based on your interview, here are recommended offers ranked by ${tip('confidence', 'confidence')}.
@@ -133,19 +140,22 @@ function renderApprovedProfile(profile: ReturnType<typeof engine.getCurrentProfi
 export function bindDiscoveryEvents(): void {
     const form = document.getElementById('discovery-form');
     if (form) {
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const val = (id: string) => (document.getElementById(id) as HTMLInputElement)?.value || '';
+            const btn = form.querySelector('button[type=submit]') as HTMLButtonElement | null;
+            if (btn) { btn.disabled = true; btn.textContent = '⏳ Analyzing...'; }
 
-            engine.submitDiscoveryInterview({
+            const input = {
                 businessName: val('disc-name'),
                 industry: val('disc-industry'),
                 targetCustomer: val('disc-customer'),
                 currentOfferings: val('disc-offerings').split(',').map(s => s.trim()),
                 painPoints: val('disc-pains').split(',').map(s => s.trim()),
                 competitiveAdvantage: val('disc-advantage'),
-            });
+            };
 
+            await engine.submitDiscoveryInterviewAI(input);
             engine.getOfferSuggestions();
             window.dispatchEvent(new CustomEvent('navigate', { detail: 'discovery' }));
         });

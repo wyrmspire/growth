@@ -16,6 +16,11 @@ const aliases = {
 
 export default defineConfig({
     resolve: { alias: aliases },
+    server: {
+        proxy: {
+            '/api': 'http://localhost:3400',
+        },
+    },
     test: {
         globals: true,
         environment: 'node',

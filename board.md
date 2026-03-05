@@ -133,9 +133,9 @@ Depends on: core
 - [x] FUN-A1 [DONE] Implement `createFunnelPlan()` for awareness -> consideration -> decision sequence. See `modules/funnel/CONTRACT.md`. Tests: `modules/funnel/src/__tests__/plan.test.ts` -> `modules/funnel/src/plan.ts`
 - [x] FUN-A2 [DONE] Add CTA mapping by channel for each stage. Tests: `modules/funnel/src/__tests__/cta-map.test.ts` -> `modules/funnel/src/cta-map.ts`
 
-#### Lane B - Validation [READY]
-- [ ] FUN-B1 [READY] Implement `validateFunnelPlan()` coverage and transition checks. Tests: `modules/funnel/src/__tests__/validate.test.ts` -> `modules/funnel/src/validate.ts`
-- [ ] FUN-B2 [READY] Add funnel plan serializer for workflow handoff payloads. Tests: `modules/funnel/src/__tests__/serialize.test.ts` -> `modules/funnel/src/serialize.ts`
+#### Lane B - Validation [DONE]
+- [x] FUN-B1 [DONE] Implement `validateFunnelPlan()` coverage and transition checks. Tests: `modules/funnel/src/__tests__/validate.test.ts` -> `modules/funnel/src/validate.ts`
+- [x] FUN-B2 [DONE] Add funnel plan serializer for workflow handoff payloads. Tests: `modules/funnel/src/__tests__/serialize.test.ts` -> `modules/funnel/src/serialize.ts`
 
 ---
 
@@ -149,8 +149,8 @@ Depends on: core, analytics, adapters
 - [x] STR-A2 [DONE] Implement `generateOfferHypotheses()` with rationale/confidence fields. Tests: `modules/strategy/src/__tests__/hypothesis.test.ts` -> `modules/strategy/src/hypothesis.ts`
 - [x] STR-A3 [DONE] Add NOTE in module docs: integrate Genkit Offer Strategist agent for higher-quality hypotheses (assistive only, not autonomous decisions). Docs: `modules/strategy/README.md` -> `modules/strategy/README.md`
 
-#### Lane B - Market Signals [READY]
-- [ ] STR-B1 [READY] Implement source allowlist and rate-limit policy for market signal collection. Tests: `modules/strategy/src/__tests__/sources.test.ts` -> `modules/strategy/src/sources.ts`
+#### Lane B - Market Signals [DONE]
+- [x] STR-B1 [DONE] Implement source allowlist and rate-limit policy for market signal collection. Tests: `modules/strategy/src/__tests__/sources.test.ts` -> `modules/strategy/src/sources.ts`
 - [ ] STR-B2 [BLOCKED by STR-B1] Implement Playwright fallback collector for allowed public pages after API-first attempts fail. Tests: `modules/strategy/src/__tests__/collector.test.ts` -> `modules/strategy/src/collector-playwright.ts`
 
 ---
@@ -245,9 +245,9 @@ Depends on: core
 
 ## Backlog
 
-- [ ] BACK-1 [READY] Add integration workflow tests for launch flow (brief -> copy -> approval -> schedule).
-- [ ] BACK-2 [READY] Add board drift checker script that fails CI when contract functions are missing implementation.
-- [ ] BACK-3 [READY] Add import-boundary lint rules mapped to module ownership.
+- [x] BACK-1 [DONE] Add integration workflow tests for launch flow (brief -> copy -> approval -> schedule). -> `scripts/integration/launch-flow.test.ts`
+- [x] BACK-2 [DONE] Add board drift checker script that fails CI when contract functions are missing implementation. -> `scripts/drift-check.ts`
+- [x] BACK-3 [DONE] Add import-boundary lint rules mapped to module ownership. -> `scripts/lint-boundaries.ts`
 - [ ] BACK-4 [BLOCKED by first real provider] Add real provider adapter for one channel.
 - [ ] BACK-5 [READY] Add strategy workspace UI shell for business detail capture and offer review.
 - [x] BACK-6 [DONE] Install Genkit base and add flow scaffolds (`offerStrategistFlow`, `copyCoachFlow`, `replyCoachFlow`) in mock-safe mode. -> `modules/strategy/src/flows/offerStrategistFlow.ts`, `modules/copylab/src/flows/copyCoachFlow.ts`, `modules/comments/src/flows/replyCoachFlow.ts`, `modules/genkit-shared/src/`
@@ -292,6 +292,7 @@ Depends on: core
 | 2026-03-05T06:15:00Z | antigravity | DONE ADP-A1/A2(31) + PUB-A1(27). DONE BACK-6: offerStrategistFlow, copyCoachFlow, replyCoachFlow (mock-safe, Genkit 1.29). DONE BACK-8: genkit-gate.ts in core/src. Total: 223/223 tests pass. |
 | 2026-03-05T15:24:00Z | copilot | CLAIMED COPY-A1/COPY-A2/COPY-B1/COPY-B2 in Lane A. Implementing copylab generation, policy versioning, scoring, and channel formatter with focused tests. |
 | 2026-03-05T15:27:00Z | copilot | DONE COPY-A1/A2/B1/B2: added copylab generate/policy/score/format implementations and 15 focused tests. Full suite passing (238/238). |
+| 2026-03-05T16:28:00Z | copilot | DONE Lane E: FUN-B1 (validateFunnelPlan — FUNNEL_GAP/FUNNEL_TRANSITION_INVALID checks), FUN-B2 (serializeFunnelPlan/deserializeFunnelPlan for workflow handoff), STR-B1 (SOURCE_ALLOWLIST + DEFAULT_RATE_LIMIT_POLICY + collectMarketSignals with SIGNAL_SOURCE_DENIED guard), BACK-1 (scripts/integration/launch-flow.test.ts — full brief→funnel→copy→approval→schedule integration), BACK-2 (scripts/drift-check.ts — exits non-zero on CONTRACT.md drift), BACK-3 (scripts/lint-boundaries.ts — exits non-zero on disallowed peer imports). All 380 tests pass. STR-B2 now unblocked. |
 
 ## Refill Protocol
 

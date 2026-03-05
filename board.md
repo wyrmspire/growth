@@ -102,10 +102,10 @@ Owner: copilot (Lane A, 2026-03-05T19:55:00Z)
 Layer: workflows
 Depends on: core, strategy, funnel, copylab, approvals, adapters, publishing, comments, analytics
 
-#### Lane A - Translation Layer [IN_PROGRESS]
+#### Lane A - Translation Layer [DONE]
 - [x] MCK-A1 [DONE] Create local translation layer connecting UI flows to module mock functions. -> `src/mock-engine.ts`
 - [x] MCK-A2 [DONE] Reconcile function signatures against module CONTRACT docs and record temporary mismatches. -> `src/mock-engine.ts`, `modules/*/CONTRACT.md`
-- [ ] MCK-A3 [READY] Add local smoke script for end-to-end mock flow (discovery -> launch -> review -> calendar -> comments -> dashboard). -> `scripts/smoke-mock.ts`
+- [x] MCK-A3 [DONE] Add local smoke script for end-to-end mock flow (discovery -> launch -> review -> calendar -> comments -> dashboard). -> `scripts/smoke-mock.ts` | owner: copilot | done: 2026-03-05T20:00:00Z
 
 ---
 
@@ -152,7 +152,7 @@ Depends on: core, analytics, adapters
 
 #### Lane B - Market Signals [DONE]
 - [x] STR-B1 [DONE] Implement source allowlist and rate-limit policy for market signal collection. Tests: `modules/strategy/src/__tests__/sources.test.ts` -> `modules/strategy/src/sources.ts`
-- [ ] STR-B2 [BLOCKED by STR-B1] Implement Playwright fallback collector for allowed public pages after API-first attempts fail. Tests: `modules/strategy/src/__tests__/collector.test.ts` -> `modules/strategy/src/collector-playwright.ts`
+- [x] STR-B2 [DONE] Implement Playwright fallback collector for allowed public pages after API-first attempts fail. Tests: `modules/strategy/src/__tests__/collector.test.ts` -> `modules/strategy/src/collector-playwright.ts` | owner: copilot | done: 2026-03-05T20:03:00Z
 
 ---
 
@@ -297,6 +297,7 @@ Depends on: core
 | 2026-03-05T17:31:00Z | copilot | CLAIMED LUI-C3 for mobile tooltip hotfix + sprint-lane planning doc refresh requested in issue. |
 | 2026-03-05T17:34:00Z | copilot | DONE LUI-C3: tooltips now attach only on hover-capable pointer-fine devices; added tooltip support tests. Also refreshed `lanes.md` with next sprint lanes, explicit non-overlap file ownership, and required per-lane `lanes (x).results.md` outputs. |
 | 2026-03-05T19:55:00Z | copilot | CLAIMED + DONE MCK-A2: reconciled `src/mock-engine.ts` signatures against module contracts, switched copy generation call to canonical request-object form, and added explicit temporary mismatch notes in strategy/approvals/publishing/analytics/comments contracts for mock-only signature differences. |
+| 2026-03-05T20:03:00Z | copilot | CLAIMED + DONE MCK-A3 + STR-B2: (1) Added `scripts/smoke-mock.ts` end-to-end smoke script exercising discovery→launch→review→calendar→comments→dashboard with assertions per step. (2) Added `modules/strategy/src/collector-playwright.ts` with API-first then browser fallback strategy, enforcing SOURCE_ALLOWLIST and rate policy; added 32 tests in collector.test.ts. 416/416 tests pass. |
 
 ## Refill Protocol
 

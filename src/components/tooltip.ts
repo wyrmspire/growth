@@ -22,7 +22,22 @@ function ensureTooltipEl(): HTMLDivElement {
     return tooltipEl;
 }
 
-function show(target: HTMLElement, text: string) {
+/** Cancel any pending show or hide and immediately hide the tooltip. */
+export function cancelAndHide(): void {
+    if (showTimeout) {
+        clearTimeout(showTimeout);
+        showTimeout = null;
+    }
+    if (hideTimeout) {
+        clearTimeout(hideTimeout);
+        hideTimeout = null;
+    }
+    if (tooltipEl) {
+        tooltipEl.classList.remove('visible', 'above');
+    }
+}
+
+export function showTooltip(target: HTMLElement, text: string): void {
     const el = ensureTooltipEl();
     el.textContent = text;
     el.classList.add('visible');
@@ -47,15 +62,23 @@ function show(target: HTMLElement, text: string) {
     el.style.maxWidth = `${tipWidth}px`;
 }
 
-function hide() {
-    if (tooltipEl) {
-        tooltipEl.classList.remove('visible');
+export function hideTooltip(): void {
+    // Cancel pending show first so a fast hover can't leave a stale tip
+    if (showTimeout) {
+        clearTimeout(showTimeout);
+        showTimeout = null;
     }
+    hideTimeout = setTimeout(() => {
+        if (tooltipEl) {
+            tooltipEl.classList.remove('visible', 'above');
+        }
+        hideTimeout = null;
+    }, 80);
 }
 
 export function attachTooltips(root: HTMLElement = document.body): void {
     if (!supportsHoverTooltips()) {
-        hide();
+        cancelAndHide();
         return;
     }
 
@@ -67,16 +90,27 @@ export function attachTooltips(root: HTMLElement = document.body): void {
         const text = target.getAttribute('data-tip-text') || getTooltip(key);
         if (!text) return;
 
-        if (hideTimeout) clearTimeout(hideTimeout);
-        showTimeout = setTimeout(() => show(target, text), 200);
+        // Cancel any pending hide so we don't flicker on fast hover transitions
+        if (hideTimeout) {
+            clearTimeout(hideTimeout);
+            hideTimeout = null;
+        }
+        // Cancel any pending (stale) show and schedule a fresh one
+        if (showTimeout) {
+            clearTimeout(showTimeout);
+            showTimeout = null;
+        }
+        showTimeout = setTimeout(() => {
+            showTimeout = null;
+            showTooltip(target, text);
+        }, 200);
     }, true);
 
     root.addEventListener('mouseleave', (e) => {
         const target = (e.target as HTMLElement).closest('[data-tip]');
         if (!target) return;
 
-        if (showTimeout) clearTimeout(showTimeout);
-        hideTimeout = setTimeout(hide, 100);
+        hideTooltip();
     }, true);
 }
 

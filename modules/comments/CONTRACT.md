@@ -20,7 +20,7 @@ Errors: COMMENT_INVALID
 Purpose: Create response candidates with policy constraints.
 Errors: REPLY_POLICY_INVALID
 
-### Temporary mock-engine mismatch note (MCK-A2)
+### Mock-engine note (verified current, DOC-4 audit 2026-03-05)
 - `src/mock-engine.ts` relies on `modules/comments/src/mock.ts` where `draftReply(...)` may return `null` for spam-classified items.
 - Contract keeps the non-null `ReplyDraft` shape for domain API clarity; mock translation layer filters null drafts before returning replies.
 

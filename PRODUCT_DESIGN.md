@@ -77,3 +77,29 @@ Users should feel:
 ### V3.0
 - Adaptive multi-channel optimization with guardrails.
 - End-to-end campaign simulation before publish.
+
+## UI Language Rules (GUIDE-4)
+
+These rules apply to all UI copy, page descriptions, coaching blocks, and button labels.
+
+### Use this language
+- "Build a campaign for your business or a client"
+- "Run campaigns for your business or a client's business"
+- "Your offer" / "the offer" (not "the product")
+- "Approve before it goes live" (reinforce human control)
+- "The system suggests — you decide" (AI is advisory)
+- "Try a starter example" (for presets — makes it exploratory, not tutorial-mandatory)
+
+### Do NOT use this language
+- "Our platform" / "Our software" / "Our tool" (implies a product being sold)
+- "Marketers will love..." (this is not a product being sold to marketers)
+- "Sign up" / "Get started" / "Free trial" (no SaaS framing)
+- "Powered by AI" as a headline claim (AI is advisory, not the feature)
+- Passive forms implying the system acts autonomously: "AI will send..." → "You approve, then it sends"
+
+### Coaching block format
+Every page must have a coaching block with three parts:
+1. **What you do here** — plain action description, no jargon
+2. **Why it matters** — business reason, connects action to outcome
+3. **What comes next** — links to the next step in the campaign journey
+

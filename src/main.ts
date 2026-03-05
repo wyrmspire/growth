@@ -8,8 +8,12 @@ import { renderReviewPage, bindReviewEvents } from './pages/review';
 import { renderCalendarPage, bindCalendarEvents } from './pages/calendar';
 import { renderCommentsPage, bindCommentsEvents } from './pages/comments';
 import { renderDashboardPage, bindDashboardEvents } from './pages/dashboard';
+import { renderStrategyWorkspacePage, bindStrategyWorkspaceEvents } from './pages/strategy-workspace';
+import { renderStyleStudioPage, bindStyleStudioEvents } from './pages/style-studio';
+import { renderIntegrationsPage, bindIntegrationsEvents } from './pages/integrations';
+import { renderOpportunitiesPage, bindOpportunitiesEvents } from './pages/opportunities';
 
-type PageId = 'discovery' | 'launcher' | 'review' | 'calendar' | 'comments' | 'dashboard';
+type PageId = 'discovery' | 'launcher' | 'review' | 'calendar' | 'comments' | 'dashboard' | 'strategy-workspace' | 'style-studio' | 'integrations' | 'opportunities';
 const MOBILE_BREAKPOINT = 900;
 
 // Glossary keys shown in the help drawer for each page
@@ -20,11 +24,16 @@ const PAGE_HELP_KEYS: Record<PageId, string[]> = {
   calendar: ['publishing', 'schedule', 'channelMeta', 'channelLinkedin', 'channelX', 'channelEmail'],
   comments: ['commentTriage', 'intentLead', 'intentSupport', 'intentObjection', 'intentSpam', 'draftReply', 'approve'],
   dashboard: ['attribution', 'cpl', 'roas', 'conversionRate', 'impressions', 'clicks', 'funnel'],
+  'strategy-workspace': ['strategyWorkspace', 'offer', 'icp', 'offerHypothesis', 'confidence'],
+  'style-studio': ['copy', 'variant', 'channel'],
+  integrations: [],
+  opportunities: ['commentTriage', 'intentLead', 'approve'],
 };
 
 // Journey steps — used for the progress bar
 const JOURNEY_STEPS: { id: PageId; label: string; description: string }[] = [
   { id: 'discovery', label: 'Discover', description: 'Define your business and choose what to promote' },
+  { id: 'strategy-workspace', label: 'Strategise', description: 'Review your offer and confirm your campaign foundation' },
   { id: 'launcher', label: 'Launch', description: 'Create your campaign and generate ad copy' },
   { id: 'review', label: 'Review', description: 'Approve or reject content before it goes live' },
   { id: 'calendar', label: 'Schedule', description: 'Pick when your posts go live on each platform' },
@@ -41,11 +50,15 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { id: 'discovery', icon: '🔍', label: 'Business Discovery', tipKey: 'businessDiscovery' },
+  { id: 'strategy-workspace', icon: '🗺️', label: 'Strategy Workspace', tipKey: 'strategyWorkspace' },
   { id: 'launcher', icon: '🚀', label: 'Campaign Launcher', tipKey: 'campaign' },
   { id: 'review', icon: '📋', label: 'Review Queue', tipKey: 'reviewQueue' },
   { id: 'calendar', icon: '📅', label: 'Publishing', tipKey: 'publishing' },
   { id: 'comments', icon: '💬', label: 'Comment Ops', tipKey: 'commentTriage' },
   { id: 'dashboard', icon: '📊', label: 'Dashboard', tipKey: 'attribution' },
+  { id: 'style-studio', icon: '🎨', label: 'Style Studio', tipKey: 'copy' },
+  { id: 'integrations', icon: '🔗', label: 'Integrations', tipKey: 'attribution' },
+  { id: 'opportunities', icon: '📡', label: 'Opportunities', tipKey: 'commentTriage' },
 ];
 
 let currentPage: PageId = 'discovery';
@@ -116,6 +129,10 @@ const PAGE_RENDERERS: Record<PageId, () => string> = {
   calendar: renderCalendarPage,
   comments: renderCommentsPage,
   dashboard: renderDashboardPage,
+  'strategy-workspace': renderStrategyWorkspacePage,
+  'style-studio': renderStyleStudioPage,
+  integrations: renderIntegrationsPage,
+  opportunities: renderOpportunitiesPage,
 };
 
 const PAGE_BINDERS: Record<PageId, () => void> = {
@@ -125,6 +142,10 @@ const PAGE_BINDERS: Record<PageId, () => void> = {
   calendar: bindCalendarEvents,
   comments: bindCommentsEvents,
   dashboard: bindDashboardEvents,
+  'strategy-workspace': bindStrategyWorkspaceEvents,
+  'style-studio': bindStyleStudioEvents,
+  integrations: bindIntegrationsEvents,
+  opportunities: bindOpportunitiesEvents,
 };
 
 function isMobileViewport(): boolean {
@@ -186,9 +207,27 @@ function updateIntentBanner(): void {
   }
 }
 
+function setRealVh(): void {
+  // JS-measured fallback: --real-vh equals the visual viewport height so
+  // older browsers that lack dvh still avoid browser-chrome clipping.
+  const vh = window.visualViewport
+    ? window.visualViewport.height
+    : window.innerHeight;
+  document.documentElement.style.setProperty('--real-vh', `${vh}px`);
+}
+
+
 function init(): void {
   const app = document.getElementById('app');
   if (!app) return;
+
+  // Maintain --real-vh so dvh-lacking browsers avoid browser-chrome clipping
+  setRealVh();
+  window.addEventListener('resize', setRealVh);
+  window.addEventListener('orientationchange', setRealVh);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', setRealVh);
+  }
 
   app.innerHTML = `
     <div class="intent-banner" id="intent-banner">

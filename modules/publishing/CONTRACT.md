@@ -15,7 +15,7 @@ Depended on by: ui, analytics
 Purpose: Create scheduled publish record.
 Errors: APPROVAL_REQUIRED, SCHEDULE_TIME_INVALID
 
-### Temporary mock-engine mismatch note (MCK-A2)
+### Mock-engine note (verified current, DOC-4 audit 2026-03-05)
 - `src/mock-engine.ts` and `modules/publishing/src/mock.ts` currently call `scheduleAsset(assetId, assetLabel, runAt, channel)`.
 - The extra `assetLabel` parameter is mock-layer metadata used for calendar readability in the UI.
 

@@ -66,6 +66,8 @@
 /* ─── Base ──────────────────────────────────────────────────────── */
 html,
 body {
+  /* Use dvh on browsers that support it so the app fills the visual viewport,
+     not the layout viewport which can be clipped by mobile browser bars. */
   height: 100%;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 14px;
@@ -88,7 +90,9 @@ a:hover {
 .app-shell {
   display: grid;
   grid-template-columns: 240px 1fr;
+  /* Fallback for browsers without dvh support */
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 }
 
@@ -650,6 +654,234 @@ textarea.form-input {
   margin: var(--space-xl) 0;
 }
 
+/* ─── Page-level Layout Utilities ───────────────────────────────── */
+
+/* Cards with constrained widths */
+.card-narrow {
+  max-width: 640px;
+}
+
+.card-wide {
+  max-width: 100%;
+}
+
+/* Empty-state / placeholder card */
+.card-empty-state {
+  max-width: 480px;
+  text-align: center;
+  padding: var(--space-2xl);
+}
+
+/* Card wrapping a horizontally scrollable table */
+.card-overflow {
+  overflow-x: auto;
+}
+
+/* Horizontal action/button row */
+.action-row {
+  display: flex;
+  gap: var(--space-md);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.action-row-top {
+  margin-bottom: var(--space-lg);
+}
+
+.action-row-bottom {
+  margin-top: var(--space-lg);
+}
+
+/* Form submit button spacing */
+.form-submit {
+  margin-top: var(--space-md);
+}
+
+/* Section heading (h2/h3) with bottom margin */
+.section-heading {
+  margin-bottom: var(--space-md);
+}
+
+/* Sub-heading with smaller bottom gap */
+.sub-heading {
+  margin-bottom: var(--space-sm);
+}
+
+/* Channel checkbox row inside forms */
+.channel-row {
+  display: flex;
+  gap: var(--space-md);
+  margin-top: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+/* Inline channel label inside a channel-row */
+.channel-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  cursor: pointer;
+  font-size: 13px;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 400;
+}
+
+/* Secondary body text */
+.body-secondary {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+/* Muted / hint body text */
+.body-muted {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* Small note / meta text below content */
+.body-note {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: var(--space-xs);
+}
+
+/* Large emoji used as page decorators in empty states */
+.page-emoji {
+  font-size: 40px;
+  margin-bottom: var(--space-md);
+}
+
+/* Approved-offer highlight card modifier */
+.card-approved {
+  border-color: var(--accent-green);
+}
+
+/* Card title clamp for overflow */
+.card-title-clamp {
+  font-size: 13px;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Table cell: truncate long text */
+.cell-truncate {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Table cell: smaller date/time text */
+.cell-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* Score / rating value — color determined by HTML class, not inline style */
+.score-value {
+  font-weight: 700;
+}
+
+/* Hypothesis offer summary text */
+.offer-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: var(--space-sm);
+}
+
+/* Stage/channel inline info text inside funnel */
+.stage-meta {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.stage-ctas {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ─── Semantic Color Helpers (replaces inline style colors) ──────── */
+
+.metric-green {
+  color: var(--accent-green);
+}
+
+.metric-primary {
+  color: var(--accent-primary);
+}
+
+.metric-amber {
+  color: var(--accent-amber);
+}
+
+.metric-red {
+  color: var(--accent-red);
+}
+
+.metric-blue {
+  color: var(--accent-blue);
+}
+
+/* Copy score colors */
+.score-high {
+  color: var(--accent-green);
+}
+
+.score-mid {
+  color: var(--accent-amber);
+}
+
+.score-low {
+  color: var(--accent-red);
+}
+
+/* Channel brand colors */
+.channel-meta {
+  color: var(--accent-blue);
+}
+
+.channel-linkedin {
+  color: var(--accent-green);
+}
+
+.channel-x {
+  color: var(--accent-amber);
+}
+
+.channel-email {
+  color: var(--accent-primary);
+}
+
+/* Funnel stage rate colors */
+.funnel-rate-awareness {
+  color: var(--accent-blue);
+}
+
+.funnel-rate-consideration {
+  color: var(--accent-amber);
+}
+
+.funnel-rate-decision {
+  color: var(--accent-green);
+}
+
+/* Table cell capitalize (replaces style="text-transform: capitalize") */
+.cell-capitalize {
+  text-transform: capitalize;
+}
+
+/* Badge with left margin when inline with text */
+.badge-inline {
+  margin-left: var(--space-sm);
+}
+
+
+
 /* ─── Comment Thread ────────────────────────────────────────────── */
 .comment-item {
   display: flex;
@@ -957,9 +1189,11 @@ textarea.form-input {
 /* --- Responsive --- */
 @media (max-width: 900px) {
   body {
+    /* Do not lock scroll on body — main-content handles its own scroll */
     overflow: hidden;
   }
 
+  /* Only prevent scroll when nav drawer is open */
   body.nav-open {
     overflow: hidden;
   }
@@ -1044,10 +1278,21 @@ textarea.form-input {
     pointer-events: auto;
   }
 
+  .intent-banner {
+    /* Stick below the fixed mobile topbar instead of hiding under it */
+    position: sticky;
+    top: 56px;
+    z-index: 1200;
+  }
+
   .app-shell {
     grid-template-columns: 1fr;
+    /* margin-top covers topbar (56px) + intent-banner (approx 40px).
+       We use padding-top on main-content instead so intent-banner can be sticky. */
     margin-top: 56px;
+    /* dvh subtracts mobile browser chrome (address bar) from height */
     height: calc(100vh - 56px);
+    height: calc(100dvh - 56px);
   }
 
   .sidebar {
@@ -1056,6 +1301,7 @@ textarea.form-input {
     left: 0;
     width: min(84vw, 320px);
     height: calc(100vh - 56px);
+    height: calc(100dvh - 56px);
     transform: translateX(-102%);
     transition: transform .22s var(--ease-out);
     z-index: 1200;
@@ -1096,6 +1342,9 @@ textarea.form-input {
 
   .main-content {
     padding: var(--space-lg) var(--space-md);
+    /* Ensure main content is always scrollable; height is determined by .app-shell */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .page-header {
@@ -1221,4 +1470,621 @@ textarea.form-input {
   .sidebar {
     width: 88vw;
   }
+}
+
+/* ─── Coach Blocks (GUIDE-2) ────────────────────────────────────── */
+.coach-block {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  background: rgba(108, 92, 231, .06);
+  border: 1px solid rgba(108, 92, 231, .16);
+  border-left: 3px solid var(--accent-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+  margin-bottom: var(--space-xl);
+  animation: fadeIn .3s var(--ease-out) both;
+}
+
+.coach-block-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.coach-block-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.coach-what {
+  color: var(--text-primary);
+}
+
+.coach-why {
+  color: var(--text-secondary);
+}
+
+.coach-next {
+  color: var(--text-secondary);
+}
+
+.coach-block a {
+  color: var(--accent-primary);
+}
+
+@media (max-width: 640px) {
+  .coach-block {
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+  }
+}
+
+/* ─── Strategy Workspace (GUIDE-1) ──────────────────────────────── */
+.sw-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.sw-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-card);
+  transition: transform .2s var(--ease-out), box-shadow .2s var(--ease-out);
+}
+
+.sw-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-elevated);
+}
+
+.sw-panel--approved {
+  border-color: var(--accent-green);
+  background: linear-gradient(135deg, var(--bg-card), rgba(0, 206, 201, .04));
+}
+
+.sw-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-md);
+}
+
+.sw-panel-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.sw-field-row {
+  display: flex;
+  gap: var(--space-md);
+  padding: var(--space-xs) 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 13px;
+  align-items: flex-start;
+}
+
+.sw-field-row:last-child {
+  border-bottom: none;
+}
+
+.sw-field-label {
+  color: var(--text-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  min-width: 120px;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.sw-field-value {
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.sw-offer-name {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: var(--space-xs);
+}
+
+.sw-offer-sub {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-bottom: var(--space-xs);
+}
+
+.sw-offer-icp {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-bottom: var(--space-xs);
+}
+
+.sw-offer-signals {
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-bottom: var(--space-md);
+}
+
+.sw-approved-actions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.sw-hyp-angle,
+.sw-hyp-icp,
+.sw-hyp-rationale {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-bottom: var(--space-xs);
+}
+
+.sw-card--selected {
+  border-color: var(--accent-green);
+  background: linear-gradient(135deg, var(--bg-card), rgba(0, 206, 201, .04));
+}
+
+.sw-empty-state {
+  text-align: center;
+  padding: var(--space-2xl) 0;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.sw-empty-icon {
+  font-size: 48px;
+  margin-bottom: var(--space-lg);
+}
+
+.sw-empty-state h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: var(--space-sm);
+}
+
+.sw-empty-state p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-bottom: var(--space-md);
+}
+
+/* ─── Preset Picker (GUIDE-3) ────────────────────────────────────── */
+.preset-panel {
+  background: rgba(255, 255, 255, .025);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin-top: var(--space-xl);
+}
+
+.preset-panel-header {
+  margin-bottom: var(--space-md);
+}
+
+.preset-panel-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.preset-panel-sub {
+  display: block;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.preset-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all .2s var(--ease-out);
+  text-align: left;
+  font-family: inherit;
+}
+
+.preset-card:hover {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary-glow);
+  transform: translateY(-1px);
+}
+
+.preset-icon {
+  font-size: 24px;
+}
+
+.preset-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.preset-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.preset-note {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Inline preset bar inside discovery form */
+.preset-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0 var(--space-md);
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: var(--space-md);
+}
+
+.preset-bar-label {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.preset-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 4px 12px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-card);
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .15s var(--ease-out);
+  white-space: nowrap;
+}
+
+.preset-chip:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  background: var(--accent-primary-glow);
+}
+
+
+/* ─── FUT-1: Style Studio ──────────────────────────────────────── */
+.studio-sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  margin-top: var(--space-lg);
+}
+
+.studio-section {
+  padding: var(--space-lg);
+}
+
+.preset-chips {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin-top: var(--space-sm);
+}
+
+.chip {
+  padding: 6px 14px;
+  border-radius: 99px;
+  border: 1px solid var(--border-card);
+  background: var(--bg-badge);
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.chip--active {
+  background: var(--accent-primary);
+  color: var(--text-on-accent);
+  border-color: var(--accent-primary);
+}
+
+.chip:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.slider-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.style-slider {
+  flex: 1;
+  accent-color: var(--accent-primary);
+}
+
+.tag-list {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+  margin-top: var(--space-sm);
+}
+
+.tag {
+  padding: 4px 10px;
+  border-radius: 99px;
+  background: var(--bg-badge);
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.tag-add {
+  padding: 4px 10px;
+  border-radius: 99px;
+  border: 1px dashed var(--border-card);
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.channel-tab-row {
+  display: flex;
+  gap: var(--space-xs);
+  margin: var(--space-sm) 0;
+}
+
+.channel-tab {
+  padding: 5px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-card);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.channel-tab--active {
+  background: var(--bg-badge);
+  color: var(--text-primary);
+  border-color: var(--accent-primary);
+}
+
+.channel-override-preview {
+  padding: var(--space-md);
+  background: var(--bg-input);
+  border-radius: var(--radius-md);
+  min-height: 60px;
+}
+
+/* ─── FUT-2: Integrations ──────────────────────────────────────── */
+.integrations-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+  margin-top: var(--space-lg);
+}
+
+@media (max-width: 700px) {
+  .integrations-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.integration-card {
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.integration-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.integration-logo {
+  font-size: 28px;
+}
+
+.integration-name {
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.integration-status {
+  font-size: 12px;
+}
+
+.integration-status--disconnected {
+  color: var(--text-muted);
+}
+
+.integration-status--connected {
+  color: var(--accent-green);
+}
+
+.integration-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.integration-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.integration-actions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.security-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  margin-top: var(--space-lg);
+}
+
+.security-notice-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+/* ─── FUT-3: Opportunities Inbox ───────────────────────────────── */
+.opp-filters {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-lg);
+}
+
+.opportunities-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.opportunity-card {
+  padding: var(--space-lg);
+  border-left: 3px solid var(--accent-primary);
+  transition: opacity 0.3s;
+}
+
+.opportunity-card.opp-card--done {
+  opacity: 0.5;
+}
+
+.opp-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-sm);
+}
+
+.opp-platform {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.opp-score {
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  background: var(--accent-primary-glow);
+  color: var(--accent-primary);
+  font-weight: 600;
+}
+
+.risk-flag {
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  background: var(--accent-amber-soft);
+  color: var(--accent-amber);
+}
+
+.opp-source {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: var(--space-sm);
+}
+
+.opp-snippet {
+  font-size: 14px;
+  color: var(--text-secondary);
+  border-left: 2px solid var(--border-card);
+  padding-left: var(--space-sm);
+  margin-bottom: var(--space-md);
+  font-style: italic;
+  line-height: 1.6;
+}
+
+.opp-suggestion {
+  background: var(--bg-input);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.opp-draft {
+  font-size: 14px;
+  color: var(--text-primary);
+  margin: var(--space-xs) 0;
+  line-height: 1.6;
+}
+
+.opp-reason {
+  margin-top: var(--space-xs);
+}
+
+.advisory-tag {
+  font-size: 11px;
+  color: var(--accent-amber);
+  font-weight: normal;
+  margin-left: 4px;
+}
+
+.opp-actions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.risk-notice {
+  font-size: 12px;
+  color: var(--accent-amber);
+  margin-top: var(--space-sm);
+}
+
+.btn--sm {
+  padding: 6px 14px;
+  font-size: 13px;
+}
+
+.btn--muted {
+  color: var(--text-muted);
 }

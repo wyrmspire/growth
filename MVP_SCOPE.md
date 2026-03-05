@@ -13,6 +13,9 @@
 | Publishing Scheduler | Queue and dispatch approved assets via adapters | publishing + adapters |
 | Comment Ops | Classify comments and draft reply candidates | comments |
 | Attribution Dashboard | Basic CPL/conversion views by channel and campaign | analytics |
+| Style Studio (shell) | Style profile and instruction-pack foundation — mock-safe shell staged in FUT-1 | copylab + core |
+| Integrations (shell) | Slack and Office 365 connection lifecycle and scope policy — mock-safe shell staged in FUT-2 | integrations + adapters |
+| Opportunities Inbox (shell) | Social-scout opportunity cards and suggested engagement — mock-safe shell staged in FUT-3 | social-scout + approvals |
 
 ## Must Not Have (OUT)
 

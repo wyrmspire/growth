@@ -2,49 +2,34 @@ import { tip } from '../components/tooltip';
 import * as engine from '../mock-engine';
 
 export function renderCalendarPage(): string {
-    const entries = engine.getCalendar();
+  const entries = engine.getCalendar();
 
-    if (!entries.length) {
-        return `
+  if (!entries.length) {
+    return `
       <div class="page-header">
         <h1>${tip('publishing', '📅 Publishing Calendar')}</h1>
         <p>See when your approved content is scheduled to go live.</p>
       </div>
-      <div class="card" style="max-width: 480px; text-align: center; padding: var(--space-2xl)">
-        <p style="font-size: 40px; margin-bottom: var(--space-md)">📅</p>
-        <p style="color: var(--text-secondary)">
+      <div class="card card-empty-state">
+        <p class="page-emoji">📅</p>
+        <p class="body-secondary">
           No scheduled posts yet. ${tip('reviewQueue', 'Approve content first')}, then ${tip('schedule', 'schedule')} it here.
         </p>
       </div>
     `;
-    }
+  }
 
-    const channelColors: Record<string, string> = {
-        meta: 'var(--accent-blue)',
-        linkedin: 'var(--accent-green)',
-        x: 'var(--accent-amber)',
-        email: 'var(--accent-primary)',
-    };
+  const dispatched = entries.filter(e => e.state === 'dispatched').length;
+  const scheduled = entries.filter(e => e.state === 'scheduled').length;
 
-    // Group by day
-    const byDay = new Map<string, typeof entries>();
-    entries.forEach(e => {
-        const day = e.runAt.split('T')[0];
-        if (!byDay.has(day)) byDay.set(day, []);
-        byDay.get(day)!.push(e);
-    });
-
-    const dispatched = entries.filter(e => e.state === 'dispatched').length;
-    const scheduled = entries.filter(e => e.state === 'scheduled').length;
-
-    return `
+  return `
     <div class="page-header">
       <h1>${tip('publishing', '📅 Publishing Calendar')}</h1>
       <p>${entries.length} posts · ${dispatched} published · ${scheduled} scheduled</p>
     </div>
 
     ${scheduled > 0 ? `
-      <div style="margin-bottom: var(--space-lg)">
+      <div class="action-row action-row-top">
         <button class="btn btn-success" id="publish-now-btn">
           ⚡ Publish All Now
         </button>
@@ -53,19 +38,19 @@ export function renderCalendarPage(): string {
 
     <div class="metric-row">
       ${['meta', 'linkedin', 'x', 'email'].map(ch => {
-        const count = entries.filter(e => e.channel === ch).length;
-        if (!count) return '';
-        return `
+    const count = entries.filter(e => e.channel === ch).length;
+    if (!count) return '';
+    return `
           <div class="metric-tile">
-            <div class="metric-label" data-tip="channel${ch.charAt(0).toUpperCase() + ch.slice(1)}" class="has-tip">${ch}</div>
-            <div class="metric-value" style="color: ${channelColors[ch]}">${count}</div>
+            <div class="metric-label" data-tip="channel${ch.charAt(0).toUpperCase() + ch.slice(1)}">${ch}</div>
+            <div class="metric-value channel-${ch}">${count}</div>
             <div class="metric-sub">posts</div>
           </div>
         `;
-    }).join('')}
+  }).join('')}
     </div>
 
-    <div class="card" style="overflow-x: auto">
+    <div class="card card-overflow">
       <table class="data-table">
         <thead>
           <tr>
@@ -79,8 +64,8 @@ export function renderCalendarPage(): string {
           ${entries.map(e => `
             <tr>
               <td><span class="badge badge-${e.channel === 'meta' ? 'scheduled' : e.channel === 'linkedin' ? 'approved' : 'pending'}">${e.channel}</span></td>
-              <td style="max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">${e.assetLabel}</td>
-              <td style="font-size: 12px; color: var(--text-secondary)">${new Date(e.runAt).toLocaleString()}</td>
+              <td class="cell-truncate">${e.assetLabel}</td>
+              <td class="cell-meta">${new Date(e.runAt).toLocaleString()}</td>
               <td><span class="badge badge-${e.state}">${e.state}</span></td>
             </tr>
           `).join('')}
@@ -91,11 +76,11 @@ export function renderCalendarPage(): string {
 }
 
 export function bindCalendarEvents(): void {
-    const publishBtn = document.getElementById('publish-now-btn');
-    if (publishBtn) {
-        publishBtn.addEventListener('click', () => {
-            engine.publishNow();
-            window.dispatchEvent(new CustomEvent('navigate', { detail: 'calendar' }));
-        });
-    }
+  const publishBtn = document.getElementById('publish-now-btn');
+  if (publishBtn) {
+    publishBtn.addEventListener('click', () => {
+      engine.publishNow();
+      window.dispatchEvent(new CustomEvent('navigate', { detail: 'calendar' }));
+    });
+  }
 }

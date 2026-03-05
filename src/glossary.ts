@@ -160,6 +160,14 @@ export const glossary: Record<string, GlossaryEntry> = {
         label: 'Quality Score',
         tooltip: 'A rating of how well this copy variant follows best practices — clarity, length, call to action strength.',
     },
+    strategyWorkspace: {
+        label: 'Strategy Workspace',
+        tooltip: 'A side-by-side view of your business profile and offer options — use it to confirm what you\'re promoting before building a campaign.',
+    },
+    starterPreset: {
+        label: 'Starter Example',
+        tooltip: 'A pre-filled example business you can load to practice using the system. No real data required — just explore how campaigns are built.',
+    },
 };
 
 export function getTooltip(key: string): string {

@@ -40,7 +40,7 @@ Errors: HYPOTHESIS_RANKING_INVALID
 Invariants:
 - Same inputs produce same ranking output.
 
-### Temporary mock-engine mismatch note (MCK-A2)
+### Mock-engine note (verified current, DOC-4 audit 2026-03-05)
 - `src/mock-engine.ts` currently uses `buildOfferProfile(hypothesis, signals): OfferProfile` from `modules/strategy/src/mock.ts`.
 - This helper is intentionally mock-only for the workflow translation layer and is not yet promoted to the formal module contract.
 

@@ -2,14 +2,14 @@ import { tip } from '../components/tooltip';
 import * as engine from '../mock-engine';
 
 export function renderDiscoveryPage(): string {
-    const interview = engine.getCurrentInterview();
-    const hypotheses = engine.getCurrentHypotheses();
-    const profile = engine.getCurrentProfile();
+  const interview = engine.getCurrentInterview();
+  const hypotheses = engine.getCurrentHypotheses();
+  const profile = engine.getCurrentProfile();
 
-    const stepIndex = !interview ? 0 : !hypotheses.length ? 1 : !profile ? 2 : 3;
-    const steps = ['Your Business', 'Offer Suggestions', 'Choose & Approve'];
+  const stepIndex = !interview ? 0 : !hypotheses.length ? 1 : !profile ? 2 : 3;
+  const steps = ['Your Business', 'Offer Suggestions', 'Choose & Approve'];
 
-    return `
+  return `
     <div class="page-header">
       <h1>${tip('businessDiscovery', '🔍 Business Discovery')}</h1>
       <p>Tell us about your business so we can suggest the best marketing strategy.</p>
@@ -31,8 +31,8 @@ export function renderDiscoveryPage(): string {
 }
 
 function renderInterviewForm(): string {
-    return `
-    <div class="card" style="max-width: 640px">
+  return `
+    <div class="card card-narrow">
       <div class="card-header">
         <span class="card-title">Tell us about your business</span>
       </div>
@@ -61,7 +61,7 @@ function renderInterviewForm(): string {
           <label>What makes you different from competitors?</label>
           <textarea class="form-input" id="disc-advantage">All-in-one system with AI-assisted copy and human approval gates</textarea>
         </div>
-        <button type="submit" class="btn btn-primary" style="margin-top: var(--space-md)">
+        <button type="submit" class="btn btn-primary form-submit">
           Complete Interview →
         </button>
       </form>
@@ -70,12 +70,12 @@ function renderInterviewForm(): string {
 }
 
 function renderHypotheses(hypotheses: ReturnType<typeof engine.getCurrentHypotheses>, locked: boolean): string {
-    if (!hypotheses.length) return '';
+  if (!hypotheses.length) return '';
 
-    return `
+  return `
     <hr class="section-divider" />
-    <h2 style="margin-bottom: var(--space-md)">${tip('offerHypothesis', '💡 Offer Suggestions')}</h2>
-    <p style="color: var(--text-secondary); margin-bottom: var(--space-lg)">
+    <h2 class="section-heading">${tip('offerHypothesis', '💡 Offer Suggestions')}</h2>
+    <p class="body-secondary sub-heading">
       Based on your interview, here are recommended offers ranked by ${tip('confidence', 'confidence')}.
     </p>
     <div class="card-grid">
@@ -87,13 +87,13 @@ function renderHypotheses(hypotheses: ReturnType<typeof engine.getCurrentHypothe
               ${Math.round(h.confidence * 100)}% ${tip('confidence', 'confident')}
             </span>
           </div>
-          <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: var(--space-sm)">
+          <p class="body-secondary">
             <strong>Angle:</strong> ${h.angle}
           </p>
-          <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: var(--space-sm)">
+          <p class="body-secondary">
             <strong>${tip('icp', 'Target Customer')}:</strong> ${h.icp}
           </p>
-          <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: var(--space-md)">
+          <p class="body-secondary">
             <strong>Why:</strong> ${h.rationale}
           </p>
           ${!locked ? `
@@ -108,22 +108,22 @@ function renderHypotheses(hypotheses: ReturnType<typeof engine.getCurrentHypothe
 }
 
 function renderApprovedProfile(profile: ReturnType<typeof engine.getCurrentProfile>): string {
-    if (!profile) return '';
-    return `
+  if (!profile) return '';
+  return `
     <hr class="section-divider" />
-    <div class="card" style="border-color: var(--accent-green); max-width: 640px">
+    <div class="card card-narrow card-approved">
       <div class="card-header">
         <span class="card-title">✅ Offer Approved</span>
         <span class="badge badge-approved">Ready to Launch</span>
       </div>
-      <p style="font-size: 15px; font-weight: 600; margin-bottom: var(--space-sm)">
+      <p class="offer-title">
         ${profile.hypothesis.name}
       </p>
-      <p style="color: var(--text-secondary); font-size: 13px">
+      <p class="body-secondary">
         ${profile.hypothesis.angle} — targeting ${profile.hypothesis.icp}
       </p>
-      <p style="color: var(--text-muted); font-size: 12px; margin-top: var(--space-sm)">
-        Backed by ${profile.signals.length} market signals. Head to 
+      <p class="body-muted">
+        Backed by ${profile.signals.length} market signals. Head to
         <a href="#" data-nav="launcher">Campaign Launcher</a> to create your first ${tip('campaign', 'campaign')}.
       </p>
     </div>
@@ -131,31 +131,31 @@ function renderApprovedProfile(profile: ReturnType<typeof engine.getCurrentProfi
 }
 
 export function bindDiscoveryEvents(): void {
-    const form = document.getElementById('discovery-form');
-    if (form) {
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const val = (id: string) => (document.getElementById(id) as HTMLInputElement)?.value || '';
+  const form = document.getElementById('discovery-form');
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const val = (id: string) => (document.getElementById(id) as HTMLInputElement)?.value || '';
 
-            engine.submitDiscoveryInterview({
-                businessName: val('disc-name'),
-                industry: val('disc-industry'),
-                targetCustomer: val('disc-customer'),
-                currentOfferings: val('disc-offerings').split(',').map(s => s.trim()),
-                painPoints: val('disc-pains').split(',').map(s => s.trim()),
-                competitiveAdvantage: val('disc-advantage'),
-            });
+      engine.submitDiscoveryInterview({
+        businessName: val('disc-name'),
+        industry: val('disc-industry'),
+        targetCustomer: val('disc-customer'),
+        currentOfferings: val('disc-offerings').split(',').map(s => s.trim()),
+        painPoints: val('disc-pains').split(',').map(s => s.trim()),
+        competitiveAdvantage: val('disc-advantage'),
+      });
 
-            engine.getOfferSuggestions();
-            window.dispatchEvent(new CustomEvent('navigate', { detail: 'discovery' }));
-        });
-    }
-
-    document.querySelectorAll('.approve-offer-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const idx = parseInt((btn as HTMLElement).dataset.index || '0');
-            engine.approveOffer(idx);
-            window.dispatchEvent(new CustomEvent('navigate', { detail: 'discovery' }));
-        });
+      engine.getOfferSuggestions();
+      window.dispatchEvent(new CustomEvent('navigate', { detail: 'discovery' }));
     });
+  }
+
+  document.querySelectorAll('.approve-offer-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt((btn as HTMLElement).dataset.index || '0');
+      engine.approveOffer(idx);
+      window.dispatchEvent(new CustomEvent('navigate', { detail: 'discovery' }));
+    });
+  });
 }

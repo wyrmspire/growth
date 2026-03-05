@@ -4,6 +4,7 @@
  * The UI only sees product-shaped data returned from here.
  */
 
+
 import { resetIdCounter, EventLog } from '../modules/core/src/index';
 import type {
     CampaignBrief, FunnelPlan, ChannelVariantSet, VariantScore,
@@ -35,6 +36,70 @@ let currentSignals: MarketSignal[] = [];
 let currentProfile: OfferProfile | null = null;
 let currentCommentItems: CommentQueueItem[] = [];
 let currentReplies: ReplyDraft[] = [];
+
+// ─── Starter Presets ─────────────────────────────────────────────
+export interface StarterPreset {
+    id: string;
+    icon: string;
+    name: string;
+    description: string;
+    data: {
+        businessName: string;
+        industry: string;
+        targetCustomer: string;
+        currentOfferings: string[];
+        painPoints: string[];
+        competitiveAdvantage: string;
+    };
+}
+
+export const STARTER_PRESETS: StarterPreset[] = [
+    {
+        id: 'design-agency',
+        icon: '🎨',
+        name: 'Design Agency',
+        description: 'Brand identity and web design for small businesses',
+        data: {
+            businessName: 'Carta Creative Studio',
+            industry: 'Design & Branding',
+            targetCustomer: 'Small business owners who need a professional brand identity but don\'t know where to start',
+            currentOfferings: ['Logo design', 'Brand identity packages', 'Website design', 'Social media templates'],
+            painPoints: ['Looks unprofessional online', 'Losing clients to competitors with better branding', 'No consistent visual style across channels'],
+            competitiveAdvantage: 'Fixed-price packages, fast 2-week turnaround, and a brand playbook every client keeps',
+        },
+    },
+    {
+        id: 'automation-company',
+        icon: '⚙️',
+        name: 'Automation Company',
+        description: 'Business process automation for service businesses',
+        data: {
+            businessName: 'Streamline Ops',
+            industry: 'Business Automation',
+            targetCustomer: 'Service business owners spending 10+ hours a week on repetitive admin tasks',
+            currentOfferings: ['Workflow automation audits', 'CRM setup and integration', 'Email and follow-up automation', 'Reporting dashboards'],
+            painPoints: ['Too much time on manual data entry', 'Missed follow-ups losing deals', 'No visibility into what the team is doing'],
+            competitiveAdvantage: 'Done-for-you implementation in 30 days with a money-back guarantee if time savings aren\'t measurable',
+        },
+    },
+    {
+        id: 'local-service',
+        icon: '🔧',
+        name: 'Local Service Business',
+        description: 'Home services — plumbing, HVAC, or repairs — serving a local area',
+        data: {
+            businessName: 'NextDay Home Services',
+            industry: 'Home Services',
+            targetCustomer: 'Homeowners who need reliable repairs fast without being overcharged',
+            currentOfferings: ['Emergency plumbing', 'HVAC maintenance and repair', 'Water heater installation', 'Drain cleaning'],
+            painPoints: ['Can\'t find a trustworthy contractor', 'Waiting days for a callback', 'Unexpected charges at the end of the job'],
+            competitiveAdvantage: 'Same-day service, upfront flat-rate pricing, and a 2-year parts-and-labour warranty',
+        },
+    },
+];
+
+let pendingPreset: StarterPreset | null = null;
+
 
 // ─── Flow E: Business Discovery ──────────────────────────────────
 export function submitDiscoveryInterview(input: {
@@ -252,4 +317,31 @@ export function resetAll(): void {
     currentProfile = null;
     currentCommentItems = [];
     currentReplies = [];
+    pendingPreset = null;
 }
+
+// ─── Starter Preset API ─────────────────────────────────────────────
+export function getStarterPresets(): StarterPreset[] {
+    return STARTER_PRESETS;
+}
+
+/**
+ * Loads a preset so discovery.ts can read it and pre-fill the form.
+ * Does NOT submit the interview — the user still clicks "Complete Interview".
+ */
+export function loadStarterPreset(presetId: string): StarterPreset | null {
+    const preset = STARTER_PRESETS.find(p => p.id === presetId) || null;
+    pendingPreset = preset;
+    return preset;
+}
+
+/** Returns the pending preset (if any) so discovery form can read it. */
+export function getPendingPreset(): StarterPreset | null {
+    return pendingPreset;
+}
+
+/** Clears the pending preset after the form has consumed it. */
+export function clearPendingPreset(): void {
+    pendingPreset = null;
+}
+

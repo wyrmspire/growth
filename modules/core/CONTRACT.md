@@ -16,6 +16,15 @@ Depended on by: all modules
 - CampaignMetricRow
 - AppError
 
+### Future types (staged in FUT-1, FUT-4 — not yet implemented)
+
+- `StyleProfile` — `{ id, name, tone, formality, clarity, ctaIntensity, readingLevel, bannedTerms[], requiredPhrases[], allowedClaims[] }`
+- `ChannelStyleOverride` — `{ channel, maxLength, emojiPolicy, hashtagPolicy, lineBreakPolicy }`
+- `CampaignInstructionPack` — `{ campaignId, styleProfileId, channelOverrides[], complianceRules[] }`
+- `GeneratedCopyAudit` — `{ variantId, styleProfileId, policyVersion, violations[], score }`
+- `ApprovedCopySnippet` — `{ id, variantId, campaignId, channel, text, approvedAt, styleProfileId }` (copy-memory, FUT-4)
+- `ScoutSourceConfig`, `ScoutRun`, `OpportunityItem`, `SuggestedEngagement`, `OpportunityDecision` — see `modules/social-scout/CONTRACT.md` (FUT-3)
+
 ## Exported Functions
 
 ### validateCampaignBrief(input: CampaignBriefInput): ValidationResult

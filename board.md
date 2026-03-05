@@ -216,7 +216,7 @@ Depends on: core, approvals, adapters
 ---
 
 ### Module: comments
-Owner: unassigned
+Owner: copilot (Lane D, 2026-03-05T20:56:00Z)
 Layer: domain
 Depends on: core, approvals, adapters
 
@@ -224,8 +224,8 @@ Depends on: core, approvals, adapters
 - [ ] COM-A1 [READY] Implement `triageComment()` intent buckets (lead, objection, support, spam). Tests: `modules/comments/src/__tests__/triage.test.ts` -> `modules/comments/src/triage.ts`
 - [ ] COM-A2 [READY] Implement `draftReply()` with reply policy application. Tests: `modules/comments/src/__tests__/draft.test.ts` -> `modules/comments/src/draft.ts`
 
-#### Lane B - Send Flow [READY]
-- [ ] COM-B1 [BLOCKED by APP-B1, ADP-B2] Implement `sendApprovedReply()` approval gate + adapter dispatch. Tests: `modules/comments/src/__tests__/send.test.ts` -> `modules/comments/src/send.ts`
+#### Lane B - Send Flow [DONE]
+- [x] COM-B1 [DONE] Implement `sendApprovedReply()` approval gate + adapter dispatch. Tests: `modules/comments/src/__tests__/send.test.ts` -> `modules/comments/src/send.ts` | owner: copilot | done: 2026-03-05T20:58:00Z
 
 ---
 
@@ -298,6 +298,7 @@ Depends on: core
 | 2026-03-05T17:34:00Z | copilot | DONE LUI-C3: tooltips now attach only on hover-capable pointer-fine devices; added tooltip support tests. Also refreshed `lanes.md` with next sprint lanes, explicit non-overlap file ownership, and required per-lane `lanes (x).results.md` outputs. |
 | 2026-03-05T19:55:00Z | copilot | CLAIMED + DONE MCK-A2: reconciled `src/mock-engine.ts` signatures against module contracts, switched copy generation call to canonical request-object form, and added explicit temporary mismatch notes in strategy/approvals/publishing/analytics/comments contracts for mock-only signature differences. |
 | 2026-03-05T20:03:00Z | copilot | CLAIMED + DONE MCK-A3 + STR-B2: (1) Added `scripts/smoke-mock.ts` end-to-end smoke script exercising discovery→launch→review→calendar→comments→dashboard with assertions per step. (2) Added `modules/strategy/src/collector-playwright.ts` with API-first then browser fallback strategy, enforcing SOURCE_ALLOWLIST and rate policy; added 32 tests in collector.test.ts. 416/416 tests pass. |
+| 2026-03-05T20:58:00Z | copilot | CLAIMED + DONE COM-B1 (Lane D): implemented `sendApprovedReply()` in `modules/comments/src/send.ts` with approval gate check via `@approvals/gate.isApproved()` and adapter dispatch via `@adapters/reply.sendReply()`. Errors: APPROVAL_REQUIRED (fails closed when not approved), SEND_FAILED (adapter failure). Added 6 focused tests. 422/422 tests pass. Created `lanes (A).results.md` documenting MCK-A2 work. |
 
 ## Refill Protocol
 

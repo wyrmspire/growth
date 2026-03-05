@@ -90,9 +90,10 @@ Depends on: mock-engine, glossary
 - [x] LUI-B2 [DONE] Create main entry and page router/navigation shell. -> `src/main.ts`, `index.html`
 - [x] LUI-B3 [DONE] Add persistent page-level note: "You are creating campaigns for your business/client, not selling this software." -> `src/main.ts`, `src/pages/*.ts`
 
-#### Lane C - Beginner Coaching UX [READY]
+#### Lane C - Beginner Coaching UX [DONE]
 - [x] LUI-C1 [DONE] Add first-run checklist showing 6-step journey and current step progress. -> `src/main.ts`, `src/index.css`
 - [x] LUI-C2 [DONE] Add "What does this mean?" quick-help drawer linked to glossary keys on each page. -> `src/components/help-drawer.ts`, `src/main.ts`
+- [x] LUI-C3 [DONE] Fix mobile tooltip behavior so tooltips are hover-only on pointer-fine devices. Tests: `src/components/__tests__/tooltip.test.ts` -> `src/components/tooltip.ts` | owner: copilot | done: 2026-03-05T17:34:00Z
 
 ---
 
@@ -293,6 +294,8 @@ Depends on: core
 | 2026-03-05T15:24:00Z | copilot | CLAIMED COPY-A1/COPY-A2/COPY-B1/COPY-B2 in Lane A. Implementing copylab generation, policy versioning, scoring, and channel formatter with focused tests. |
 | 2026-03-05T15:27:00Z | copilot | DONE COPY-A1/A2/B1/B2: added copylab generate/policy/score/format implementations and 15 focused tests. Full suite passing (238/238). |
 | 2026-03-05T16:28:00Z | copilot | DONE Lane E: FUN-B1 (validateFunnelPlan — FUNNEL_GAP/FUNNEL_TRANSITION_INVALID checks), FUN-B2 (serializeFunnelPlan/deserializeFunnelPlan for workflow handoff), STR-B1 (SOURCE_ALLOWLIST + DEFAULT_RATE_LIMIT_POLICY + collectMarketSignals with SIGNAL_SOURCE_DENIED guard), BACK-1 (scripts/integration/launch-flow.test.ts — full brief→funnel→copy→approval→schedule integration), BACK-2 (scripts/drift-check.ts — exits non-zero on CONTRACT.md drift), BACK-3 (scripts/lint-boundaries.ts — exits non-zero on disallowed peer imports). All 380 tests pass. STR-B2 now unblocked. |
+| 2026-03-05T17:31:00Z | copilot | CLAIMED LUI-C3 for mobile tooltip hotfix + sprint-lane planning doc refresh requested in issue. |
+| 2026-03-05T17:34:00Z | copilot | DONE LUI-C3: tooltips now attach only on hover-capable pointer-fine devices; added tooltip support tests. Also refreshed `lanes.md` with next sprint lanes, explicit non-overlap file ownership, and required per-lane `lanes (x).results.md` outputs. |
 
 ## Refill Protocol
 

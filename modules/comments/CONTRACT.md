@@ -28,6 +28,11 @@ Errors: REPLY_POLICY_INVALID
 Purpose: Send only approved replies through adapters.
 Errors: APPROVAL_REQUIRED, SEND_FAILED
 
+### Implementation note (COM-B1)
+- Current implementation in `modules/comments/src/send.ts` takes an additional `context: ReplyDraftContext` parameter.
+- The context provides reply body and channel information needed for adapter dispatch.
+- This parameter may be removed once a persistent reply store is implemented to look up draft details by replyId.
+
 ## Module Invariants
 
 1. Comments module never auto-sends replies without approval.

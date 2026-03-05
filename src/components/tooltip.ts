@@ -4,6 +4,14 @@ let tooltipEl: HTMLDivElement | null = null;
 let hideTimeout: ReturnType<typeof setTimeout> | null = null;
 let showTimeout: ReturnType<typeof setTimeout> | null = null;
 
+export function supportsHoverTooltips(
+    mediaQuery: { matchMedia?: (query: string) => { matches: boolean } } | undefined =
+        typeof window === 'undefined' ? undefined : window,
+): boolean {
+    if (!mediaQuery || typeof mediaQuery.matchMedia !== 'function') return false;
+    return mediaQuery.matchMedia('(hover: hover) and (pointer: fine)').matches;
+}
+
 function ensureTooltipEl(): HTMLDivElement {
     if (!tooltipEl) {
         tooltipEl = document.createElement('div');
@@ -46,6 +54,11 @@ function hide() {
 }
 
 export function attachTooltips(root: HTMLElement = document.body): void {
+    if (!supportsHoverTooltips()) {
+        hide();
+        return;
+    }
+
     root.addEventListener('mouseenter', (e) => {
         const target = (e.target as HTMLElement).closest('[data-tip]') as HTMLElement | null;
         if (!target) return;

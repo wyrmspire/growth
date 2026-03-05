@@ -179,8 +179,8 @@ Depends on: core
 - [x] APP-A1 [DONE] Implement `createReviewBatch()` with pending initial state. Tests: `modules/approvals/src/__tests__/queue.test.ts` -> `modules/approvals/src/queue.ts` | owner: antigravity | 2026-03-05T05:57:48Z
 - [x] APP-A2 [DONE] Implement `decideReview()` transition rules and audit fields (reviewer, timestamp). Tests: `modules/approvals/src/__tests__/decision.test.ts` -> `modules/approvals/src/decision.ts` | owner: antigravity | 2026-03-05T05:57:48Z
 
-#### Lane B - Gate Integration [READY]
-- [ ] APP-B1 [BLOCKED by APP-A2] Expose `isApproved(itemId)` read helper for publishing/comments checks. Tests: `modules/approvals/src/__tests__/gate.test.ts` -> `modules/approvals/src/gate.ts`
+#### Lane B - Gate Integration [DONE]
+- [x] APP-B1 [DONE] Expose `isApproved(itemId)` read helper for publishing/comments checks. Tests: `modules/approvals/src/__tests__/gate.test.ts` -> `modules/approvals/src/gate.ts` | owner: copilot | 2026-03-05T15:30:00Z
 
 ---
 
@@ -193,9 +193,9 @@ Depends on: core
 - [x] ADP-A1 [DONE] Implement provider registry with mock adapters (meta, linkedin, x, email). Tests: `modules/adapters/src/__tests__/registry.test.ts` -> `modules/adapters/src/registry.ts` | owner: antigravity | 2026-03-05T05:57:48Z
 - [x] ADP-A2 [DONE] Implement `enqueuePublish()` normalized response mapping. Tests: `modules/adapters/src/__tests__/publish.test.ts` -> `modules/adapters/src/publish.ts` | owner: antigravity | 2026-03-05T05:57:48Z
 
-#### Lane B - Comments IO [READY]
-- [ ] ADP-B1 [READY] Implement `ingestComments()` mock pull stream for campaign scope. Tests: `modules/adapters/src/__tests__/ingest.test.ts` -> `modules/adapters/src/comments-ingest.ts`
-- [ ] ADP-B2 [READY] Implement `sendReply()` with normalized receipt mapping. Tests: `modules/adapters/src/__tests__/reply.test.ts` -> `modules/adapters/src/reply.ts`
+#### Lane B - Comments IO [DONE]
+- [x] ADP-B1 [DONE] Implement `ingestComments()` mock pull stream for campaign scope. Tests: `modules/adapters/src/__tests__/ingest.test.ts` -> `modules/adapters/src/comments-ingest.ts` | owner: copilot | 2026-03-05T15:30:00Z
+- [x] ADP-B2 [DONE] Implement `sendReply()` with normalized receipt mapping. Tests: `modules/adapters/src/__tests__/reply.test.ts` -> `modules/adapters/src/reply.ts` | owner: copilot | 2026-03-05T15:30:00Z
 
 ---
 
@@ -206,11 +206,11 @@ Depends on: core, approvals, adapters
 
 #### Lane A - Scheduler [DONE]
 - [x] PUB-A1 [DONE] Implement `scheduleAsset()` with timezone-safe ISO validation. Tests: `modules/publishing/src/__tests__/schedule.test.ts` -> `modules/publishing/src/schedule.ts` | owner: antigravity | 2026-03-05T05:57:48Z
-- [ ] PUB-A2 [BLOCKED by APP-B1] Add approval gate check before calendar write. Tests: `modules/publishing/src/__tests__/approval-check.test.ts` -> `modules/publishing/src/schedule.ts`
+- [x] PUB-A2 [DONE] Add approval gate check before calendar write. Tests: `modules/publishing/src/__tests__/approval-check.test.ts` -> `modules/publishing/src/schedule.ts` | owner: copilot | 2026-03-05T15:30:00Z
 
-#### Lane B - Dispatcher [READY]
-- [ ] PUB-B1 [BLOCKED by ADP-A2] Implement `dispatchDue(now)` idempotent due-job dispatch. Tests: `modules/publishing/src/__tests__/dispatch.test.ts` -> `modules/publishing/src/dispatch.ts`
-- [ ] PUB-B2 [BLOCKED by PUB-B1] Emit dispatch outcome events for analytics consumption. Tests: `modules/publishing/src/__tests__/dispatch-events.test.ts` -> `modules/publishing/src/dispatch-events.ts`
+#### Lane B - Dispatcher [DONE]
+- [x] PUB-B1 [DONE] Implement `dispatchDue(now)` idempotent due-job dispatch. Tests: `modules/publishing/src/__tests__/dispatch.test.ts` -> `modules/publishing/src/dispatch.ts` | owner: copilot | 2026-03-05T15:30:00Z
+- [x] PUB-B2 [DONE] Emit dispatch outcome events for analytics consumption. Tests: `modules/publishing/src/__tests__/dispatch-events.test.ts` -> `modules/publishing/src/dispatch-events.ts` | owner: copilot | 2026-03-05T15:30:00Z
 
 ---
 
@@ -224,7 +224,7 @@ Depends on: core, approvals, adapters
 - [ ] COM-A2 [READY] Implement `draftReply()` with reply policy application. Tests: `modules/comments/src/__tests__/draft.test.ts` -> `modules/comments/src/draft.ts`
 
 #### Lane B - Send Flow [READY]
-- [ ] COM-B1 [BLOCKED by APP-B1, ADP-B2] Implement `sendApprovedReply()` approval gate + adapter dispatch. Tests: `modules/comments/src/__tests__/send.test.ts` -> `modules/comments/src/send.ts`
+- [ ] COM-B1 [READY] Implement `sendApprovedReply()` approval gate + adapter dispatch. Tests: `modules/comments/src/__tests__/send.test.ts` -> `modules/comments/src/send.ts`
 
 ---
 
@@ -290,6 +290,8 @@ Depends on: core
 | 2026-03-05T06:15:00Z | antigravity | DONE CORE-A1/A2/A3/B1/B2: 87 tests pass. Full CONTRACT.md alignment confirmed, no gaps. |
 | 2026-03-05T06:15:00Z | antigravity | DONE STR-A1/A2 (production impls): 28 tests pass. DONE FUN-A1/A2: 23 tests pass. FUN-B1 + COPY-A1 unblocked. |
 | 2026-03-05T06:15:00Z | antigravity | DONE ADP-A1/A2(31) + PUB-A1(27). DONE BACK-6: offerStrategistFlow, copyCoachFlow, replyCoachFlow (mock-safe, Genkit 1.29). DONE BACK-8: genkit-gate.ts in core/src. Total: 223/223 tests pass. |
+| 2026-03-05T15:22:47Z | copilot | CLAIMED lane B chain: APP-B1, PUB-A2, PUB-B1, PUB-B2, ADP-B1, ADP-B2. Starting approvals→publishing→adapters implementation with focused tests. |
+| 2026-03-05T15:30:00Z | copilot | DONE APP-B1/PUB-A2/PUB-B1/PUB-B2/ADP-B1/ADP-B2. Added gate/dispatch/comments/reply implementations + tests; targeted lane tests (106) and full suite (244) pass; build passes. |
 
 ## Refill Protocol
 

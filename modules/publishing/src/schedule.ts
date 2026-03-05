@@ -1,5 +1,6 @@
 import type { EntityId, ChannelName, PublishCalendarEntry, AppError } from '@core/types';
 import { newEntityId } from '@core/id';
+import { isApproved } from '@approvals/gate';
 
 // ─── Types ────────────────────────────────────────────────────────
 export interface ScheduleAssetResult {
@@ -28,6 +29,13 @@ export function getCalendar(): PublishCalendarEntry[] {
     return _calendar.map(e => ({ ...e }));
 }
 
+export function setCalendarEntryState(jobId: EntityId, state: PublishCalendarEntry['state']): void {
+    const entry = _calendar.find(item => item.jobId === jobId);
+    if (entry) {
+        entry.state = state;
+    }
+}
+
 // ─── ISO 8601 + timezone validation ──────────────────────────────
 // Must include explicit timezone (Z or ±HH:MM). Bare local times rejected.
 const ISO_TZ_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
@@ -49,10 +57,7 @@ const VALID_CHANNELS: ReadonlySet<string> = new Set(['meta', 'linkedin', 'x', 'e
  *   - assetLabel defaults to "Untitled Asset" when omitted.
  *   - runAt must be a timezone-aware ISO 8601 datetime (Z or ±HH:MM offset).
  *
- * Note: The approval gate (APPROVAL_REQUIRED) is enforced in PUB-A2 which
- * depends on APP-B1 (isApproved). PUB-A2 is currently BLOCKED.
- *
- * Errors: SCHEDULE_TIME_INVALID
+ * Errors: APPROVAL_REQUIRED, SCHEDULE_TIME_INVALID
  */
 export function scheduleAsset(
     assetId: EntityId,
@@ -88,6 +93,17 @@ export function scheduleAsset(
             error: {
                 code: 'SCHEDULE_TIME_INVALID',
                 message: `runAt "${runAt}" is not a valid timezone-aware ISO 8601 datetime. Use Z (UTC) or an explicit ±HH:MM offset.`,
+                module: 'publishing',
+            },
+        };
+    }
+
+    if (!isApproved(assetId)) {
+        return {
+            ok: false,
+            error: {
+                code: 'APPROVAL_REQUIRED',
+                message: `Asset "${assetId}" must be approved before scheduling.`,
                 module: 'publishing',
             },
         };

@@ -3,12 +3,23 @@
  */
 
 import { scheduleAsset, getCalendar, resetCalendar } from '../schedule';
+import { decideReview, registerItem, resetStore } from '../../../approvals/src/decision';
+import { _resetStore as resetReviewQueueStore } from '../../../approvals/src/queue';
 import type { EntityId, ChannelName } from '../../../core/src/types';
 
 const ASSET_ID = 'var_000001' as EntityId;
 
 beforeEach(() => {
     resetCalendar();
+    resetStore();
+    resetReviewQueueStore();
+    registerItem({ id: ASSET_ID, label: 'Approved Asset', kind: 'asset', state: 'pending' });
+    decideReview({
+        itemId: ASSET_ID,
+        decision: 'approved',
+        reviewerId: 'reviewer-1',
+        timestamp: new Date().toISOString(),
+    });
 });
 
 describe('scheduleAsset()', () => {

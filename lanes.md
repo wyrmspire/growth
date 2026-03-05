@@ -76,6 +76,12 @@ A documentation-only lane is intentionally first to reduce merge risk and align 
 - Reconcile `src/mock-engine.ts` function signatures against module contracts.
 - Record temporary mismatches directly in impacted `CONTRACT.md` sections.
 
+**Execution context (updated for lower agents):**
+- Drift check status: implementation is present and compiles; signature drift is limited to translation-layer mock helpers, not missing functions.
+- Reconciliation target is **mock-engine call shapes vs CONTRACT signatures**, not production module internals.
+- Expected mismatch-note targets (if still present): `modules/approvals/CONTRACT.md`, `modules/publishing/CONTRACT.md`, `modules/analytics/CONTRACT.md`, `modules/comments/CONTRACT.md`, `modules/strategy/CONTRACT.md`.
+- Keep behavior unchanged for UI flows while documenting any temporary divergence.
+
 **Result file:** `lanes (A).results.md`
 
 ---
@@ -93,6 +99,11 @@ A documentation-only lane is intentionally first to reduce merge risk and align 
 **Tasks:**
 - Add smoke script for full mock flow:
   discovery -> launch -> review -> calendar -> comments -> dashboard.
+
+**Execution context (updated for lower agents):**
+- Use `src/mock-engine.ts` exported functions in user journey order; avoid direct module imports.
+- Assert at least one success condition per step (IDs, non-empty arrays, or state transitions), then exit non-zero on failure.
+- Keep script deterministic and local-only (no network/API calls).
 
 **Result file:** `lanes (B).results.md`
 
@@ -115,6 +126,11 @@ A documentation-only lane is intentionally first to reduce merge risk and align 
 - Implement API-first then Playwright fallback for allowlisted public pages.
 - Enforce source allowlist + rate policy.
 
+**Execution context (updated for lower agents):**
+- Reuse `SOURCE_ALLOWLIST` and `DEFAULT_RATE_LIMIT_POLICY`; do not duplicate policy constants.
+- Fallback must trigger only after API-first attempts fail and only for allowlisted public domains.
+- Preserve existing safety rules (no authenticated scraping, no private pages).
+
 **Result file:** `lanes (C).results.md`
 
 ---
@@ -134,6 +150,11 @@ A documentation-only lane is intentionally first to reduce merge risk and align 
 
 **Tasks:**
 - Implement `sendApprovedReply()` with approval gate + adapter dispatch.
+
+**Execution context (updated for lower agents):**
+- This lane depends on approvals gate + adapter reply wiring; fail closed if approval is missing.
+- Keep send behavior auditable: include reply id, approval outcome, and adapter receipt mapping in tests.
+- Align with comments contract invariant: never auto-send unapproved replies.
 
 **Result file:** `lanes (D).results.md`
 
@@ -155,6 +176,11 @@ A documentation-only lane is intentionally first to reduce merge risk and align 
 **Tasks:**
 - Add strategy workspace page shell for business capture + offer review.
 - Keep it mock-safe and aligned with learning UX language.
+
+**Execution context (updated for lower agents):**
+- Route from `src/main.ts` with existing navigation patterns; no module wiring in this lane.
+- Keep copy beginner-coaching oriented and consistent with non-sales framing rule.
+- UI shell only: no new backend dependencies and no side effects outside current mock flow.
 
 **Result file:** `lanes (E).results.md`
 

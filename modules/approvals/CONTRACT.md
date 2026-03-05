@@ -23,6 +23,10 @@ Invariants:
 - Decision is auditable.
 - Approval state transitions are one-way unless reopened explicitly.
 
+### Temporary mock-engine mismatch note (MCK-A2)
+- `src/mock-engine.ts` and `modules/approvals/src/mock.ts` use `decideReview(decision: ReviewDecision): ApprovalState`.
+- Contract keeps the legacy `(itemId, decision)` shape for now to avoid breaking downstream in-progress lane docs.
+
 ## Module Invariants
 
 1. Approvals owns review state transitions.

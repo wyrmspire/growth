@@ -189,7 +189,7 @@ Browser (Vite) → src/pages/*.ts → fetch('/api/flows/...') → server.ts
 
 ---
 
-## Lane E — Funnel Validation + Strategy Signals + Integration Infra
+## Lane E — Funnel Validation + Strategy Signals + Integration Infra ✅ DONE
 
 **Modules:** funnel (validation), strategy (market signals), backlog infra
 **Docs to read first:** `modules/funnel/CONTRACT.md`, `modules/strategy/CONTRACT.md`, `board.md` (Backlog section), `PROJECT_RULES.md`
@@ -199,21 +199,21 @@ Browser (Vite) → src/pages/*.ts → fetch('/api/flows/...') → server.ts
 
 | ID | Task | File | Test | Status |
 |---|---|---|---|---|
-| FUN-B1 | Implement `validateFunnelPlan()` coverage and transition checks | `modules/funnel/src/validate.ts` | `modules/funnel/src/__tests__/validate.test.ts` | READY |
-| FUN-B2 | Add funnel plan serializer for workflow handoff payloads | `modules/funnel/src/serialize.ts` | `modules/funnel/src/__tests__/serialize.test.ts` | READY |
-| STR-B1 | Implement source allowlist and rate-limit policy for market signals | `modules/strategy/src/sources.ts` | `modules/strategy/src/__tests__/sources.test.ts` | READY |
-| BACK-1 | Add integration workflow tests for launch flow (brief → copy → approval → schedule) | `scripts/integration/launch-flow.test.ts` | — | READY |
-| BACK-2 | Add board drift checker script (CI fails when contract functions missing impl) | `scripts/drift-check.ts` | — | READY |
-| BACK-3 | Add import-boundary lint rules mapped to module ownership | `scripts/lint-boundaries.ts` | — | READY |
+| FUN-B1 | Implement `validateFunnelPlan()` coverage and transition checks | `modules/funnel/src/validate.ts` | `modules/funnel/src/__tests__/validate.test.ts` | DONE |
+| FUN-B2 | Add funnel plan serializer for workflow handoff payloads | `modules/funnel/src/serialize.ts` | `modules/funnel/src/__tests__/serialize.test.ts` | DONE |
+| STR-B1 | Implement source allowlist and rate-limit policy for market signals | `modules/strategy/src/sources.ts` | `modules/strategy/src/__tests__/sources.test.ts` | DONE |
+| BACK-1 | Add integration workflow tests for launch flow (brief → copy → approval → schedule) | `scripts/integration/launch-flow.test.ts` | — | DONE |
+| BACK-2 | Add board drift checker script (CI fails when contract functions missing impl) | `scripts/drift-check.ts` | — | DONE |
+| BACK-3 | Add import-boundary lint rules mapped to module ownership | `scripts/lint-boundaries.ts` | — | DONE |
 
 ### Acceptance
 
-- `npm run test -- modules/funnel modules/strategy` — all tests pass
-- `validateFunnelPlan()` catches missing stages and invalid transitions
-- Source allowlist limits which URLs can be scraped
-- Integration test exercises the full brief → copy → approval → schedule flow
-- Drift checker exits non-zero when a CONTRACT.md function has no matching export
-- Boundary lint exits non-zero when a module imports from a disallowed peer
+- ✅ `npm run test -- modules/funnel modules/strategy` — all tests pass (380/380)
+- ✅ `validateFunnelPlan()` catches missing stages and invalid transitions
+- ✅ Source allowlist limits which URLs can be scraped (`SIGNAL_SOURCE_DENIED` on unlisted domain)
+- ✅ Integration test exercises the full brief → copy → approval → schedule flow (`scripts/integration/launch-flow.test.ts`)
+- ✅ Drift checker exits non-zero when a CONTRACT.md function has no matching export (`npx tsx scripts/drift-check.ts`)
+- ✅ Boundary lint exits non-zero when a module imports from a disallowed peer (`npx tsx scripts/lint-boundaries.ts`)
 
 ---
 

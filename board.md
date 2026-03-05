@@ -229,17 +229,17 @@ Depends on: core, approvals, adapters
 ---
 
 ### Module: analytics
-Owner: unassigned
+Owner: copilot (Lane D, 2026-03-05T15:25:31Z)
 Layer: read-models
 Depends on: core
 
-#### Lane A - Projections [READY]
-- [ ] AN-A1 [READY] Implement `projectAttribution(events)` campaign and channel rollups. Tests: `modules/analytics/src/__tests__/attribution.test.ts` -> `modules/analytics/src/attribution.ts`
-- [ ] AN-A2 [BLOCKED by FUN-A1] Implement funnel conversion projection by stage. Tests: `modules/analytics/src/__tests__/funnel.test.ts` -> `modules/analytics/src/funnel.ts`
-- [ ] AN-A3 [BLOCKED by COPY-B1] Implement variant performance projection. Tests: `modules/analytics/src/__tests__/variants.test.ts` -> `modules/analytics/src/variants.ts`
+#### Lane A - Projections [DONE]
+- [x] AN-A1 [DONE] Implement `projectAttribution(events)` campaign and channel rollups. Tests: `modules/analytics/src/__tests__/attribution.test.ts` -> `modules/analytics/src/attribution.ts`
+- [x] AN-A2 [DONE] Implement funnel conversion projection by stage. Tests: `modules/analytics/src/__tests__/funnel.test.ts` -> `modules/analytics/src/funnel.ts`
+- [x] AN-A3 [DONE] Implement variant performance projection. Tests: `modules/analytics/src/__tests__/variants.test.ts` -> `modules/analytics/src/variants.ts`
 
-#### Lane B - Dashboard Read Model [READY]
-- [ ] AN-B1 [BLOCKED by AN-A1, AN-A2] Build `campaignDashboardReadModel()` aggregator. Tests: `modules/analytics/src/__tests__/dashboard.test.ts` -> `modules/analytics/src/dashboard.ts`
+#### Lane B - Dashboard Read Model [DONE]
+- [x] AN-B1 [DONE] Build `campaignDashboardReadModel()` aggregator. Tests: `modules/analytics/src/__tests__/dashboard.test.ts` -> `modules/analytics/src/dashboard.ts`
 
 ---
 
@@ -290,6 +290,7 @@ Depends on: core
 | 2026-03-05T06:15:00Z | antigravity | DONE CORE-A1/A2/A3/B1/B2: 87 tests pass. Full CONTRACT.md alignment confirmed, no gaps. |
 | 2026-03-05T06:15:00Z | antigravity | DONE STR-A1/A2 (production impls): 28 tests pass. DONE FUN-A1/A2: 23 tests pass. FUN-B1 + COPY-A1 unblocked. |
 | 2026-03-05T06:15:00Z | antigravity | DONE ADP-A1/A2(31) + PUB-A1(27). DONE BACK-6: offerStrategistFlow, copyCoachFlow, replyCoachFlow (mock-safe, Genkit 1.29). DONE BACK-8: genkit-gate.ts in core/src. Total: 223/223 tests pass. |
+| 2026-03-05T15:33:00Z | copilot | CLAIMED + DONE AN-A1/A2/A3/B1 (Lane D). attribution.ts: projectAttribution() groups events by campaign+channel, accumulates impressions/clicks/leads/spend/revenue, computes cpl+roas. funnel.ts: projectFunnelConversion() filters by planId, returns stage rows in deterministic order, computes conversion rates. variants.ts: projectVariantPerformance() extracts VariantPerformanceRow from variant-metric events. dashboard.ts: campaignDashboardReadModel() aggregates all three projections. index.ts exports all. 55 new tests, 278/278 total tests pass. |
 
 ## Refill Protocol
 

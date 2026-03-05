@@ -1,8 +1,91 @@
-# lanes.md — Next Sprint: 5 Parallel Lanes
+# lanes.md — Next Sprint: 6 Parallel Lanes
 
 Sprint start: 2026-03-05
 Source: `board.md` remaining READY tasks + newly unblocked tasks
-All lanes are independent — zero cross-lane blockers.
+
+---
+
+## Setup (every agent must do this first)
+
+```bash
+npm install
+cp .env.local.example .env.local   # then add your GEMINI_API_KEY
+npm run test                        # verify 223+ tests pass
+npm run dev                         # starts Vite UI at localhost:5173
+```
+
+### Env vars (`.env.local`)
+
+| Var | Required | Purpose |
+|---|---|---|
+| `GEMINI_API_KEY` | For live AI | Get from https://aistudio.google.com/apikey — without it, flows run in mock-safe mode (hardcoded responses) |
+| `GEMINI_MODEL` | No | Defaults to `gemini-2.5-flash`. Override to use a different Gemini model. |
+
+### Key files to understand before starting any lane
+
+| File | What it tells you |
+|---|---|
+| `board.md` | All tasks, statuses, agent workflow rules, coordination log |
+| `SYSTEM_ARCHITECTURE.md` | Layer diagram: `ui → workflows → domain modules → adapters` |
+| `DATA_FLOW.md` | 4 data flows: Campaign Launch, Approval→Publish, Comment Ops, Attribution |
+| `PRODUCT_DESIGN.md` | What the user sees, product language rules |
+| `PROJECT_RULES.md` | Hard constraints (no auto-publish, human gates, etc.) |
+| `modules/*/CONTRACT.md` | Each module's exported functions, types, and error contracts |
+
+---
+
+## ⚠ Lane 0 — Wire Genkit Flows to UI (CRITICAL — do this first)
+
+**Why this lane exists:** The 3 Genkit flows (`offerStrategistFlow`, `copyCoachFlow`, `replyCoachFlow`) exist in `modules/*/src/flows/` and work standalone, but **nothing in the running app calls them yet**. The UI runs entirely on `src/mock-engine.ts` (hardcoded data). This lane connects them.
+
+**Docs to read first:** `SYSTEM_ARCHITECTURE.md` (layer diagram), `DATA_FLOW.md` (all 4 flows), `modules/genkit-shared/src/genkit-init.ts` (env var handling), `src/mock-engine.ts` (current mock functions)
+
+### How it works today (broken)
+
+```
+Browser (Vite) → src/pages/*.ts → src/mock-engine.ts → hardcoded data
+                                                        ↑ flows are never called
+modules/*/src/flows/*.ts → exist but are unreachable from the browser
+```
+
+### How it should work after this lane
+
+```
+Browser (Vite) → src/pages/*.ts → fetch('/api/flows/...') → server.ts
+                                                                ↓
+                                            Genkit flows (offerStrategist, copyCoach, replyCoach)
+                                                                ↓
+                                            if GEMINI_API_KEY set → real Gemini responses
+                                            if no key            → mock-safe deterministic responses
+```
+
+### Tasks
+
+| # | Task | Files to create/modify | Details |
+|---|---|---|---|
+| L0-1 | **Create API server** that exposes Genkit flows as HTTP endpoints | `server.ts` (new, project root) | Use `@genkit-ai/express` (`startFlowServer`) OR plain Express. Endpoints: `POST /api/flows/offerStrategist`, `POST /api/flows/copyCoach`, `POST /api/flows/replyCoach`. Import flows from `modules/*/src/flows/`. Load `.env.local` with `dotenv`. |
+| L0-2 | **Add Vite proxy** so the UI can call `/api/*` during dev without CORS issues | `vite.config.ts` | Add `server.proxy: { '/api': 'http://localhost:3400' }` (or whatever port server.ts uses). |
+| L0-3 | **Update mock-engine** to call the real API when available, fall back to hardcoded data when offline | `src/mock-engine.ts` | For each product action (e.g. `submitInterview`, `createCampaign`), try `fetch('/api/flows/...')` first. If it fails (server not running), fall back to current mock data. This keeps the app working with or without the server. |
+| L0-4 | **Wire Discovery page** → `offerStrategistFlow` | `src/pages/discovery.ts`, `src/mock-engine.ts` | When user submits the business interview form, send data to `/api/flows/offerStrategist`. Display the AI's coaching message and offer hypotheses. Keep the current mock fallback. |
+| L0-5 | **Wire Launcher page** → `copyCoachFlow` | `src/pages/launcher.ts`, `src/mock-engine.ts` | When user clicks "Generate Launch Pack", send brief data to `/api/flows/copyCoach`. Display the AI-generated variants with "whyItWorks" explanations. |
+| L0-6 | **Wire Comments page** → `replyCoachFlow` | `src/pages/comments.ts`, `src/mock-engine.ts` | When a comment is triaged, send it to `/api/flows/replyCoach`. Display the AI's draft reply with strategy explanation and coaching note. |
+| L0-7 | **Add `npm run server` script** and update package.json | `package.json` | Add: `"server": "npx tsx server.ts"`, `"dev:full": "concurrently \"npm run server\" \"npm run dev\""`. Install `dotenv`, `@genkit-ai/express` (or `express`), `concurrently` as dev deps. |
+| L0-8 | **Test end-to-end** with a real API key | — | Set `GEMINI_API_KEY` in `.env.local`, run `npm run dev:full`, fill out Business Discovery form, verify real AI coaching responses appear in the UI. Verify mock fallback still works when server is stopped. |
+
+### Acceptance
+
+- `npm run dev:full` starts both the Vite UI and the Genkit API server
+- Business Discovery → submitting the interview form triggers real AI coaching (with key) or mock responses (without)
+- Campaign Launcher → "Generate Launch Pack" returns AI-written copy with explanations
+- Comment Ops → triaged comments get AI-drafted replies with coaching notes
+- Everything still works with `npm run dev` alone (no server = mock fallback)
+- No AI output reaches the user without the `humanReviewRequired: true` flag visible
+
+### Dependencies
+
+- Requires `dotenv` and either `@genkit-ai/express` or `express` as new deps
+- Must install `concurrently` for `dev:full` script
+- No dependency on Lanes A–E (this lane is independent)
 
 ---
 
@@ -137,15 +220,19 @@ All lanes are independent — zero cross-lane blockers.
 ## Cross-Lane Dependencies
 
 ```
+Lane 0 (server + UI wiring) — independent, do first or in parallel
 Lane A (copylab) ──COPY-B1──▶ Lane D (AN-A3)
 Lane B (APP-B1 + ADP-B2) ──▶ Lane C (COM-B1)
 ```
 
 All other tasks within each lane are fully independent.
 
-## How to Run All Tests
+## How to Run
 
 ```bash
-npm install
-npm run test
+npm install                  # install deps
+npm run test                 # run all tests (223+ should pass)
+npm run dev                  # UI only (mock mode)
+npm run server               # API server only (after Lane 0)
+npm run dev:full             # both UI + server (after Lane 0)
 ```

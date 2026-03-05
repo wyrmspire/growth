@@ -16,6 +16,10 @@ Depended on by: ui, workflows
 Purpose: Derive channel and campaign metrics from event stream.
 Errors: METRIC_EVENT_INVALID
 
+### Temporary mock-engine mismatch note (MCK-A2)
+- `src/mock-engine.ts` and `modules/analytics/src/mock.ts` use `projectAttribution(events, campaignId)` to force deterministic single-campaign snapshots in local mock flows.
+- Contract remains campaign-agnostic for production projection API shape.
+
 ### projectFunnelConversion(events: DomainEvent[], planId: EntityId): ConversionFunnelRow[]
 Purpose: Produce conversion rates per funnel stage.
 Errors: FUNNEL_PLAN_UNKNOWN

@@ -98,13 +98,13 @@ Depends on: mock-engine, glossary
 ---
 
 ### Module: mock-engine
-Owner: unassigned
+Owner: copilot (Lane A, 2026-03-05T19:55:00Z)
 Layer: workflows
 Depends on: core, strategy, funnel, copylab, approvals, adapters, publishing, comments, analytics
 
 #### Lane A - Translation Layer [IN_PROGRESS]
 - [x] MCK-A1 [DONE] Create local translation layer connecting UI flows to module mock functions. -> `src/mock-engine.ts`
-- [ ] MCK-A2 [READY] Reconcile function signatures against module CONTRACT docs and record temporary mismatches. -> `src/mock-engine.ts`, `modules/*/CONTRACT.md`
+- [x] MCK-A2 [DONE] Reconcile function signatures against module CONTRACT docs and record temporary mismatches. -> `src/mock-engine.ts`, `modules/*/CONTRACT.md`
 - [ ] MCK-A3 [READY] Add local smoke script for end-to-end mock flow (discovery -> launch -> review -> calendar -> comments -> dashboard). -> `scripts/smoke-mock.ts`
 
 ---
@@ -296,6 +296,7 @@ Depends on: core
 | 2026-03-05T16:28:00Z | copilot | DONE Lane E: FUN-B1 (validateFunnelPlan — FUNNEL_GAP/FUNNEL_TRANSITION_INVALID checks), FUN-B2 (serializeFunnelPlan/deserializeFunnelPlan for workflow handoff), STR-B1 (SOURCE_ALLOWLIST + DEFAULT_RATE_LIMIT_POLICY + collectMarketSignals with SIGNAL_SOURCE_DENIED guard), BACK-1 (scripts/integration/launch-flow.test.ts — full brief→funnel→copy→approval→schedule integration), BACK-2 (scripts/drift-check.ts — exits non-zero on CONTRACT.md drift), BACK-3 (scripts/lint-boundaries.ts — exits non-zero on disallowed peer imports). All 380 tests pass. STR-B2 now unblocked. |
 | 2026-03-05T17:31:00Z | copilot | CLAIMED LUI-C3 for mobile tooltip hotfix + sprint-lane planning doc refresh requested in issue. |
 | 2026-03-05T17:34:00Z | copilot | DONE LUI-C3: tooltips now attach only on hover-capable pointer-fine devices; added tooltip support tests. Also refreshed `lanes.md` with next sprint lanes, explicit non-overlap file ownership, and required per-lane `lanes (x).results.md` outputs. |
+| 2026-03-05T19:55:00Z | copilot | CLAIMED + DONE MCK-A2: reconciled `src/mock-engine.ts` signatures against module contracts, switched copy generation call to canonical request-object form, and added explicit temporary mismatch notes in strategy/approvals/publishing/analytics/comments contracts for mock-only signature differences. |
 
 ## Refill Protocol
 

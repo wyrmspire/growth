@@ -16,7 +16,9 @@ export const ai = hasApiKey
     ? genkit({ plugins: [googleAI()] })
     : genkit({ plugins: [] }); // mock model injected per-flow when no key
 
-export const LIVE_MODEL = 'googleai/gemini-2.5-flash';
+export const LIVE_MODEL = process.env.GEMINI_MODEL
+    ? `googleai/${process.env.GEMINI_MODEL}`
+    : 'googleai/gemini-2.5-flash';
 
 /**
  * Returns the model identifier to use.

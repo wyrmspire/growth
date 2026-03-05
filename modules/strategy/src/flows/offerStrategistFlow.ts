@@ -12,10 +12,8 @@
  */
 
 import { genkit, z } from 'genkit';
+import { LIVE_MODEL } from '../../../genkit-shared/src/genkit-init';
 
-// ── Mock-safe Genkit init ────────────────────────────────────────────────────
-// No plugin needed for mock-safe mode — ai.generate() with no model uses built-in test model.
-// When a real API key is available, add googleAI() plugin and specify model.
 const ai = genkit({});
 
 // ── Input / Output schemas ───────────────────────────────────────────────────
@@ -69,9 +67,9 @@ export const offerStrategistFlow = ai.defineFlow(
         outputSchema: OfferStrategistOutput,
     },
     async (input) => {
-        // MOCK-SAFE: When GOOGLE_GENAI_API_KEY is set, this will call the real model.
+        // MOCK-SAFE: When GEMINI_API_KEY is set, this will call the real model.
         // Without it, the flow scaffolding is exercisable in tests via direct call.
-        const isMockMode = !process.env.GOOGLE_GENAI_API_KEY;
+        const isMockMode = !process.env.GEMINI_API_KEY;
 
         if (isMockMode) {
             // Deterministic mock response for local/test use
@@ -81,7 +79,7 @@ export const offerStrategistFlow = ai.defineFlow(
         const prompt = buildOfferStrategistPrompt(input);
 
         const response = await ai.generate({
-            model: 'googleai/gemini-2.5-flash',
+            model: LIVE_MODEL,
             prompt,
             output: { schema: OfferStrategistOutput },
         });

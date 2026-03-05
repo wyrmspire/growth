@@ -11,6 +11,7 @@
  */
 
 import { genkit, z } from 'genkit';
+import { LIVE_MODEL } from '../../../genkit-shared/src/genkit-init';
 
 const ai = genkit({});
 
@@ -60,14 +61,14 @@ export const replyCoachFlow = ai.defineFlow(
         outputSchema: ReplyCoachOutput,
     },
     async (input) => {
-        const isMockMode = !process.env.GOOGLE_GENAI_API_KEY;
+        const isMockMode = !process.env.GEMINI_API_KEY;
 
         if (isMockMode) {
             return buildMockReplyCoachResponse(input);
         }
 
         const response = await ai.generate({
-            model: 'googleai/gemini-2.5-flash',
+            model: LIVE_MODEL,
             prompt: buildReplyCoachPrompt(input),
             output: { schema: ReplyCoachOutput },
         });

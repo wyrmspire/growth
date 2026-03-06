@@ -3,15 +3,16 @@
  * BACK-2 — Contract Drift Checker
  *
  * Reads every modules/<name>/CONTRACT.md and extracts declared function names
- * (lines matching `### functionName(`). For each function, checks that a
- * matching `export function` or `export const` exists somewhere in the
- * module's src/ directory (excluding __tests__ files).
+ * from the active `## Exported Functions` section only (lines matching
+ * `### functionName(`). Future or staged sections are ignored. For each
+ * function, checks that a matching `export function` or `export const`
+ * exists somewhere in the module's src/ directory (excluding __tests__ files).
  *
  * Exit code 0 = no drift detected.
  * Exit code 1 = one or more CONTRACT.md functions have no matching export.
  *
  * Usage:
- *   npx tsx scripts/drift-check.ts
+ *   npm run check:drift
  */
 
 import * as fs from 'fs';
@@ -37,13 +38,28 @@ function walkDir(dir: string): string[] {
     return results;
 }
 
+function getExportedFunctionsSection(content: string): string {
+    const heading = /^## Exported Functions\s*$/m;
+    const start = content.search(heading);
+
+    if (start === -1) {
+        return '';
+    }
+
+    const afterHeading = content.slice(start).replace(heading, '').trimStart();
+    const nextSection = afterHeading.search(/^##\s+/m);
+
+    return nextSection === -1 ? afterHeading : afterHeading.slice(0, nextSection);
+}
+
 /**
- * Extract declared function names from a CONTRACT.md file.
- * Looks for lines like `### functionName(` at the start.
+ * Extract declared function names from the active Exported Functions section
+ * of a CONTRACT.md file. Future staged sections are not treated as drift.
  */
 function extractContractFunctions(contractPath: string): string[] {
     const content = fs.readFileSync(contractPath, 'utf-8');
-    const matches = [...content.matchAll(/^###\s+(\w+)\(/gm)];
+    const section = getExportedFunctionsSection(content);
+    const matches = [...section.matchAll(/^###\s+(\w+)\(/gm)];
     return matches.map(m => m[1]);
 }
 
@@ -100,7 +116,7 @@ for (const moduleName of fs.readdirSync(MODULES_DIR).sort()) {
 }
 
 if (exitCode === 0) {
-    console.log('[OK] All CONTRACT.md functions have matching exports in their module src/.');
+    console.log('[OK] All active CONTRACT.md exported functions have matching exports in src/.');
 }
 
 process.exit(exitCode);

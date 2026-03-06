@@ -1,17 +1,22 @@
-import { tip } from '../components/tooltip';
+﻿import { tip } from '../components/tooltip';
 import * as engine from '../mock-engine';
 
 export function renderCommentsPage(): string {
   const brief = engine.getCurrentBrief();
+  const commentItems = engine.getCommentItems();
+  const replies = engine.getCommentReplies();
+  const advisory = engine.getCommentsAdvisory();
+  const notice = engine.getPageNotice('comments');
+  const loading = engine.isCommentsLoading();
 
   if (!brief) {
     return `
       <div class="page-header">
-        <h1>${tip('commentTriage', '💬 Comment Operations')}</h1>
+        <h1>${tip('commentTriage', 'Comment Operations')}</h1>
         <p>Manage incoming comments, classify intent, and draft replies.</p>
       </div>
       <div class="card card-empty-state">
-        <p class="page-emoji">💬</p>
+        <p class="page-emoji">Reply</p>
         <p class="body-secondary">
           <a href="#" data-nav="launcher">Launch a campaign</a> first to start receiving comments.
         </p>
@@ -19,18 +24,25 @@ export function renderCommentsPage(): string {
     `;
   }
 
-  let commentItems: ReturnType<typeof engine.pullComments> = [];
-  try {
-    commentItems = engine.pullComments();
-  } catch { /* already pulled */ }
-
-  const replies = engine.getCommentReplies();
+  if (loading || !commentItems.length) {
+    return `
+      <div class="page-header">
+        <h1>${tip('commentTriage', 'Comment Operations')}</h1>
+        <p>Loading comment suggestions and reply coaching.</p>
+      </div>
+      ${notice ? renderPageNotice(notice) : ''}
+      <div class="card card-empty-state">
+        <p class="page-emoji">Loading</p>
+        <p class="body-secondary">Pulling comments and preparing draft replies. This stays review-first even when the AI coach is available.</p>
+      </div>
+    `;
+  }
 
   const intentEmoji: Record<string, string> = {
-    lead: '🟢',
-    support: '🔵',
-    objection: '🟡',
-    spam: '🔴',
+    lead: 'Lead',
+    support: 'Support',
+    objection: 'Objection',
+    spam: 'Spam',
   };
 
   const intentCounts = commentItems.reduce((acc, item) => {
@@ -40,14 +52,29 @@ export function renderCommentsPage(): string {
 
   return `
     <div class="page-header">
-      <h1>${tip('commentTriage', '💬 Comment Operations')}</h1>
+      <h1>${tip('commentTriage', 'Comment Operations')}</h1>
       <p>${commentItems.length} comments pulled · ${replies.length} replies drafted</p>
     </div>
+
+    <div class="coach-block">
+      <div class="coach-block-icon">Guide</div>
+      <div class="coach-block-body">
+        <strong>What you do here</strong>
+        <p>Review incoming comments, see the suggested response strategy, and decide what should actually be sent.</p>
+        <strong>Why it matters</strong>
+        <p>Comments are where reputation and conversion meet. Fast responses are useful, but only if they stay accurate and on-brand.</p>
+        <strong>What comes next</strong>
+        <p>Approve the replies you want, then keep an eye on the Dashboard to see how campaign activity turns into leads.</p>
+      </div>
+    </div>
+
+    ${notice ? renderPageNotice(notice) : ''}
+    ${advisory ? renderAdvisory(advisory) : ''}
 
     <div class="metric-row">
       ${Object.entries(intentCounts).map(([intent, count]) => `
         <div class="metric-tile" data-tip="intent${intent.charAt(0).toUpperCase() + intent.slice(1)}">
-          <div class="metric-label has-tip">${intentEmoji[intent] || ''} ${intent}</div>
+          <div class="metric-label has-tip">${intentEmoji[intent] || ''}</div>
           <div class="metric-value">${count}</div>
         </div>
       `).join('')}
@@ -56,9 +83,10 @@ export function renderCommentsPage(): string {
     <h3 class="section-heading">Incoming Comments</h3>
 
     <div class="card">
-      ${commentItems.map(item => {
-    const reply = replies.find(r => r.commentId === item.commentId);
-    return `
+      ${commentItems.map((item) => {
+        const reply = replies.find((draft) => draft.commentId === item.commentId);
+        const replyState = engine.getReplyCoachState(item.commentId);
+        return `
           <div class="comment-item">
             <div class="comment-avatar">${item.comment.authorName.charAt(0)}</div>
             <div class="comment-body">
@@ -71,36 +99,91 @@ export function renderCommentsPage(): string {
               <div class="comment-text">${item.comment.body}</div>
               ${reply ? `
                 <div class="reply-box">
-                  <strong>${tip('draftReply', '💡 Suggested Reply')}:</strong> ${reply.body}
-                  <div class="body-note">
-                    ${tip('confidence', 'Confidence')}: ${Math.round(reply.confidence * 100)}%
-                  </div>
+                  <strong>${tip('draftReply', 'Suggested Reply')}:</strong> ${reply.body}
+                  <div class="body-note">${tip('confidence', 'Confidence')}: ${Math.round(reply.confidence * 100)}%</div>
                 </div>
+                ${replyState ? `
+                  <div class="advisor-panel advisor-panel--compact">
+                    <div class="advisor-panel-header">
+                      <span class="badge badge-approved">${replyState.source}</span>
+                      <span class="badge badge-${advisoryPhaseClass(replyState.phase)}">${replyState.phase}</span>
+                    </div>
+                    <p class="advisor-panel-summary">${replyState.strategy}</p>
+                    <ul class="advisor-panel-list">
+                      <li>${replyState.coachingNote}</li>
+                      <li>Human approval is required before any reply is sent.</li>
+                    </ul>
+                  </div>
+                ` : ''}
                 <div class="comment-actions">
-                  <button class="btn btn-success btn-sm">${tip('approve', '✓ Approve & Send')}</button>
-                  <button class="btn btn-ghost btn-sm">✏️ Edit</button>
-                  <button class="btn btn-danger btn-sm">${tip('reject', '✗ Discard')}</button>
+                  <button class="btn btn-success btn-sm">${tip('approve', 'Approve & Send')}</button>
+                  <button class="btn btn-ghost btn-sm">Edit</button>
+                  <button class="btn btn-danger btn-sm">${tip('reject', 'Discard')}</button>
                 </div>
               ` : item.intent === 'spam' ? `
-                <div class="body-note">
-                  ${tip('intentSpam', '🚫 Flagged as spam')} — no reply generated
-                </div>
+                <div class="body-note">${tip('intentSpam', 'Flagged as spam')} - no reply generated</div>
               ` : ''}
             </div>
           </div>
         `;
-  }).join('')}
+      }).join('')}
     </div>
 
     <div class="action-row action-row-bottom">
       <button class="btn btn-success" id="send-all-replies-btn">
-        ✉️ Approve & Send All Replies
+        Approve & Send All Replies
       </button>
     </div>
   `;
 }
 
+function renderPageNotice(notice: NonNullable<ReturnType<typeof engine.getPageNotice>>): string {
+  return `
+    <div class="status-banner status-banner--${notice.type}">
+      <strong>${notice.type === 'error' ? 'Action needed' : 'Heads up'}</strong>
+      <span>${notice.message}</span>
+    </div>
+  `;
+}
+
+function advisoryPhaseClass(
+  phase: NonNullable<ReturnType<typeof engine.getCommentsAdvisory>>['phase'] | NonNullable<ReturnType<typeof engine.getReplyCoachState>>['phase'],
+): string {
+  switch (phase) {
+    case 'approved':
+      return 'approved';
+    case 'in-review':
+      return 'scheduled';
+    case 'rejected':
+      return 'rejected';
+    default:
+      return 'pending';
+  }
+}
+
+function renderAdvisory(advisory: NonNullable<ReturnType<typeof engine.getCommentsAdvisory>>): string {
+  return `
+    <div class="advisor-panel">
+      <div class="advisor-panel-header">
+        <span class="badge badge-approved">${advisory.source}</span>
+        <span class="badge badge-${advisoryPhaseClass(advisory.phase)}">${advisory.phase}</span>
+      </div>
+      <h3 class="advisor-panel-title">Reply advisory state</h3>
+      <p class="advisor-panel-summary">${advisory.summary}</p>
+      <ul class="advisor-panel-list">
+        ${advisory.bullets.map((bullet) => `<li>${bullet}</li>`).join('')}
+      </ul>
+    </div>
+  `;
+}
+
 export function bindCommentsEvents(): void {
+  if (!engine.getCommentItems().length && !engine.isCommentsLoading()) {
+    void engine.ensureCommentsLoaded().then(() => {
+      window.dispatchEvent(new CustomEvent('navigate', { detail: 'comments' }));
+    });
+  }
+
   const sendAllBtn = document.getElementById('send-all-replies-btn');
   if (sendAllBtn) {
     sendAllBtn.addEventListener('click', () => {

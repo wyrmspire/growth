@@ -5,19 +5,30 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "server": "tsx server.ts",
+    "dev:full": "concurrently -k -n UI,API -c blue,green \"npm:dev\" \"npm:server\"",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "smoke:mock": "tsx scripts/smoke-mock.ts",
+    "check:drift": "tsx scripts/drift-check.ts",
+    "check:boundaries": "tsx scripts/lint-boundaries.ts",
+    "check": "npm run check:drift && npm run check:boundaries && npm run smoke:mock"
   },
   "devDependencies": {
+    "@types/express": "^5.0.6",
     "@vitest/ui": "^4.0.18",
+    "concurrently": "^9.2.1",
+    "tsx": "^4.21.0",
     "typescript": "^5.4.0",
     "vite": "^5.4.0",
     "vitest": "^4.0.18"
   },
   "dependencies": {
     "@genkit-ai/google-genai": "^1.29.0",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
     "genkit": "^1.29.0",
     "zod": "^4.3.6"
   }

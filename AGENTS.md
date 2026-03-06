@@ -35,14 +35,20 @@ In mock mode (current default):
 ui -> mock-engine -> modules/*/src/mock.ts
 ```
 
-In production mode (future, requires OPS-2):
+In local advisory mode (optional when `npm run server` is running):
+
+```
+ui -> mock-engine -> /api/flows/* -> Genkit flows
+```
+
+In production mode (future):
 
 ```
 ui -> workflows -> domain modules -> adapters
 ```
 
-Agents must not assume production-mode wiring is live unless `OPS-2` and
-`OPS-3` are marked DONE.
+Agents must not assume provider-backed workflow automation is live unless a
+later workflow layer is explicitly documented as active.
 
 ## Doc Sync Rules
 
@@ -66,9 +72,7 @@ Before marking a task DONE, verify:
 - `npm run check:boundaries` — no disallowed cross-module imports
 - `npm run smoke:mock` — mock-engine round-trip passes
 
-Note: Guard scripts require `tsx` installed and wired into `package.json`
-(tracked under `OPS-1`). Until OPS-1 is done, run `npx tsx scripts/...`
-as a manual substitute.
+Preferred local gate: `npm run check`
 
 ## Definition of Done
 

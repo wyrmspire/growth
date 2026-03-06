@@ -1,4 +1,4 @@
-import { tip } from '../components/tooltip';
+﻿import { tip } from '../components/tooltip';
 import * as engine from '../mock-engine';
 
 export function renderLauncherPage(): string {
@@ -7,15 +7,28 @@ export function renderLauncherPage(): string {
   const variants = engine.getCurrentVariants();
   const scores = engine.getCurrentScores();
   const profile = engine.getCurrentProfile();
+  const advisory = engine.getLaunchAdvisory();
+  const notice = engine.getPageNotice('launcher');
 
   if (!profile) {
     return `
       <div class="page-header">
-        <h1>🚀 Campaign Launcher</h1>
+        <h1>Campaign Launcher</h1>
         <p>Create and launch a coordinated marketing ${tip('campaign', 'campaign')}.</p>
       </div>
+      <div class="coach-block">
+        <div class="coach-block-icon">Guide</div>
+        <div class="coach-block-body">
+          <strong>What you do here</strong>
+          <p>Turn an approved offer into a real campaign plan, then generate channel-specific copy you can review before publishing.</p>
+          <strong>Why it matters</strong>
+          <p>This is where strategy becomes execution. Good launch structure makes later approvals and scheduling much easier.</p>
+          <strong>What comes next</strong>
+          <p>Complete Business Discovery first, then come back here to generate the launch pack.</p>
+        </div>
+      </div>
       <div class="card card-empty-state">
-        <p class="page-emoji">🔍</p>
+        <p class="page-emoji">Plan</p>
         <p class="body-secondary">
           Complete <a href="#" data-nav="discovery">Business Discovery</a> first to define your ${tip('offer', 'offer')}.
         </p>
@@ -26,26 +39,79 @@ export function renderLauncherPage(): string {
   if (!brief) {
     return `
       <div class="page-header">
-        <h1>🚀 Campaign Launcher</h1>
+        <h1>Campaign Launcher</h1>
         <p>Create and launch a coordinated marketing ${tip('campaign', 'campaign')}.</p>
       </div>
+      <div class="coach-block">
+        <div class="coach-block-icon">Guide</div>
+        <div class="coach-block-body">
+          <strong>What you do here</strong>
+          <p>Confirm the offer, choose channels, and generate copy suggestions for each stage of your funnel.</p>
+          <strong>Why it matters</strong>
+          <p>The same offer needs different wording for awareness, consideration, and decision. This step gives you a structured first draft.</p>
+          <strong>What comes next</strong>
+          <p>Once the variants look good, move them into the Review Queue for approval.</p>
+        </div>
+      </div>
+      ${notice ? renderPageNotice(notice) : ''}
+      ${advisory ? renderAdvisory(advisory) : ''}
       ${renderLaunchForm(profile)}
     `;
   }
 
   return `
     <div class="page-header">
-      <h1>🚀 Campaign Launcher</h1>
+      <h1>Campaign Launcher</h1>
       <p>${tip('campaign', 'Campaign')} for <strong>${brief.offerName}</strong> targeting <strong>${brief.audience}</strong></p>
     </div>
 
+    ${notice ? renderPageNotice(notice) : ''}
+    ${advisory ? renderAdvisory(advisory) : ''}
     ${plan ? renderFunnelPreview(plan) : ''}
     ${variants && scores.length ? renderVariantTable(variants, scores) : ''}
 
     <div class="action-row action-row-bottom">
       <button class="btn btn-primary" id="send-to-review-btn">
-        ${tip('reviewQueue', '📋 Send to Review')}
+        ${tip('reviewQueue', 'Send to Review')}
       </button>
+    </div>
+  `;
+}
+
+function renderPageNotice(notice: NonNullable<ReturnType<typeof engine.getPageNotice>>): string {
+  return `
+    <div class="status-banner status-banner--${notice.type}">
+      <strong>${notice.type === 'error' ? 'Action needed' : 'Heads up'}</strong>
+      <span>${notice.message}</span>
+    </div>
+  `;
+}
+
+function advisoryPhaseClass(phase: NonNullable<ReturnType<typeof engine.getLaunchAdvisory>>['phase']): string {
+  switch (phase) {
+    case 'approved':
+      return 'approved';
+    case 'in-review':
+      return 'scheduled';
+    case 'rejected':
+      return 'rejected';
+    default:
+      return 'pending';
+  }
+}
+
+function renderAdvisory(advisory: NonNullable<ReturnType<typeof engine.getLaunchAdvisory>>): string {
+  return `
+    <div class="advisor-panel">
+      <div class="advisor-panel-header">
+        <span class="badge badge-approved">${advisory.source}</span>
+        <span class="badge badge-${advisoryPhaseClass(advisory.phase)}">${advisory.phase}</span>
+      </div>
+      <h3 class="advisor-panel-title">Copy advisory state</h3>
+      <p class="advisor-panel-summary">${advisory.summary}</p>
+      <ul class="advisor-panel-list">
+        ${advisory.bullets.map((bullet) => `<li>${bullet}</li>`).join('')}
+      </ul>
     </div>
   `;
 }
@@ -68,18 +134,10 @@ function renderLaunchForm(profile: NonNullable<ReturnType<typeof engine.getCurre
         <div class="form-group">
           <label>${tip('channel', 'Channels')} (select which platforms to post on)</label>
           <div class="channel-row">
-            <label class="channel-label">
-              <input type="checkbox" value="meta" checked /> ${tip('channelMeta', 'Meta')}
-            </label>
-            <label class="channel-label">
-              <input type="checkbox" value="linkedin" checked /> ${tip('channelLinkedin', 'LinkedIn')}
-            </label>
-            <label class="channel-label">
-              <input type="checkbox" value="x" checked /> ${tip('channelX', 'X')}
-            </label>
-            <label class="channel-label">
-              <input type="checkbox" value="email" /> ${tip('channelEmail', 'Email')}
-            </label>
+            <label class="channel-label"><input type="checkbox" value="meta" checked /> ${tip('channelMeta', 'Meta')}</label>
+            <label class="channel-label"><input type="checkbox" value="linkedin" checked /> ${tip('channelLinkedin', 'LinkedIn')}</label>
+            <label class="channel-label"><input type="checkbox" value="x" checked /> ${tip('channelX', 'X')}</label>
+            <label class="channel-label"><input type="checkbox" value="email" /> ${tip('channelEmail', 'Email')}</label>
           </div>
         </div>
         <div class="form-group">
@@ -87,7 +145,7 @@ function renderLaunchForm(profile: NonNullable<ReturnType<typeof engine.getCurre
           <input class="form-input" id="launch-goals" value="Generate leads, Build brand awareness, Drive demo bookings" />
         </div>
         <button type="submit" class="btn btn-primary form-submit">
-          ${tip('generateCopy', '⚡ Generate Launch Pack')}
+          ${tip('generateCopy', 'Generate Launch Pack')}
         </button>
       </form>
     </div>
@@ -96,17 +154,13 @@ function renderLaunchForm(profile: NonNullable<ReturnType<typeof engine.getCurre
 
 function renderFunnelPreview(plan: NonNullable<ReturnType<typeof engine.getCurrentPlan>>): string {
   return `
-    <h3 class="sub-heading">${tip('funnel', '🔻 Campaign Funnel')}</h3>
+    <h3 class="sub-heading">${tip('funnel', 'Campaign Funnel')}</h3>
     <div class="funnel-visual">
-      ${plan.stages.map(stage => `
+      ${plan.stages.map((stage) => `
         <div class="funnel-stage ${stage.name}" data-tip="${stage.name}">
           <div class="stage-name">${stage.name.charAt(0).toUpperCase() + stage.name.slice(1)}</div>
-          <div class="stage-meta">
-            ${stage.channels.length} ${tip('channel', 'channels')} · ${stage.ctas.length} ${tip('cta', 'CTAs')}
-          </div>
-          <div class="stage-ctas">
-            ${stage.ctas.join(' · ')}
-          </div>
+          <div class="stage-meta">${stage.channels.length} channels · ${stage.ctas.length} CTAs</div>
+          <div class="stage-ctas">${stage.ctas.join(' · ')}</div>
         </div>
       `).join('')}
     </div>
@@ -117,16 +171,16 @@ function renderVariantTable(
   variants: NonNullable<ReturnType<typeof engine.getCurrentVariants>>,
   scores: ReturnType<typeof engine.getCurrentScores>,
 ): string {
-  const scoreMap = new Map(scores.map(s => [s.variantId, s]));
-  const sorted = [...variants.variants].sort((a, b) => {
-    const sa = scoreMap.get(a.id)?.score || 0;
-    const sb = scoreMap.get(b.id)?.score || 0;
-    return sb - sa;
+  const scoreMap = new Map(scores.map((score) => [score.variantId, score]));
+  const sorted = [...variants.variants].sort((left, right) => {
+    const leftScore = scoreMap.get(left.id)?.score || 0;
+    const rightScore = scoreMap.get(right.id)?.score || 0;
+    return rightScore - leftScore;
   });
 
   return `
     <hr class="section-divider" />
-    <h3 class="section-heading">${tip('copy', '📝 Generated Copy')}</h3>
+    <h3 class="section-heading">${tip('copy', 'Generated Copy')}</h3>
     <div class="card card-overflow">
       <table class="data-table">
         <thead>
@@ -139,20 +193,19 @@ function renderVariantTable(
           </tr>
         </thead>
         <tbody>
-          ${sorted.map(v => {
-    const s = scoreMap.get(v.id);
-    const scoreVal = s?.score || 0;
-    const scoreClass = scoreVal >= 85 ? 'score-high' : scoreVal >= 70 ? 'score-mid' : 'score-low';
-    return `
+          ${sorted.map((variant) => {
+            const score = scoreMap.get(variant.id)?.score || 0;
+            const scoreClass = score >= 85 ? 'score-high' : score >= 70 ? 'score-mid' : 'score-low';
+            return `
               <tr>
-                <td><span class="badge badge-${v.channel === 'meta' ? 'scheduled' : v.channel === 'linkedin' ? 'approved' : 'pending'}">${v.channel}</span></td>
-                <td data-tip="${v.stage}" class="has-tip cell-capitalize">${v.stage}</td>
-                <td class="cell-truncate">${v.headline}</td>
-                <td>${v.cta}</td>
-                <td class="score-value score-${scoreClass}">${scoreVal}</td>
+                <td><span class="badge badge-${variant.channel === 'meta' ? 'scheduled' : variant.channel === 'linkedin' ? 'approved' : 'pending'}">${variant.channel}</span></td>
+                <td class="cell-capitalize">${variant.stage}</td>
+                <td class="cell-truncate">${variant.headline}</td>
+                <td>${variant.cta}</td>
+                <td class="score-value score-${scoreClass}">${score}</td>
               </tr>
             `;
-  }).join('')}
+          }).join('')}
         </tbody>
       </table>
     </div>
@@ -162,18 +215,17 @@ function renderVariantTable(
 export function bindLauncherEvents(): void {
   const form = document.getElementById('launch-form');
   if (form) {
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
       const val = (id: string) => (document.getElementById(id) as HTMLInputElement)?.value || '';
-
       const checkedChannels = Array.from(form.querySelectorAll('input[type=checkbox]:checked'))
-        .map(c => (c as HTMLInputElement).value) as ('meta' | 'linkedin' | 'x' | 'email')[];
+        .map((checkbox) => (checkbox as HTMLInputElement).value) as ('meta' | 'linkedin' | 'x' | 'email')[];
 
-      engine.createCampaign({
+      await engine.createCampaignWithAdvisory({
         offerName: val('launch-offer'),
         audience: val('launch-audience'),
         channels: checkedChannels,
-        goals: val('launch-goals').split(',').map(s => s.trim()),
+        goals: val('launch-goals').split(',').map((goal) => goal.trim()).filter(Boolean),
       });
 
       window.dispatchEvent(new CustomEvent('navigate', { detail: 'launcher' }));

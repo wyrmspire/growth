@@ -147,9 +147,17 @@ try {
     assert(replies[0].id.startsWith('reply_'), 'Reply ID has reply_ prefix');
     logOk(`Drafted ${replies.length} replies`);
 
+    logStep('Comments: Verify reply drafts are gated through approvals');
+    const replyReviewItems = getReviewItems().filter((item) => item.kind === 'reply');
+    assert(replyReviewItems.length === replies.length, 'Each drafted reply is registered in the review queue');
+    assert(replyReviewItems.every((item) => item.state === 'pending'), 'Drafted replies start in pending review state');
+    logOk(`Registered ${replyReviewItems.length} reply review item(s)`);
+
     logStep('Comments: Send replies');
     sendReplies();
-    logOk('Replies sent');
+    const repliedEvents = getEventLog().filter((event) => event.name === 'CommentReplied');
+    assert(repliedEvents.length === replies.length, 'Each drafted reply emitted a CommentReplied event after send');
+    logOk(`Replies sent: ${repliedEvents.length}`);
 
     // ─── Dashboard Flow ───────────────────────────────────────────────────
     logStep('Dashboard: Get dashboard data');

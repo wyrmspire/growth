@@ -59,6 +59,13 @@ Users should feel:
 2. Mark winning and weak messages.
 3. Feed learning into next brief and copy generation.
 
+## Operator Control Model
+
+- AI suggestions are always labeled with both a source (`mock-engine`, `genkit-mock`, or `genkit-live`) and an advisory phase (`suggested`, `in-review`, `approved`, `rejected`).
+- Discovery, launch, and comment coaching remain useful even when the local flow server is offline because the UI falls back to deterministic mock guidance.
+- The approval gate is visible in the product language and UI. Nothing is sent, scheduled, or published unless a human operator approves it first.
+- The intended user experience is "the system suggests, you decide," even when the guidance is AI-assisted.
+
 ## Post-MVP Roadmap
 
 ### V1.1
@@ -102,4 +109,3 @@ Every page must have a coaching block with three parts:
 1. **What you do here** — plain action description, no jargon
 2. **Why it matters** — business reason, connects action to outcome
 3. **What comes next** — links to the next step in the campaign journey
-

@@ -1,17 +1,35 @@
-/**
- * Mock Engine — Translation layer between product UI and module code.
+﻿/**
+ * Mock Engine - Translation layer between product UI and module code.
  * This is the ONLY file that imports module mock functions.
  * The UI only sees product-shaped data returned from here.
  */
 
-
-import { resetIdCounter, EventLog } from '../modules/core/src/index';
+import {
+    resetIdCounter,
+    EventLog,
+    newEntityId,
+} from '../modules/core/src/index';
 import type {
-    CampaignBrief, FunnelPlan, ChannelVariantSet, VariantScore,
-    ReviewBatch, PublishCalendarEntry, PublishDispatchResult,
-    CommentQueueItem, ReplyDraft, AttributionSnapshot, ConversionFunnelRow,
-    VariantPerformanceRow, DiscoveryInterview, OfferHypothesis, MarketSignal,
-    OfferProfile, ReviewDecision, EntityId,
+    AttributionSnapshot,
+    CampaignBrief,
+    ChannelName,
+    ChannelVariantSet,
+    CommentQueueItem,
+    ConversionFunnelRow,
+    CopyVariant,
+    DiscoveryInterview,
+    EntityId,
+    FunnelPlan,
+    MarketSignal,
+    OfferHypothesis,
+    OfferProfile,
+    PublishCalendarEntry,
+    PublishDispatchResult,
+    ReplyDraft,
+    ReviewBatch,
+    ReviewDecision,
+    VariantPerformanceRow,
+    VariantScore,
 } from '../modules/core/src/types';
 import { validateCampaignBrief } from '../modules/core/src/validation';
 
@@ -24,8 +42,8 @@ import * as publishing from '../modules/publishing/src/mock';
 import * as comments from '../modules/comments/src/mock';
 import * as analytics from '../modules/analytics/src/mock';
 
-// ─── Shared state ────────────────────────────────────────────────
 const eventLog = new EventLog();
+
 let currentBrief: CampaignBrief | null = null;
 let currentPlan: FunnelPlan | null = null;
 let currentVariants: ChannelVariantSet | null = null;
@@ -37,7 +55,6 @@ let currentProfile: OfferProfile | null = null;
 let currentCommentItems: CommentQueueItem[] = [];
 let currentReplies: ReplyDraft[] = [];
 
-// ─── Starter Presets ─────────────────────────────────────────────
 export interface StarterPreset {
     id: string;
     icon: string;
@@ -56,13 +73,13 @@ export interface StarterPreset {
 export const STARTER_PRESETS: StarterPreset[] = [
     {
         id: 'design-agency',
-        icon: '🎨',
+        icon: 'Design',
         name: 'Design Agency',
         description: 'Brand identity and web design for small businesses',
         data: {
             businessName: 'Carta Creative Studio',
             industry: 'Design & Branding',
-            targetCustomer: 'Small business owners who need a professional brand identity but don\'t know where to start',
+            targetCustomer: 'Small business owners who need a professional brand identity but do not know where to start',
             currentOfferings: ['Logo design', 'Brand identity packages', 'Website design', 'Social media templates'],
             painPoints: ['Looks unprofessional online', 'Losing clients to competitors with better branding', 'No consistent visual style across channels'],
             competitiveAdvantage: 'Fixed-price packages, fast 2-week turnaround, and a brand playbook every client keeps',
@@ -70,7 +87,7 @@ export const STARTER_PRESETS: StarterPreset[] = [
     },
     {
         id: 'automation-company',
-        icon: '⚙️',
+        icon: 'Automation',
         name: 'Automation Company',
         description: 'Business process automation for service businesses',
         data: {
@@ -79,20 +96,20 @@ export const STARTER_PRESETS: StarterPreset[] = [
             targetCustomer: 'Service business owners spending 10+ hours a week on repetitive admin tasks',
             currentOfferings: ['Workflow automation audits', 'CRM setup and integration', 'Email and follow-up automation', 'Reporting dashboards'],
             painPoints: ['Too much time on manual data entry', 'Missed follow-ups losing deals', 'No visibility into what the team is doing'],
-            competitiveAdvantage: 'Done-for-you implementation in 30 days with a money-back guarantee if time savings aren\'t measurable',
+            competitiveAdvantage: 'Done-for-you implementation in 30 days with a money-back guarantee if time savings are not measurable',
         },
     },
     {
         id: 'local-service',
-        icon: '🔧',
+        icon: 'Service',
         name: 'Local Service Business',
-        description: 'Home services — plumbing, HVAC, or repairs — serving a local area',
+        description: 'Home services serving a local area',
         data: {
             businessName: 'NextDay Home Services',
             industry: 'Home Services',
             targetCustomer: 'Homeowners who need reliable repairs fast without being overcharged',
             currentOfferings: ['Emergency plumbing', 'HVAC maintenance and repair', 'Water heater installation', 'Drain cleaning'],
-            painPoints: ['Can\'t find a trustworthy contractor', 'Waiting days for a callback', 'Unexpected charges at the end of the job'],
+            painPoints: ['Cannot find a trustworthy contractor', 'Waiting days for a callback', 'Unexpected charges at the end of the job'],
             competitiveAdvantage: 'Same-day service, upfront flat-rate pricing, and a 2-year parts-and-labour warranty',
         },
     },
@@ -100,8 +117,246 @@ export const STARTER_PRESETS: StarterPreset[] = [
 
 let pendingPreset: StarterPreset | null = null;
 
+type AdvisorySource = 'mock-engine' | 'genkit-mock' | 'genkit-live';
+type AdvisoryPhase = 'suggested' | 'in-review' | 'approved' | 'rejected';
+type PageKey = 'discovery' | 'launcher' | 'comments' | 'review';
 
-// ─── Flow E: Business Discovery ──────────────────────────────────
+export interface AdvisoryState {
+    source: AdvisorySource;
+    phase: AdvisoryPhase;
+    title: string;
+    summary: string;
+    bullets: string[];
+    lastUpdated: string;
+}
+
+export interface ReplyCoachState {
+    source: AdvisorySource;
+    phase: AdvisoryPhase;
+    strategy: string;
+    coachingNote: string;
+    lastUpdated: string;
+}
+
+export interface PageNotice {
+    type: 'info' | 'error';
+    message: string;
+}
+
+interface Checklist {
+    quality: boolean;
+    safety: boolean;
+    tone: boolean;
+    factuality: boolean;
+}
+
+interface OfferStrategistOutput {
+    coachMessage: string;
+    hypotheses: Array<{
+        name: string;
+        angle: string;
+        icp: string;
+        rationale: string;
+        confidence: number;
+    }>;
+    nextQuestion?: string;
+    humanReviewRequired: boolean;
+    evaluationChecklist: Checklist;
+}
+
+interface CopyCoachOutput {
+    coachMessage: string;
+    variants: Array<{
+        channel: ChannelName;
+        stage: 'awareness' | 'consideration' | 'decision';
+        headline: string;
+        body: string;
+        cta: string;
+        whyItWorks: string;
+        characterCount: number;
+    }>;
+    copyLesson: string;
+    humanReviewRequired: true;
+    evaluationChecklist: Checklist;
+}
+
+interface ReplyCoachOutput {
+    draftReply: string;
+    strategyExplained: string;
+    coachingNote: string;
+    doNotSendAutomatically: true;
+    characterCount: number;
+    humanReviewRequired: true;
+    evaluationChecklist: Checklist;
+}
+
+interface FlowSuccess<T> {
+    ok: true;
+    mode: 'live' | 'mock-safe';
+    output: T;
+}
+
+interface FlowFailure {
+    ok: false;
+    error: string;
+}
+
+let discoveryAdvisory: AdvisoryState | null = null;
+let launchAdvisory: AdvisoryState | null = null;
+let commentsAdvisory: AdvisoryState | null = null;
+let replyCoachStates = new Map<EntityId, ReplyCoachState>();
+let pageNotices = new Map<PageKey, PageNotice>();
+let commentsLoading = false;
+let commentsAiAttempted = false;
+
+function advisorySource(mode: 'live' | 'mock-safe'): AdvisorySource {
+    return mode === 'live' ? 'genkit-live' : 'genkit-mock';
+}
+
+function setPageNotice(page: PageKey, type: PageNotice['type'], message: string): void {
+    pageNotices.set(page, { type, message });
+}
+
+function clearPageNotice(page: PageKey): void {
+    pageNotices.delete(page);
+}
+
+function updateAdvisoryPhase(advisory: AdvisoryState | null, phase: AdvisoryPhase): AdvisoryState | null {
+    if (!advisory) return advisory;
+    return {
+        ...advisory,
+        phase,
+        lastUpdated: new Date().toISOString(),
+    };
+}
+
+function formatChecklist(checklist: Checklist): string[] {
+    return [
+        `Quality: ${checklist.quality ? 'pass' : 'needs review'}`,
+        `Safety: ${checklist.safety ? 'pass' : 'needs review'}`,
+        `Tone: ${checklist.tone ? 'pass' : 'needs review'}`,
+        `Factuality: ${checklist.factuality ? 'pass' : 'needs review'}`,
+    ];
+}
+
+function fallbackErrorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : 'Unknown flow error';
+}
+
+function normalizeReviewBatchResult(
+    result: ReviewBatch | { ok: true; batch: ReviewBatch } | { ok: false; error?: { message?: string } },
+): ReviewBatch {
+    if ('items' in result) {
+        return result;
+    }
+
+    if (result.ok) {
+        return result.batch;
+    }
+
+    throw new Error(result.error?.message || 'Review batch creation failed.');
+}
+
+async function postFlow<T>(path: string, payload: unknown): Promise<FlowSuccess<T>> {
+    const baseUrl = typeof window === 'undefined' ? 'http://localhost:3400' : '';
+    const response = await fetch(`${baseUrl}${path}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    });
+
+    const body = await response.json() as FlowSuccess<T> | FlowFailure;
+    if (!response.ok || !body.ok) {
+        throw new Error('error' in body ? body.error : `Flow request failed for ${path}`);
+    }
+
+    return body;
+}
+
+function createMockDiscoveryAdvisory(): AdvisoryState {
+    return {
+        source: 'mock-engine',
+        phase: currentProfile ? 'approved' : 'suggested',
+        title: 'Local strategy coach',
+        summary: 'Using deterministic local offer guidance because the flow server is unavailable.',
+        bullets: [
+            `${currentHypotheses.length} ranked offer suggestions generated`,
+            'Human review is still required before approving an offer.',
+        ],
+        lastUpdated: new Date().toISOString(),
+    };
+}
+
+function createMockLaunchAdvisory(): AdvisoryState {
+    return {
+        source: 'mock-engine',
+        phase: 'suggested',
+        title: 'Local copy coach',
+        summary: 'Using deterministic local copy generation while the flow server is unavailable.',
+        bullets: [
+            'Variant scoring remains deterministic and review-required.',
+            'Nothing is published until you explicitly approve it.',
+        ],
+        lastUpdated: new Date().toISOString(),
+    };
+}
+
+function createMockReplyCoachState(): ReplyCoachState {
+    return {
+        source: 'mock-engine',
+        phase: 'suggested',
+        strategy: 'Fallback reply guidance is coming from the local rule-based coach.',
+        coachingNote: 'Review the draft before sending. Replies remain advisory until you approve them.',
+        lastUpdated: new Date().toISOString(),
+    };
+}
+
+function createMockCommentsAdvisory(): AdvisoryState {
+    return {
+        source: 'mock-engine',
+        phase: currentReplies.length ? 'suggested' : 'approved',
+        title: 'Local reply coach',
+        summary: 'Comment drafts are currently coming from the local rule-based coach.',
+        bullets: [
+            `${currentReplies.length} draft replies ready for review`,
+            'Spam comments remain non-reply items.',
+            'Human approval is required before any reply is sent.',
+        ],
+        lastUpdated: new Date().toISOString(),
+    };
+}
+
+function ensureReplyReviewItems(replies: ReplyDraft[]): void {
+    if (!replies.length) {
+        return;
+    }
+
+    const existingIds = new Set(approvals.getAllItems().map((item) => item.id));
+    const pendingItems = replies
+        .filter((reply) => !existingIds.has(reply.id))
+        .map((reply) => {
+            const comment = currentCommentItems.find((item) => item.commentId === reply.commentId);
+            const author = comment?.comment.authorName || 'Unknown';
+            return {
+                id: reply.id,
+                label: `Reply draft for ${author}`,
+                kind: 'reply' as const,
+            };
+        });
+
+    if (!pendingItems.length) {
+        return;
+    }
+
+    const batch = normalizeReviewBatchResult(approvals.createReviewBatch(pendingItems));
+    eventLog.append('ReviewBatchCreated', batch.id, {
+        items: batch.items.length,
+        kind: 'reply',
+    });
+}
+
 export function submitDiscoveryInterview(input: {
     businessName: string;
     industry: string;
@@ -111,8 +366,77 @@ export function submitDiscoveryInterview(input: {
     competitiveAdvantage: string;
 }): DiscoveryInterview {
     currentInterview = strategy.captureInterview(input);
+    currentHypotheses = [];
+    currentSignals = [];
+    currentProfile = null;
+    discoveryAdvisory = null;
+    clearPageNotice('discovery');
     eventLog.append('InterviewCaptured', currentInterview.id);
     return currentInterview;
+}
+
+export async function runDiscoveryInterview(input: {
+    businessName: string;
+    industry: string;
+    targetCustomer: string;
+    currentOfferings: string[];
+    painPoints: string[];
+    competitiveAdvantage: string;
+}): Promise<DiscoveryInterview> {
+    const interview = submitDiscoveryInterview(input);
+
+    try {
+        const flow = await postFlow<OfferStrategistOutput>('/api/flows/offer-strategist', {
+            businessName: input.businessName,
+            industry: input.industry,
+            targetCustomer: input.targetCustomer,
+            painPoints: input.painPoints,
+            competitiveAdvantage: input.competitiveAdvantage,
+            currentChannels: ['meta', 'linkedin', 'x'],
+        });
+
+        currentSignals = strategy.collectMarketSignals({
+            allowedDomains: ['industry-trends.com', 'market-insights.io'],
+            maxRequests: 5,
+            strategy: 'api-first',
+        });
+
+        currentHypotheses = flow.output.hypotheses.map((hypothesis) => ({
+            id: newEntityId('hyp'),
+            name: hypothesis.name,
+            angle: hypothesis.angle,
+            icp: hypothesis.icp,
+            rationale: hypothesis.rationale,
+            confidence: hypothesis.confidence,
+        }));
+        currentHypotheses = strategy.rankHypotheses(currentHypotheses, currentSignals);
+        discoveryAdvisory = {
+            source: advisorySource(flow.mode),
+            phase: 'suggested',
+            title: 'AI offer coach',
+            summary: flow.output.coachMessage,
+            bullets: [
+                ...(flow.output.nextQuestion ? [`Next question: ${flow.output.nextQuestion}`] : []),
+                ...formatChecklist(flow.output.evaluationChecklist),
+                'Human review is required before approving an offer.',
+            ],
+            lastUpdated: new Date().toISOString(),
+        };
+        clearPageNotice('discovery');
+        eventLog.append('OfferHypothesesGenerated', interview.id, {
+            count: currentHypotheses.length,
+            source: discoveryAdvisory.source,
+        });
+    } catch (error) {
+        getOfferSuggestions();
+        setPageNotice(
+            'discovery',
+            'info',
+            `AI server unavailable. Falling back to local offer guidance. ${fallbackErrorMessage(error)}`,
+        );
+    }
+
+    return interview;
 }
 
 export function getOfferSuggestions(): OfferHypothesis[] {
@@ -127,6 +451,7 @@ export function getOfferSuggestions(): OfferHypothesis[] {
         strategy: 'api-first',
     });
     currentHypotheses = strategy.rankHypotheses(currentHypotheses, currentSignals);
+    discoveryAdvisory = createMockDiscoveryAdvisory();
     eventLog.append('OfferHypothesesGenerated', currentInterview.id, { count: currentHypotheses.length });
     return currentHypotheses;
 }
@@ -136,56 +461,188 @@ export function approveOffer(hypothesisIndex: number): OfferProfile {
     if (!hypothesis) throw new Error('Invalid offer selection.');
     currentProfile = strategy.buildOfferProfile(hypothesis, currentSignals);
     currentProfile.state = 'approved';
+    discoveryAdvisory = updateAdvisoryPhase(discoveryAdvisory, 'approved');
     eventLog.append('OfferProfileApproved', currentProfile.id);
     return currentProfile;
 }
 
-// ─── Flow A: Campaign Launch ─────────────────────────────────────
-export function createCampaign(input: {
+function createCampaignBase(input: {
     offerName: string;
     audience: string;
-    channels: ('meta' | 'linkedin' | 'x' | 'email')[];
+    channels: ChannelName[];
     goals: string[];
-}): { brief: CampaignBrief; plan: FunnelPlan; variants: ChannelVariantSet; scores: VariantScore[] } {
+}): { brief: CampaignBrief; plan: FunnelPlan } {
     const result = validateCampaignBrief(input);
     if (!result.valid || !result.normalized) {
-        throw new Error(result.errors.map(e => e.message).join(', '));
+        throw new Error(result.errors.map((error) => error.message).join(', '));
     }
 
     currentBrief = result.normalized;
-    eventLog.append('CampaignDrafted', currentBrief.id);
-
     currentPlan = funnel.createFunnelPlan(currentBrief);
+    currentVariants = null;
+    currentScores = [];
+    currentCommentItems = [];
+    currentReplies = [];
+    commentsLoading = false;
+    commentsAiAttempted = false;
+    replyCoachStates.clear();
+    commentsAdvisory = null;
+    launchAdvisory = null;
+    clearPageNotice('launcher');
+    clearPageNotice('comments');
+    clearPageNotice('review');
+
+    eventLog.append('CampaignDrafted', currentBrief.id);
     eventLog.append('FunnelPlanCreated', currentPlan.id);
-
-    currentVariants = copylab.generateVariants(currentBrief, currentPlan);
-    eventLog.append('VariantsGenerated', currentBrief.id, { count: currentVariants.variants.length });
-
-    currentScores = copylab.scoreVariants(currentVariants);
-    eventLog.append('VariantsScored', currentBrief.id);
 
     return {
         brief: currentBrief,
         plan: currentPlan,
+    };
+}
+
+function finalizeCampaign(variantSet: ChannelVariantSet, advisory: AdvisoryState) {
+    currentVariants = variantSet;
+    eventLog.append('VariantsGenerated', currentBrief!.id, { count: currentVariants.variants.length });
+    currentScores = copylab.scoreVariants(currentVariants);
+    eventLog.append('VariantsScored', currentBrief!.id);
+    launchAdvisory = advisory;
+
+    return {
+        brief: currentBrief!,
+        plan: currentPlan!,
         variants: currentVariants,
         scores: currentScores,
     };
 }
 
+async function buildFlowVariantSet(brief: CampaignBrief, plan: FunnelPlan): Promise<{
+    variantSet: ChannelVariantSet;
+    advisory: AdvisoryState;
+}> {
+    const outputs = await Promise.all(
+        plan.stages.map(async (stage) => {
+            const flow = await postFlow<CopyCoachOutput>('/api/flows/copy-coach', {
+                briefId: brief.id,
+                offerName: brief.offerName,
+                audience: brief.audience,
+                channels: stage.channels,
+                funnelStage: stage.name,
+                cta: stage.ctas[0] || 'Learn more',
+            });
+            return {
+                source: advisorySource(flow.mode),
+                output: flow.output,
+            };
+        }),
+    );
+
+    const source = outputs[0]?.source ?? 'genkit-mock';
+    const variants: CopyVariant[] = outputs.flatMap(({ output }) =>
+        output.variants.map((variant) => ({
+            id: newEntityId('var'),
+            channel: variant.channel,
+            stage: variant.stage,
+            headline: variant.headline,
+            body: variant.body,
+            cta: variant.cta,
+            policyVersion: `${source}-v1`,
+        })),
+    );
+
+    const lessons = Array.from(new Set(outputs.map(({ output }) => output.copyLesson)));
+
+    return {
+        variantSet: {
+            briefId: brief.id,
+            policyVersion: `${source}-v1`,
+            variants,
+        },
+        advisory: {
+            source,
+            phase: 'suggested',
+            title: 'AI copy coach',
+            summary: outputs[0]?.output.coachMessage || 'AI-assisted copy suggestions are ready for review.',
+            bullets: [
+                ...lessons,
+                'Review is required before any asset can be sent to publishing.',
+            ],
+            lastUpdated: new Date().toISOString(),
+        },
+    };
+}
+
+export async function createCampaignWithAdvisory(input: {
+    offerName: string;
+    audience: string;
+    channels: ChannelName[];
+    goals: string[];
+}): Promise<{ brief: CampaignBrief; plan: FunnelPlan; variants: ChannelVariantSet; scores: VariantScore[] }> {
+    const { brief, plan } = createCampaignBase(input);
+
+    try {
+        const result = await buildFlowVariantSet(brief, plan);
+        clearPageNotice('launcher');
+        return finalizeCampaign(result.variantSet, result.advisory);
+    } catch (error) {
+        const variantSet = copylab.generateVariants(brief, plan);
+        setPageNotice(
+            'launcher',
+            'info',
+            `AI server unavailable. Falling back to local copy generation. ${fallbackErrorMessage(error)}`,
+        );
+        return finalizeCampaign(variantSet, createMockLaunchAdvisory());
+    }
+}
+
+export function createCampaign(input: {
+    offerName: string;
+    audience: string;
+    channels: ChannelName[];
+    goals: string[];
+}): { brief: CampaignBrief; plan: FunnelPlan; variants: ChannelVariantSet; scores: VariantScore[] } {
+    const { brief, plan } = createCampaignBase(input);
+    const variantSet = copylab.generateVariants(brief, plan);
+    return finalizeCampaign(variantSet, createMockLaunchAdvisory());
+}
+
 export function sendToReview(): ReviewBatch {
     if (!currentVariants) throw new Error('Generate copy first.');
-    const items = currentVariants.variants.map(v => ({
-        id: v.id,
-        label: `${v.channel} — ${v.stage} — ${v.headline.slice(0, 40)}...`,
+    const items = currentVariants.variants.map((variant) => ({
+        id: variant.id,
+        label: `${variant.channel} - ${variant.stage} - ${variant.headline.slice(0, 40)}...`,
         kind: 'asset' as const,
     }));
-    const batch = approvals.createReviewBatch(items);
+    const batch = normalizeReviewBatchResult(approvals.createReviewBatch(items));
+    launchAdvisory = updateAdvisoryPhase(launchAdvisory, 'in-review');
     eventLog.append('ReviewBatchCreated', batch.id, { items: batch.items.length });
     return batch;
 }
 
-// ─── Flow B: Review & Publish ────────────────────────────────────
+function syncApprovalPhase(itemId: EntityId): void {
+    const items = approvals.getAllItems();
+    const allApproved = items.length > 0 && items.every((item) => item.state === 'approved');
+
+    if (currentVariants?.variants.some((variant) => variant.id === itemId)) {
+        launchAdvisory = updateAdvisoryPhase(launchAdvisory, allApproved ? 'approved' : 'in-review');
+    }
+
+    if (currentReplies.some((reply) => reply.id === itemId)) {
+        commentsAdvisory = updateAdvisoryPhase(commentsAdvisory, allApproved ? 'approved' : 'in-review');
+    }
+}
+
 export function approveItem(itemId: EntityId): void {
+    const item = approvals.getAllItems().find((entry) => entry.id === itemId);
+    if (!item) {
+        const message = `Approval item ${itemId} was not found in the review queue.`;
+        setPageNotice('review', 'error', message);
+        if (currentReplies.some((reply) => reply.id === itemId)) {
+            setPageNotice('comments', 'error', message);
+        }
+        return;
+    }
+
     const decision: ReviewDecision = {
         itemId,
         decision: 'approved',
@@ -193,10 +650,45 @@ export function approveItem(itemId: EntityId): void {
         timestamp: new Date().toISOString(),
     };
     approvals.decideReview(decision);
+    if (!approvals.isApproved(itemId)) {
+        const message = `Approval failed for ${item.label}.`;
+        setPageNotice('review', 'error', message);
+        if (item.kind === 'reply') {
+            setPageNotice('comments', 'error', message);
+        }
+        return;
+    }
+
+    syncApprovalPhase(itemId);
+    setPageNotice('review', 'info', 'Item approved. It can now move to the next step.');
+    if (item.kind === 'reply') {
+        const reply = currentReplies.find((entry) => entry.id === itemId);
+        if (reply) {
+            const currentState = replyCoachStates.get(reply.commentId);
+            if (currentState) {
+                replyCoachStates.set(reply.commentId, {
+                    ...currentState,
+                    phase: 'approved',
+                    lastUpdated: new Date().toISOString(),
+                });
+            }
+        }
+        setPageNotice('comments', 'info', 'Reply approved. You can send it now.');
+    }
     eventLog.append('AssetApproved', itemId);
 }
 
 export function rejectItem(itemId: EntityId): void {
+    const item = approvals.getAllItems().find((entry) => entry.id === itemId);
+    if (!item) {
+        const message = `Approval item ${itemId} was not found in the review queue.`;
+        setPageNotice('review', 'error', message);
+        if (currentReplies.some((reply) => reply.id === itemId)) {
+            setPageNotice('comments', 'error', message);
+        }
+        return;
+    }
+
     const decision: ReviewDecision = {
         itemId,
         decision: 'rejected',
@@ -204,12 +696,38 @@ export function rejectItem(itemId: EntityId): void {
         timestamp: new Date().toISOString(),
     };
     approvals.decideReview(decision);
+    if (approvals.isApproved(itemId)) {
+        const message = `Reject failed for ${item.label}.`;
+        setPageNotice('review', 'error', message);
+        if (item.kind === 'reply') {
+            setPageNotice('comments', 'error', message);
+        }
+        return;
+    }
+
+    syncApprovalPhase(itemId);
+    setPageNotice('review', 'info', 'Item rejected. It will stay out of publishing until revised.');
+    if (item.kind === 'reply') {
+        const reply = currentReplies.find((entry) => entry.id === itemId);
+        if (reply) {
+            const currentState = replyCoachStates.get(reply.commentId);
+            if (currentState) {
+                replyCoachStates.set(reply.commentId, {
+                    ...currentState,
+                    phase: 'rejected',
+                    lastUpdated: new Date().toISOString(),
+                });
+            }
+        }
+        setPageNotice('comments', 'info', 'Reply discarded. It will not be sent.');
+    }
     eventLog.append('AssetRejected', itemId);
 }
 
 export function approveAll(): void {
     const pending = approvals.getPendingItems();
-    pending.forEach(item => approveItem(item.id));
+    pending.forEach((item) => approveItem(item.id));
+    setPageNotice('review', 'info', `${pending.length} item(s) approved.`);
 }
 
 export function getReviewItems() {
@@ -220,9 +738,9 @@ export function scheduleAll(): PublishCalendarEntry[] {
     if (!currentVariants) return [];
 
     const now = new Date();
-    return currentVariants.variants.map((v, i) => {
-        const runAt = new Date(now.getTime() + (i + 1) * 3600_000).toISOString();
-        const entry = publishing.scheduleAsset(v.id, `${v.channel} — ${v.stage}`, runAt, v.channel);
+    return currentVariants.variants.map((variant, index) => {
+        const runAt = new Date(now.getTime() + (index + 1) * 3600_000).toISOString();
+        const entry = publishing.scheduleAsset(variant.id, `${variant.channel} - ${variant.stage}`, runAt, variant.channel);
         eventLog.append('PublishScheduled', entry.jobId);
         return entry;
     });
@@ -231,7 +749,7 @@ export function scheduleAll(): PublishCalendarEntry[] {
 export function publishNow(): PublishDispatchResult[] {
     const future = new Date(Date.now() + 86400_000 * 30).toISOString();
     const results = publishing.dispatchDue(future);
-    results.forEach(r => eventLog.append('PublishDispatched', r.jobId));
+    results.forEach((result) => eventLog.append('PublishDispatched', result.jobId));
     return results;
 }
 
@@ -239,57 +757,209 @@ export function getCalendar() {
     return publishing.getCalendar();
 }
 
-// ─── Flow C: Comment Operations ──────────────────────────────────
-export function pullComments(): CommentQueueItem[] {
+function loadMockComments(): CommentQueueItem[] {
     if (!currentBrief) throw new Error('Create a campaign first.');
+
     const raw = adapters.ingestComments('meta', currentBrief.id);
     eventLog.append('CommentsIngested', currentBrief.id, { count: raw.length });
 
-    currentCommentItems = raw.map(e => {
-        const item = comments.triageComment(e.comment);
+    currentCommentItems = raw.map((event) => {
+        const item = comments.triageComment(event.comment);
         eventLog.append('CommentClassified', item.commentId, { intent: item.intent });
         return item;
     });
 
     const policy = comments.getDefaultReplyPolicy();
     currentReplies = currentCommentItems
-        .map(item => comments.draftReply(item, policy))
-        .filter((r): r is ReplyDraft => r !== null);
+        .map((item) => comments.draftReply(item, policy))
+        .filter((reply): reply is ReplyDraft => reply !== null);
+    ensureReplyReviewItems(currentReplies);
 
-    currentReplies.forEach(r => eventLog.append('ReplyDrafted', r.id));
+    replyCoachStates.clear();
+    currentReplies.forEach((reply) => {
+        replyCoachStates.set(reply.commentId, createMockReplyCoachState());
+        eventLog.append('ReplyDrafted', reply.id);
+    });
+
+    commentsAdvisory = createMockCommentsAdvisory();
+    return currentCommentItems;
+}
+
+export function pullComments(): CommentQueueItem[] {
+    if (currentCommentItems.length) {
+        return currentCommentItems;
+    }
+    return loadMockComments();
+}
+
+export async function ensureCommentsLoaded(): Promise<CommentQueueItem[]> {
+    if (!currentBrief) throw new Error('Create a campaign first.');
+    if (commentsLoading) return currentCommentItems;
+    if (!currentCommentItems.length) loadMockComments();
+    if (commentsAiAttempted) return currentCommentItems;
+
+    commentsLoading = true;
+
+    try {
+        const policy = comments.getDefaultReplyPolicy();
+        const nextReplies: ReplyDraft[] = [];
+        const nextCoachStates = new Map<EntityId, ReplyCoachState>();
+        let firstSource: AdvisorySource | null = null;
+
+        for (const item of currentCommentItems) {
+            if (item.intent === 'spam') {
+                continue;
+            }
+
+            try {
+                const flow = await postFlow<ReplyCoachOutput>('/api/flows/reply-coach', {
+                    commentId: item.commentId,
+                    commentText: item.comment.body,
+                    commentAuthor: item.comment.authorName,
+                    intent: item.intent,
+                    channel: item.comment.channel,
+                    offerContext: currentProfile?.hypothesis.name || currentBrief.offerName,
+                    tone: policy.tone,
+                });
+
+                const source = advisorySource(flow.mode);
+                if (!firstSource) firstSource = source;
+                const confidence = flow.output.evaluationChecklist.quality && flow.output.evaluationChecklist.tone ? 0.88 : 0.72;
+                const reply: ReplyDraft = {
+                    id: newEntityId('reply'),
+                    commentId: item.commentId,
+                    body: flow.output.draftReply,
+                    confidence,
+                    policyApplied: policy.tone,
+                };
+                nextReplies.push(reply);
+                nextCoachStates.set(item.commentId, {
+                    source,
+                    phase: 'suggested',
+                    strategy: flow.output.strategyExplained,
+                    coachingNote: flow.output.coachingNote,
+                    lastUpdated: new Date().toISOString(),
+                });
+            } catch {
+                const fallbackReply = comments.draftReply(item, policy);
+                if (fallbackReply) {
+                    nextReplies.push(fallbackReply);
+                    nextCoachStates.set(item.commentId, createMockReplyCoachState());
+                }
+            }
+        }
+
+        if (nextReplies.length > 0) {
+            currentReplies = nextReplies;
+            ensureReplyReviewItems(currentReplies);
+            replyCoachStates = nextCoachStates;
+            currentReplies.forEach((reply) => eventLog.append('ReplyDrafted', reply.id));
+            commentsAdvisory = {
+                source: firstSource ?? 'mock-engine',
+                phase: 'suggested',
+                title: firstSource ? 'AI reply coach' : 'Local reply coach',
+                summary: firstSource
+                    ? 'Reply drafts were upgraded with the Genkit reply coach. Review each draft before sending.'
+                    : 'Reply drafts are still coming from the local rule-based coach.',
+                bullets: [
+                    `${currentReplies.length} reply draft(s) ready for review`,
+                    'Every reply remains advisory until you approve it.',
+                ],
+                lastUpdated: new Date().toISOString(),
+            };
+            clearPageNotice('comments');
+        }
+    } catch (error) {
+        setPageNotice(
+            'comments',
+            'info',
+            `AI reply coach unavailable. Keeping local rule-based replies. ${fallbackErrorMessage(error)}`,
+        );
+    } finally {
+        commentsLoading = false;
+        commentsAiAttempted = true;
+    }
 
     return currentCommentItems;
+}
+
+export function getCommentItems(): CommentQueueItem[] {
+    return currentCommentItems;
+}
+
+export function isCommentsLoading(): boolean {
+    return commentsLoading;
 }
 
 export function getCommentReplies(): ReplyDraft[] {
     return currentReplies;
 }
 
-export function sendReplies(): void {
-    currentReplies.forEach(reply => {
-        approveItem(reply.id);
-        eventLog.append('CommentReplied', reply.id);
-    });
+export function getReplyCoachState(commentId: EntityId): ReplyCoachState | null {
+    return replyCoachStates.get(commentId) || null;
 }
 
-// ─── Flow D: Dashboard ──────────────────────────────────────────
+export function sendReplies(): void {
+    let sentCount = 0;
+    let failedCount = 0;
+
+    currentReplies.forEach((reply) => {
+        approveItem(reply.id);
+        const result = comments.sendApprovedReply(reply.id);
+        if (result.success) {
+            sentCount += 1;
+            eventLog.append('CommentReplied', reply.id, { externalId: result.externalId });
+        } else {
+            failedCount += 1;
+            setPageNotice('comments', 'error', 'A reply could not be sent because it was not approved.');
+        }
+    });
+
+    if (failedCount === 0 && sentCount > 0) {
+        commentsAdvisory = updateAdvisoryPhase(commentsAdvisory, 'approved');
+        setPageNotice('comments', 'info', `${sentCount} reply(s) approved and sent.`);
+    } else if (sentCount > 0) {
+        commentsAdvisory = updateAdvisoryPhase(commentsAdvisory, 'in-review');
+        setPageNotice('comments', 'error', `${failedCount} reply(s) failed to send after approval checks.`);
+    }
+}
+
 export function getDashboard(): {
     attribution: AttributionSnapshot;
     funnel: ConversionFunnelRow[];
     variants: VariantPerformanceRow[];
 } {
-    const campId = currentBrief?.id || ('' as EntityId);
+    const campaignId = currentBrief?.id || ('' as EntityId);
     const planId = currentPlan?.id || ('' as EntityId);
     const events = eventLog.all();
 
     return {
-        attribution: analytics.projectAttribution(events, campId),
+        attribution: analytics.projectAttribution(events, campaignId),
         funnel: analytics.projectFunnelConversion(events, planId),
         variants: analytics.projectVariantPerformance(events),
     };
 }
 
-// ─── State access ────────────────────────────────────────────────
+export function getDiscoveryAdvisory(): AdvisoryState | null {
+    return discoveryAdvisory;
+}
+
+export function getLaunchAdvisory(): AdvisoryState | null {
+    return launchAdvisory;
+}
+
+export function getCommentsAdvisory(): AdvisoryState | null {
+    return commentsAdvisory;
+}
+
+export function getPageNotice(page: PageKey): PageNotice | null {
+    return pageNotices.get(page) || null;
+}
+
+export function clearPageMessage(page: PageKey): void {
+    clearPageNotice(page);
+}
+
 export function getEventLog() {
     return eventLog.all();
 }
@@ -318,30 +988,29 @@ export function resetAll(): void {
     currentCommentItems = [];
     currentReplies = [];
     pendingPreset = null;
+    discoveryAdvisory = null;
+    launchAdvisory = null;
+    commentsAdvisory = null;
+    replyCoachStates.clear();
+    pageNotices.clear();
+    commentsLoading = false;
+    commentsAiAttempted = false;
 }
 
-// ─── Starter Preset API ─────────────────────────────────────────────
 export function getStarterPresets(): StarterPreset[] {
     return STARTER_PRESETS;
 }
 
-/**
- * Loads a preset so discovery.ts can read it and pre-fill the form.
- * Does NOT submit the interview — the user still clicks "Complete Interview".
- */
 export function loadStarterPreset(presetId: string): StarterPreset | null {
-    const preset = STARTER_PRESETS.find(p => p.id === presetId) || null;
+    const preset = STARTER_PRESETS.find((item) => item.id === presetId) || null;
     pendingPreset = preset;
     return preset;
 }
 
-/** Returns the pending preset (if any) so discovery form can read it. */
 export function getPendingPreset(): StarterPreset | null {
     return pendingPreset;
 }
 
-/** Clears the pending preset after the form has consumed it. */
 export function clearPendingPreset(): void {
     pendingPreset = null;
 }
-

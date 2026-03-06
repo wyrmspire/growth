@@ -1,30 +1,29 @@
-# board.md — GrowthOps OS Execution Board
+﻿# board.md - GrowthOps OS Execution Board
 
 Last reset: 2026-03-05
-Source of truth: **this file** (not `lanes.md`, not a conversation)
-Current sprint: Recovery, UX hardening, flow wiring, and future-foundation prep
+Source of truth: this file (not `lanes.md`, not a conversation)
+Current sprint: Recovery sprint closeout and backlog refill prep
 Capacity: 5 agents in parallel
 Global waterline: 16 READY tasks
-Per-lane reserve: READY tasks in each active lane must stay >= (active agents in lane × 2)
+Per-lane reserve: READY tasks in each active lane must stay >= (active agents in lane * 2)
 
 ## Quick Start (read this first if you are a new agent)
 
-1. **Read this entire file** before touching any code.
-2. **Pick ONE lane** — do not work across lanes unless explicitly unblocked.
-3. **Claim a task** by following the Agent Workflow below (all 3 steps or claim is invalid).
-4. **One agent per file** — if another agent's task lists the same file, coordinate in the Coordination Log first.
+1. Read this entire file before touching any code.
+2. Pick ONE lane - do not work across lanes unless explicitly unblocked.
+3. Claim a task by following the Agent Workflow below (all 3 steps or claim is invalid).
+4. One agent per file - if another agent's task lists the same file, coordinate in the Coordination Log first.
 5. Refer to `SYSTEM_ARCHITECTURE.md`, `DATA_FLOW.md`, `PRODUCT_DESIGN.md`, and `PROJECT_RULES.md` for design constraints.
 6. Refer to `modules/<name>/CONTRACT.md` for the API surface of any module you touch.
-7. **Update this file** as you work — status changes, Coordination Log, and Run Issues Log.
+7. Update this file as you work - status changes, Coordination Log, and Run Issues Log.
 
 ## Validation Snapshot
 
 Validated on 2026-03-05 against the current workspace state:
-- `npm run test` -> PASS (`438/438` tests) — 16 new tooltip tests added by agent-2
+- `npm run check` -> PASS (`check:drift`, `check:boundaries`, `smoke:mock`)
+- `npm run test` -> PASS (`438/438` tests)
 - `npm run build` -> PASS
-
-Important note:
-- `scripts/drift-check.ts` and `scripts/lint-boundaries.ts` exist, but they are not yet operational from a clean local checkout because `tsx` is not installed or scripted in `package.json`.
+- `lanes.md` regenerated from this board after closeout (`DOC-5`)
 
 ## Product Intent Lock
 
@@ -35,15 +34,14 @@ Not in scope: positioning this as a product sold to marketers.
 ## Recovery Reset Note
 
 The previous board drifted behind the merged codebase. Several tasks remained open even though implementation and tests already existed.
-This reset treats the current code as the validated baseline and focuses active work on:
+This reset treated the current code as the validated baseline and focused active work on:
 1. doc and contract reconciliation
 2. UX and mobile hardening
 3. beginner guidance and strategy workspace clarity
 4. flow wiring and operational guardrails
 5. future-capability foundations from `future.md`
 
-> [!WARNING]
-> `lanes.md` is stale. This board is the single source of truth for task assignment. `lanes.md` must be regenerated from this board (see DOC-5) before being referenced.
+`lanes.md` is now synchronized again, but this board remains the single source of truth for task assignment.
 
 ## Claim State Machine
 
@@ -64,9 +62,9 @@ If any part is missing, claim is invalid and coding must not start.
 
 ## Concurrency Rules
 
-1. **One agent per lane** unless the lane has 4+ READY tasks, in which case two agents may share it.
-2. **One agent per file** — if two tasks in different lanes touch the same file, the later claim must wait or coordinate in the Coordination Log.
-3. **board.md edits are atomic** — update this file immediately when you change task status. Do not batch board updates.
+1. One agent per lane unless the lane has 4+ READY tasks, in which case two agents may share it.
+2. One agent per file - if two tasks in different lanes touch the same file, the later claim must wait or coordinate in the Coordination Log.
+3. `board.md` edits are atomic - update this file immediately when you change task status. Do not batch board updates.
 
 ## Agent Workflow
 
@@ -109,17 +107,19 @@ A task is DONE only if:
 
 | Agent | Role | Current Lane | Status |
 |---|---|---|---|
-| agent-1 | Builder | Lane 1 — Docs and Contract Reconciliation | Active |
-| agent-2 | Builder | Lane 2 — UX Hardening | Active |
-| agent-3 | Builder | Lane 3 — Beginner Guidance | Active |
+| agent-1 | Builder | Lane 1 - Docs and Contract Reconciliation | Complete |
+| agent-2 | Builder | Lane 2 - UX Hardening and Mobile Reliability | Complete |
+| agent-3 | Builder | Lane 3 - Beginner Guidance and Strategy Workspace | Complete |
 | agent-4 | Builder | unassigned | Standby |
-| agent-5 | Builder | Lane 5 — Future Foundations | Active |
+| agent-5 | Builder | Lane 5 - Future Foundations | Complete |
+| codex | Integrator | Lane 4 - Flow Wiring and Operational Guardrails | Complete |
 
 ## Validated Baseline (Do Not Reopen Without Regression)
 
 The following work is treated as code-complete unless a regression is discovered:
 - learning-ui baseline: glossary, tooltip support detection, main app shell, help drawer, guided pages
 - mock-engine baseline: local translation layer and smoke script
+- local advisory mode baseline: flow server scaffold, Vite dev proxy, offline fallback notices
 - core: types, validation, approval gate, IDs, domain events
 - funnel: plan creation, CTA map, validation, serialization
 - strategy: interview capture, offer hypotheses, allowlist/rate policy, Playwright fallback collector
@@ -131,23 +131,23 @@ The following work is treated as code-complete unless a regression is discovered
 - analytics: attribution, funnel projection, variant projection, dashboard read model
 - backlog infra: integration test, drift-check script, boundary-lint script, Genkit scaffolds, Genkit evaluation gate
 
-Code-complete does not mean doc-complete. Active lanes below exist because docs, UX, and operational wiring still lag the shipped baseline.
+Code-complete does not mean doc-complete. The sprint below exists to track doc sync, UX hardening, beginner guidance, operational guardrails, and future-foundation prep.
 
 ---
 
 ## Active 5-Lane Sprint
 
 ### Lane 1 - Docs and Contract Reconciliation
-Owner: agent-1
+Owner: agent-1 / codex (DOC-5 closeout)
 Goal: make docs describe the shipped system and remove planning drift.
 
 | ID | Status | Task | Files | Acceptance | Depends on |
 |---|---|---|---|---|---|
 | DOC-1 | [DONE] agent-1 2026-03-05T22:45:00Z | Add missing contract entries for shipped helpers and read models, especially approvals and analytics. | `modules/approvals/CONTRACT.md`, `modules/analytics/CONTRACT.md`, `modules/analytics/README.md` | `isApproved()` and `campaignDashboardReadModel()` are documented with current semantics and error behavior. | none |
 | DOC-2 | [DONE] agent-1 2026-03-05T22:45:00Z | Refresh flow docs to match actual function names and review gates instead of legacy placeholder names. | `DATA_FLOW.md` | Flow B, C, D, and E reference current module APIs (`createReviewBatch`, `decideReview`, `scheduleAsset`, `dispatchDue`, `sendApprovedReply`, `campaignDashboardReadModel`) and explain mock-engine translation where it still exists. | none |
-| DOC-3 | [DONE] agent-1 2026-03-05T22:45:00Z | Update architecture and project rules to reflect the actual runtime shape and required issue logging. | `SYSTEM_ARCHITECTURE.md`, `PROJECT_RULES.md`, `AGENTS.md` | Docs explicitly describe `ui -> mock-engine -> modules` in mock mode, guard-script expectations, issue logging requirements, and the non-autonomous AI boundary. | none |
+| DOC-3 | [DONE] agent-1 2026-03-05T22:45:00Z | Update architecture and project rules to reflect the actual runtime shape and required issue logging. | `SYSTEM_ARCHITECTURE.md`, `PROJECT_RULES.md`, `AGENTS.md` | Docs explicitly describe mock mode, guard-script expectations, issue logging requirements, and the non-autonomous AI boundary. | none |
 | DOC-4 | [DONE] agent-1 2026-03-05T22:45:00Z | Audit temporary mismatch notes added by `MCK-A2` and keep only the ones still true after the latest merges. | `modules/strategy/CONTRACT.md`, `modules/approvals/CONTRACT.md`, `modules/publishing/CONTRACT.md`, `modules/analytics/CONTRACT.md`, `modules/comments/CONTRACT.md`, `modules/copylab/CONTRACT.md` | Every remaining mismatch note points to a real current divergence; stale notes are removed. | DOC-1 |
-| DOC-5 | READY | Regenerate `lanes.md` from this board after doc sync lands. | `lanes.md` | `lanes.md` matches this board, uses 5 lanes, and does not re-open already-validated tasks. | DOC-1, DOC-2, DOC-3, DOC-4 |
+| DOC-5 | [DONE] codex 2026-03-05T23:13:40Z | Regenerate `lanes.md` from this board after doc sync lands. | `lanes.md` | `lanes.md` matches this board, uses 5 lanes, and does not re-open already-validated tasks. | DOC-1, DOC-2, DOC-3, DOC-4 |
 
 ### Lane 2 - UX Hardening and Mobile Reliability
 Owner: agent-2
@@ -172,15 +172,15 @@ Goal: make the product unmistakably read as a guided marketing workspace, not so
 | GUIDE-4 | [DONE] agent-3 2026-03-05T23:00:00Z | Tighten product language where current copy still sounds like generic marketing software. | `src/pages/discovery.ts`, `src/pages/launcher.ts`, `src/pages/review.ts`, `src/glossary.ts`, `PRODUCT_DESIGN.md` | The UI consistently reads as "build campaigns for your business or a client" and not "sell marketing software." | none |
 
 ### Lane 4 - Flow Wiring and Operational Guardrails
-Owner: unassigned
+Owner: codex
 Goal: make the existing guardrails runnable and start connecting the UI to the Genkit scaffolds without losing mock-mode safety.
 
 | ID | Status | Task | Files | Acceptance | Depends on |
 |---|---|---|---|---|---|
-| OPS-1 | READY | Operationalize local guard scripts so they run without `npx` fetching new packages. | `package.json`, `package-lock.json` | `npm run check:drift`, `npm run check:boundaries`, and `npm run smoke:mock` exist and run from a clean local checkout. | none |
-| OPS-2 | READY | Add the local flow server and dev proxy plan from the older lane-0 design. | `server.ts`, `vite.config.ts`, `package.json`, `.env.local.example`, `SYSTEM_ARCHITECTURE.md` | `npm run server` and `npm run dev:full` are documented and scaffolded without breaking mock-only mode. | OPS-1 |
-| OPS-3 | READY | Wire Discovery, Launcher, and Comments to Genkit flows with offline fallback. | `src/mock-engine.ts`, `src/pages/discovery.ts`, `src/pages/launcher.ts`, `src/pages/comments.ts` | When the local server is available, the UI can call flow endpoints; when it is not, the current deterministic mock path still works. | OPS-2 |
-| OPS-4 | READY | Make AI advisory state visible in the UI so beginners know what is generated, reviewed, and approved. | `src/pages/discovery.ts`, `src/pages/launcher.ts`, `src/pages/comments.ts`, `src/glossary.ts`, `PRODUCT_DESIGN.md` | Every AI-assisted output clearly shows that it is advisory and still requires human approval before action. | OPS-3 |
+| OPS-1 | [DONE] codex 2026-03-05T23:12:53Z | Operationalize local guard scripts so they run without `npx` fetching new packages. | `package.json`, `package-lock.json`, `scripts/drift-check.ts`, `scripts/smoke-mock.ts` | `npm run check:drift`, `npm run check:boundaries`, and `npm run smoke:mock` exist and run from a clean local checkout. | none |
+| OPS-2 | [DONE] codex 2026-03-05T23:12:53Z | Add the local flow server and dev proxy plan from the older lane-0 design. | `server.ts`, `vite.config.ts`, `package.json`, `.env.local.example`, `SYSTEM_ARCHITECTURE.md` | `npm run server` and `npm run dev:full` are documented and scaffolded without breaking mock-only mode. | OPS-1 |
+| OPS-3 | [DONE] codex 2026-03-05T23:12:53Z | Wire Discovery, Launcher, and Comments to Genkit flows with offline fallback. | `src/mock-engine.ts`, `src/pages/discovery.ts`, `src/pages/launcher.ts`, `src/pages/comments.ts`, `scripts/smoke-mock.ts` | When the local server is available, the UI can call flow endpoints; when it is not, the current deterministic mock path still works. Reply drafts are routed through approvals before send. | OPS-2 |
+| OPS-4 | [DONE] codex 2026-03-05T23:12:53Z | Make AI advisory state visible in the UI so beginners know what is generated, reviewed, and approved. | `src/pages/discovery.ts`, `src/pages/launcher.ts`, `src/pages/comments.ts`, `src/glossary.ts`, `PRODUCT_DESIGN.md`, `AGENTS.md`, `PROJECT_RULES.md` | Every AI-assisted output clearly shows that it is advisory and still requires human approval before action. | OPS-3 |
 
 ### Lane 5 - Future Foundations (Style, Integrations, Social Scout)
 Owner: agent-5
@@ -200,6 +200,7 @@ Goal: stage the next major capabilities from `future.md` as cleanly separable wo
 - [ ] BACK-1 [BLOCKED by outbound-channel decision] Add real provider adapter pilot for one outbound channel after integrations shell is accepted. Files: `modules/adapters/src/publish.ts`, `modules/adapters/src/registry.ts`, `modules/integrations/CONTRACT.md`, `PROJECT_RULES.md`
 - [ ] BACK-2 [BLOCKED by FUT-2] Add approval notification dispatch through Slack or Office test mode after `FUT-2` lands. Files: `modules/adapters/src/slack-notify.ts`, `modules/adapters/src/office-notify.ts`, `modules/approvals/src/queue.ts`, `src/pages/review.ts`
 - [ ] BACK-3 [READY] Add page analytics and event instrumentation for the learning UI after UX hardening lands. Files: `src/main.ts`, `src/pages/discovery.ts`, `src/pages/launcher.ts`, `src/pages/review.ts`, `src/pages/calendar.ts`, `src/pages/comments.ts`, `src/pages/dashboard.ts`, `modules/analytics/src/dashboard.ts`, `DATA_FLOW.md`
+- [ ] BACK-4 [READY] Wire row-level comment actions so no reply controls are inert. Files: `src/pages/comments.ts`, `src/mock-engine.ts`, `PRODUCT_DESIGN.md` Acceptance: comment-row approve/send, discard, and edit-placeholder actions either perform a real state transition or explicitly explain why they are unavailable.
 
 ## Icebox
 
@@ -214,35 +215,38 @@ Record every material issue discovered during a run. If a run has no material is
 | UTC Timestamp | Agent | Task | Issue | Follow-up |
 |---|---|---|---|---|
 | 2026-03-05T22:05:00Z | codex | board reset audit | `board.md` was stale relative to shipped code. Open tasks existed for approvals, adapters, publishing, comments, and analytics despite passing implementations and tests. | Reset board around validated baseline and move remaining work into 5 new lanes. |
-| 2026-03-05T22:05:00Z | codex | board reset audit | `DATA_FLOW.md` still describes legacy placeholder APIs (`approveAsset`, `publishing.schedule`, `comments.classify`) instead of current implementations. | Track under `DOC-2`. |
-| 2026-03-05T22:05:00Z | codex | board reset audit | Tooltip fix only covered pointer support detection; it does not yet test or guarantee clean hide behavior during rapid hover transitions. | Track under `UX-1`. |
-| 2026-03-05T22:05:00Z | codex | board reset audit | Mobile layout still relies on fixed top chrome plus `100vh` assumptions, which can clip content under browser UI bars. | Track under `UX-2`. |
-| 2026-03-05T22:05:00Z | codex | board reset audit | Guard scripts exist but are not runnable from a clean local checkout because `tsx` is not installed or wired into `package.json`. | Track under `OPS-1`. |
+| 2026-03-05T22:05:00Z | codex | board reset audit | `DATA_FLOW.md` still described legacy placeholder APIs (`approveAsset`, `publishing.schedule`, `comments.classify`) instead of current implementations. | Track under `DOC-2`. |
+| 2026-03-05T22:05:00Z | codex | board reset audit | Tooltip fix only covered pointer support detection; it did not yet test or guarantee clean hide behavior during rapid hover transitions. | Track under `UX-1`. |
+| 2026-03-05T22:05:00Z | codex | board reset audit | Mobile layout still relied on fixed top chrome plus `100vh` assumptions, which could clip content under browser UI bars. | Track under `UX-2`. |
+| 2026-03-05T22:05:00Z | codex | board reset audit | Guard scripts existed but were not runnable from a clean local checkout because `tsx` was not installed or wired into `package.json`. | Track under `OPS-1`. |
+| 2026-03-05T23:12:53Z | codex | OPS-1 | `check:drift` treated staged `## Future functions` contract notes as active exports, blocking the local guardrail even though those APIs were intentionally future-scoped. | Scope the checker to the active `## Exported Functions` section only. |
+| 2026-03-05T23:12:53Z | codex | OPS-3 | Reply drafts were not being registered in the approvals queue, so the comments send path could fail closed without the smoke test noticing. | Register reply drafts in a review batch and assert reply-send events in `scripts/smoke-mock.ts`. |
+| 2026-03-05T23:12:53Z | codex | OPS-3 audit | Comment-row reply controls in `src/pages/comments.ts` are still inert. | Track under `BACK-4`. |
 
 ## Refill Log
 
 | Date | Analyst | Tasks Added | Source | Notes |
 |---|---|---|---|---|
 | 2026-03-05 | codex | 17 | current codebase, `lanes.md`, `future.md`, test/build validation | Reset board to 5 active lanes around real remaining work |
+| 2026-03-05 | codex | 1 | Lane 4 validation audit | Added `BACK-4` after finding inert comment-row actions during final flow reconciliation. |
 
 ## Coordination Log
 
 | UTC Timestamp | Agent | Note |
 |---|---|---|
-| 2026-03-05T22:05:00Z | codex | Reconciled board against current `C:\growth` workspace, `lanes.md`, recent merges, and `future.md`. Verified `npm run test` (`422/422` pass) and `npm run build` pass. Reset active work into 5 lanes: docs, UX, beginner guidance, flow wiring, and future foundations. |
-| 2026-03-05T22:30:00Z | agent-3 | Claimed Lane 3 (GUIDE-1 through GUIDE-4). Starting with GUIDE-1 strategy workspace shell, then GUIDE-2 coaching blocks, GUIDE-3 presets, GUIDE-4 copy audit. |
-| 2026-03-05T22:30:00Z | agent-3 | FILE CONFLICT NOTICE: GUIDE-3 touches `src/mock-engine.ts`. Agent-4 (OPS-3) also modifies `src/mock-engine.ts`. Coordination: agent-3 will add preset data as a new isolated export block at the bottom of the file (lines after `resetAll`). Agent-4 should be aware of this addition so merge does not clobber preset exports. No functional overlap expected. |
-| 2026-03-05T22:25:18Z | agent-1 | Claimed Lane 1 (DOC-1 through DOC-4). Read board.md, all module source files, and existing CONTRACT.md docs. Beginning doc reconciliation in order: DOC-1 → DOC-2 → DOC-3 → DOC-4. |
-| 2026-03-05T22:30:00Z | agent-2 | Claiming Lane 2 (UX-1, UX-2, UX-3, UX-4). Starting UX-1 (tooltip linger) and UX-2 (mobile clipping/100vh) in parallel; UX-3 and UX-4 follow their dependencies. |
-| 2026-03-05T23:00:00Z | agent-3 | DONE Lane 3. GUIDE-1: created src/pages/strategy-workspace.ts (business profile + offer comparison shell), wired to main.ts nav, CSS in index.css. GUIDE-2: added coach-block to all 6 existing pages (discovery, launcher, review, calendar, comments, dashboard) with what/why/next. Added strategyWorkspace and starterPreset to glossary.ts. GUIDE-3: added StarterPreset type + 3 presets (design studio, automation agency, local service) as isolated export block at end of mock-engine.ts; discovery form reads window.__pendingPreset for prefill; preset chips in discovery form + preset panel in strategy-workspace. GUIDE-4: tightened all page copy to read 'for your business or a client', removed auto-filled 'GrowthOps Automation' default, added UI Language Rules section to PRODUCT_DESIGN.md. FILE CONFLICT: mock-engine.ts additions are additive-only, below resetAll — no functional overlap with agent-4 OPS-3 changes expected. No material issues found. |
-| 2026-03-05T22:45:00Z | agent-2 | UX-1 DONE: tooltip.ts refactored — cancelAndHide() clears both timers atomically, hideTooltip() cancels pending show before scheduling hide. 19 tests added (438/438 pass). no material issues found. |
-| 2026-03-05T22:45:00Z | agent-2 | UX-2 DONE: 100vh → dvh (with vh fallback) in app-shell, sidebar, and mobile overrides. setRealVh() JS fallback with --real-vh CSS prop. Intent-banner positioned sticky below mobile-topbar (top: 56px on mobile breakpoint). main-content overflow-y: auto on mobile. no material issues found. |
-| 2026-03-05T23:00:00Z | agent-2 | UX-3 DONE: All 6 page files (discovery, launcher, review, calendar, comments, dashboard) scrubbed of layout inline styles. Added 30+ shared utility classes to index.css (card-narrow, card-empty-state, card-overflow, card-approved, action-row, action-row-top/bottom, form-submit, section-heading, sub-heading, body-secondary, body-muted, body-note, page-emoji, channel-row, channel-label, cell-truncate, cell-meta, cell-capitalize, score-value, score-high/mid/low, metric-green/primary/amber, channel-meta/linkedin/x/email, funnel-rate colors, badge-inline, stage-meta, stage-ctas, offer-title, card-title-clamp). Build: PASS. Tests: 438/438 PASS. no material issues found. |
-| 2026-03-05T23:00:00Z | agent-2 | UX-4 DONE: Created docs/ui-qa.md — 35 regression checks across 5 sections: Tooltip (7), Help Drawer (7), Navigation (8), Mobile Viewport (8), Responsive Layout Classes (5), plus quick smoke run script. no material issues found. |
-| 2026-03-05T22:27:00Z | agent-5 | Claimed Lane 5 (FUT-1 through FUT-4). All 4 tasks are independent — will work FUT-1 (style-system docs + shell), FUT-2 (integrations docs + shell), FUT-3 (social-scout docs + shell), FUT-4 (copy-memory docs) concurrently. FILE CONFLICT NOTICE: FUT-1 and FUT-2 and FUT-3 all add nav items to `src/main.ts` and CSS to `src/index.css`. Will batch all navigation additions into a single edit at end to avoid conflict with other lanes. |
-| 2026-03-05T22:45:00Z | agent-5 | DONE Lane 5 (FUT-1, FUT-2, FUT-3, FUT-4). Created: `modules/integrations/` (CONTRACT, README, ANTI_PATTERNS), `modules/social-scout/` (CONTRACT, README, ANTI_PATTERNS), `src/pages/style-studio.ts`, `src/pages/integrations.ts`, `src/pages/opportunities.ts`. Updated: `modules/core/CONTRACT.md` (future types), `modules/copylab/CONTRACT.md` (instruction-pack + copy-memory functions), `SYSTEM_ARCHITECTURE.md` (new modules, secrets boundary), `PROJECT_RULES.md` (rules 18–21), `MVP_SCOPE.md` (3 new shell rows), `src/main.ts` (3 new page imports, nav items, renderers, binders), `src/index.css` (FUT CSS). No material issues found. |
-| 2026-03-05T22:30:00Z | agent-3 | Claiming Lane 3 (GUIDE-1 through GUIDE-4). Read board.md, PRODUCT_DESIGN.md, glossary.ts, and all 6 existing page files. Starting GUIDE-1 (strategy-workspace shell) and GUIDE-2 (coaching blocks) together; GUIDE-3 follows GUIDE-1; GUIDE-4 runs in parallel. |
-| 2026-03-05T23:00:00Z | agent-3 | DONE — Lane 3 (GUIDE-1 through GUIDE-4). Summary: GUIDE-1: strategy-workspace.ts wired into nav, renderers, binders, PAGE_HELP_KEYS, and JOURNEY_STEPS in main.ts. GUIDE-2: all 6 pages had coach-block elements (prior session had already added most; verified and updated discovery). GUIDE-3: StarterPreset interface + 3 presets (design-agency, automation-company, local-service) added to mock-engine.ts with getStarterPresets(), loadStarterPreset(), getPendingPreset(), clearPendingPreset(). Discovery.ts updated to use engine.getPendingPreset() and engine.clearPendingPreset(). GUIDE-4: PRODUCT_DESIGN.md has UI Language Rules; glossary has strategyWorkspace and starterPreset entries. One material issue found: prior session had added a duplicate old preset block using window.__pendingPreset — removed and replaced with clean module-state approach. Build: PASS. Tests: 438/438 PASS. |
+| 2026-03-05T22:05:00Z | codex | Reconciled board against current `C:\growth` workspace, `lanes.md`, recent merges, and `future.md`. Verified `npm run test` and `npm run build` pass. Reset active work into 5 lanes: docs, UX, beginner guidance, flow wiring, and future foundations. |
+| 2026-03-05T22:25:18Z | agent-1 | Claimed Lane 1 (DOC-1 through DOC-4). Read board.md, all module source files, and existing CONTRACT.md docs. Beginning doc reconciliation in order: DOC-1 -> DOC-2 -> DOC-3 -> DOC-4. |
+| 2026-03-05T22:45:00Z | agent-1 | DONE Lane 1 (DOC-1 through DOC-4). Updated approvals and analytics contracts, refreshed DATA_FLOW.md to current APIs, aligned SYSTEM_ARCHITECTURE.md, PROJECT_RULES.md, and AGENTS.md to the actual runtime shape, and audited remaining mismatch notes. no material issues found. |
+| 2026-03-05T22:30:00Z | agent-2 | Claimed Lane 2 (UX-1 through UX-4). Starting tooltip/mobile fixes first, then shared layout cleanup and the UI QA checklist. |
+| 2026-03-05T23:00:00Z | agent-2 | DONE Lane 2. Tooltip linger fixed, mobile clipping hardened, inline layout styles removed in favor of shared responsive classes, and `docs/ui-qa.md` added. `npm run test` (`438/438`) and `npm run build` passed. no material issues found. |
+| 2026-03-05T22:30:00Z | agent-3 | Claimed Lane 3 (GUIDE-1 through GUIDE-4). Starting with the strategy workspace shell, coaching blocks, starter presets, and UI language tightening. |
+| 2026-03-05T23:00:00Z | agent-3 | DONE Lane 3. Strategy workspace shell landed, every page now includes beginner coaching, starter presets were added for design/automation/local-service examples, and product language was tightened away from SaaS framing. One material issue found: removed a duplicated legacy `window.__pendingPreset` path and replaced it with module-owned preset state. |
+| 2026-03-05T22:27:00Z | agent-5 | Claimed Lane 5 (FUT-1 through FUT-4). Working the style, integrations, social-scout, and copy-memory foundations in parallel with a single nav/CSS merge. |
+| 2026-03-05T22:45:00Z | agent-5 | DONE Lane 5. Added Style Studio, Integrations, and Opportunities shells plus the supporting contracts, anti-pattern docs, and roadmap updates for style packs, Slack/Office 365, social scout, and copy memory. no material issues found. |
+| 2026-03-05T22:20:00Z | codex | Claimed Lane 4 (OPS-1 through OPS-4). Starting with guard-script wiring in `package.json`, then server/proxy scaffold, then UI flow wiring with mock fallback and visible advisory state. |
+| 2026-03-05T23:13:10Z | codex | Claimed DOC-5 for closeout after Lane 1 doc sync was already complete. Regenerating `lanes.md` directly from the finished 5-lane board and remaining backlog. |
+| 2026-03-05T23:12:53Z | codex | DONE Lane 4. Guard scripts are now runnable from a clean checkout, the local flow server and Vite proxy are scaffolded, discovery/launcher/comments use Genkit flow endpoints with offline fallback, reply drafts now enter the approval gate before send, and advisory state is visible in both the UI and docs. Validation: `npm run check`, `npm run test` (`438/438`), and `npm run build` all passed. Material issues found and resolved: drift-check false positive on staged future functions; reply drafts were not entering the approvals queue. |
+| 2026-03-05T23:13:40Z | codex | DONE DOC-5. Regenerated `lanes.md` from the current board without reopening validated work. `lanes.md` now mirrors the completed 5-lane sprint and points new work to READY backlog items only. no material issues found. |
 
 ## Refill Protocol
 

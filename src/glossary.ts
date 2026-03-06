@@ -168,6 +168,14 @@ export const glossary: Record<string, GlossaryEntry> = {
         label: 'Starter Example',
         tooltip: 'A pre-filled example business you can load to practice using the system. No real data required — just explore how campaigns are built.',
     },
+    advisoryState: {
+        label: 'Advisory State',
+        tooltip: 'The status of AI-assisted output in the workflow: suggested, in review, approved, or rejected. Advisory means it still needs your judgment.',
+    },
+    approvalGate: {
+        label: 'Approval Gate',
+        tooltip: 'The required review checkpoint that blocks sending, scheduling, or publishing until you explicitly approve the item.',
+    },
 };
 
 export function getTooltip(key: string): string {

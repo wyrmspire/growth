@@ -58,7 +58,7 @@ Three guard scripts exist and must remain runnable from a clean local checkout:
 | `scripts/lint-boundaries.ts` | `npm run check:boundaries` | disallowed cross-module imports |
 | `npm run smoke:mock` | `npm run smoke:mock` | mock-engine round-trip correctness |
 
-Prerequisite: `tsx` must be installed and wired into `package.json` (tracked: `OPS-1`).
+These scripts are wired through `tsx` in `package.json`.
 Guard scripts are expected to pass before any task is marked DONE.
 
 ## Non-Autonomous AI Boundary
@@ -73,7 +73,7 @@ The following constraints are hard requirements — not guidelines:
 3. **No autonomous posting.** No content reaches an outbound adapter without an
    explicit `approvals.isApproved()` check returning `true`.
 4. **UI must label AI-generated content.** Every AI-assisted output must be
-   visually marked as advisory and pending review (tracked: `OPS-4`).
+   visually marked with its advisory state and pending-review requirement.
 5. **Genkit evaluation gates.** Quality, safety, tone, and factuality checks run
    before any AI output is surfaced to the operator for approval.
 

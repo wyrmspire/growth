@@ -34,10 +34,16 @@ Allowed dependencies are unidirectional only (no circular imports).
   implementation inside each module, which returns deterministic in-memory
   results. No external API calls are made. This is the safe offline and
   learning mode.
+- **Local advisory mode (current optional upgrade):**
+  `ui → mock-engine → /api/flows/* → Genkit flows`
+  When `npm run server` is running, the mock-engine can call the local flow
+  server for offer, copy, and reply coaching. If the server is unavailable,
+  the mock-engine falls back to deterministic local guidance and surfaces a
+  page notice in the UI.
 - **Production mode (future):** `ui → workflows → domain modules → adapters`
   Workflows orchestrate cross-module business flows using the production
-  module exports. Adapters wrap external platforms. Production mode requires
-  the local flow server (`npm run server`) and valid provider credentials.
+  module exports. Adapters wrap external platforms. Provider-backed sending
+  still requires valid credentials and a later workflow layer.
 
 ---
 
@@ -142,9 +148,17 @@ be runnable from a clean local checkout via `npm run`:
 | Boundary lint | `npm run check:boundaries` | Detect disallowed cross-module imports |
 | Mock smoke test | `npm run smoke:mock` | Round-trip exercise of mock-engine layer |
 
-Status: Script shell files exist (`scripts/drift-check.ts`,
-`scripts/lint-boundaries.ts`). They require `tsx` to be wired into
-`package.json` (tracked under `OPS-1`).
+Status: Wired into `package.json` through `tsx` and runnable from a clean local
+checkout. `npm run check` executes all three guard scripts in sequence.
+
+## Local Flow Server
+
+- `npm run server` starts `server.ts` and exposes `/api/health` plus advisory
+  flow endpoints under `/api/flows/*`.
+- `npm run dev:full` starts both the Vite UI and the local flow server.
+- Vite proxies `/api/*` requests to `http://localhost:3400` during development.
+- When `GEMINI_API_KEY` is unset, the flow server remains in `mock-safe` mode
+  and returns deterministic local coaching output.
 
 ---
 

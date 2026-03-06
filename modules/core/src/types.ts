@@ -16,7 +16,13 @@ export type IdPrefix =
     | 'hyp'
     | 'sig'
     | 'prof'
-    | 'int';
+    | 'int'
+    | 'style'
+    | 'srun'
+    | 'opp'
+    | 'eng'
+    | 'dec'
+    | 'prev';
 
 // ─── Campaign Brief ──────────────────────────────────────────────
 export interface CampaignBriefInput {
@@ -216,6 +222,137 @@ export interface ResearchSourcePlan {
     strategy: 'api-first' | 'browser-fallback';
 }
 
+// ─── Style System ────────────────────────────────────────────────
+
+/** Controls: tone, formality, CTA intensity, and compliance boundaries. */
+export type TonePreset = 'professional' | 'casual' | 'urgent' | 'friendly' | 'authoritative';
+export type CtaIntensity = 'soft' | 'medium' | 'hard';
+export type EmojiPolicy = 'none' | 'sparse' | 'liberal';
+
+export interface StyleProfile {
+    id: EntityId;
+    name: string;
+    tone: TonePreset;
+    /** 1 = very casual, 10 = very formal */
+    formality: number;
+    /** Target reading level (e.g. "8th grade", "professional") */
+    readingLevel: string;
+    ctaIntensity: CtaIntensity;
+    bannedTerms: string[];
+    requiredPhrases: string[];
+    allowedClaims: string[];
+    createdAt: string;
+    updatedAt: string;
+}
+
+/** Per-channel tweaks that override or narrow global StyleProfile settings. */
+export interface ChannelStyleOverride {
+    channel: ChannelName;
+    maxLength: number;
+    emojiPolicy: EmojiPolicy;
+    hashtagPolicy: 'none' | 'branded-only' | 'open';
+    lineBreakPolicy: 'short-paragraphs' | 'single-block' | 'bullet-list';
+}
+
+/** Compiled prompt context: offer brief + style profile + channel overrides. */
+export interface CampaignInstructionPack {
+    campaignId: EntityId;
+    styleProfileId: EntityId;
+    channelOverrides: ChannelStyleOverride[];
+    complianceRules: string[];
+    compiledAt: string;
+}
+
+/** Policy-check result returned after validating generated copy against an instruction pack. */
+export interface StyleViolation {
+    rule: string;
+    severity: 'hard' | 'soft';
+    detail: string;
+}
+
+export interface GeneratedCopyAudit {
+    variantId: EntityId;
+    styleProfileId: EntityId;
+    policyVersion: string;
+    violations: StyleViolation[];
+    /** 0-100 compliance score; 100 = no violations */
+    score: number;
+    passed: boolean;
+}
+
+// ─── Social Scout ────────────────────────────────────────────────
+
+export type ScoutPlatform = 'reddit' | 'x' | 'facebook' | 'instagram' | 'linkedin';
+
+export interface ScoutSourceConfig {
+    id: EntityId;
+    platform: ScoutPlatform;
+    sourceId: string;
+    query: string;
+    enabled: boolean;
+    scanIntervalMinutes: number;
+}
+
+export interface ScoutRun {
+    id: EntityId;
+    startedAt: string;
+    completedAt?: string;
+    platform: ScoutPlatform;
+    status: 'running' | 'completed' | 'failed';
+    itemsFound: number;
+}
+
+export interface OpportunityScoreBreakdown {
+    keywordRelevance: number;
+    engagementPotential: number;
+    recency: number;
+    riskPenalty: number;
+}
+
+export interface OpportunityItem {
+    id: EntityId;
+    platform: ScoutPlatform;
+    sourceUrl: string;
+    author: string;
+    contentSnippet: string;
+    /** Composite score 0-100 */
+    score: number;
+    scoreBreakdown: OpportunityScoreBreakdown;
+    riskFlags: string[];
+    discoveredAt: string;
+}
+
+export interface SuggestedEngagement {
+    id: EntityId;
+    opportunityId: EntityId;
+    draftComment: string;
+    toneProfile: TonePreset;
+    confidence: number;
+    policyChecks: string[];
+}
+
+export type OpportunityDecisionType = 'approved' | 'skipped' | 'muted';
+
+export interface OpportunityDecision {
+    opportunityId: EntityId;
+    decision: OpportunityDecisionType;
+    reviewerId: string;
+    timestamp: string;
+    notes?: string;
+}
+
+// ─── Preview Feed ────────────────────────────────────────────────
+
+export interface PreviewPost {
+    id: EntityId;
+    channel: ChannelName;
+    content: string;
+    headline?: string;
+    cta?: string;
+    publishedAt: string;
+    campaignId?: EntityId;
+}
+
 // ─── Analytics ───────────────────────────────────────────────────
 export interface CampaignMetricRow {
     campaignId: EntityId;
@@ -270,7 +407,16 @@ export type DomainEventName =
     | 'CommentClassified'
     | 'ReplyDrafted'
     | 'CommentReplied'
-    | 'AttributionProjected';
+    | 'AttributionProjected'
+    | 'StyleProfileCreated'
+    | 'StyleProfileUpdated'
+    | 'InstructionPackCompiled'
+    | 'CopyAuditRun'
+    | 'ScoutScanStarted'
+    | 'ScoutScanCompleted'
+    | 'OpportunityScored'
+    | 'OpportunityDecided'
+    | 'PreviewPostPublished';
 
 export interface DomainEvent {
     id: EntityId;

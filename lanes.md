@@ -1,75 +1,74 @@
-﻿# lanes.md - Sprint Mirror (Revision 3)
+﻿# lanes.md - Sprint Mirror (Revision 5 — Sprint 2 Progress)
 
 Updated: 2026-03-05
 Source of truth: `board.md`
 
 This file mirrors the current board state. It does not reopen finished work.
 
-## Sprint Status
+## Sprint 1 Status: CLOSED
 
-- The recovery sprint's 5 lanes are complete.
-- New execution should start from READY backlog items only.
-- `board.md` remains the only assignment source of truth.
+All 5 lanes complete (17 tasks). See board.md coordination log for details.
 
-## Lane Summary
+## Sprint 2 — Automation Foundations
 
-### Lane 1 - Docs and Contract Reconciliation
-Status: CLOSED
-Completed cards: `DOC-1`, `DOC-2`, `DOC-3`, `DOC-4`, `DOC-5`
-Outcome:
-- Runtime docs, contracts, and issue-logging rules now match the shipped system.
-- `lanes.md` has been regenerated from the board.
+Started: 2026-03-05
+Goal: Build the automation backbone — style compiler, preview feed, background job API, and social scout pipeline.
 
-### Lane 2 - UX Hardening and Mobile Reliability
-Status: CLOSED
-Completed cards: `UX-1`, `UX-2`, `UX-3`, `UX-4`
-Outcome:
-- Tooltip linger is fixed.
-- Mobile clipping and `100vh` assumptions were hardened.
-- Shared responsive classes and a UI QA checklist are in place.
+### Lane 1 — Style System (FC-1) ✅ COMPLETE
+Owner: agent-5
 
-### Lane 3 - Beginner Guidance and Strategy Workspace
-Status: CLOSED
-Completed cards: `GUIDE-1`, `GUIDE-2`, `GUIDE-3`, `GUIDE-4`
-Outcome:
-- Strategy workspace shell is live.
-- Every page includes beginner coaching.
-- Starter presets let new users practice without going to the web.
-- UI language stays focused on running campaigns for your business or a client.
+| ID | Status | Task |
+|---|---|---|
+| STYLE-1 | ✅ DONE | Core types added (`StyleProfile`, `ChannelStyleOverride`, `CampaignInstructionPack`, `GeneratedCopyAudit`) |
+| STYLE-2 | ✅ DONE | Instruction pack compiler (7 tests, `modules/copylab/src/instructions.ts`) |
+| STYLE-3 | ✅ DONE | Style validator (7 tests, `modules/copylab/src/validate-style.ts`) |
+| STYLE-4 | ✅ DONE | Interactive Style Studio UI (live controls, tag editors, channel tabs, preview) |
 
-### Lane 4 - Flow Wiring and Operational Guardrails
-Status: CLOSED
-Completed cards: `OPS-1`, `OPS-2`, `OPS-3`, `OPS-4`
-Outcome:
-- Local guard scripts are runnable from `npm run`.
-- `server.ts` and Vite proxy support local advisory flow development.
-- Discovery, launcher, and comments now use Genkit flow endpoints with offline fallback.
-- Advisory state is visible in the UI and reply drafts enter the approval gate before send.
+### Lane 2 — Preview Feed (Sandbox Publishing)
+Status: IN PROGRESS (2/4 done)
+Owner: agent-5
 
-### Lane 5 - Future Foundations
-Status: CLOSED
-Completed cards: `FUT-1`, `FUT-2`, `FUT-3`, `FUT-4`
-Outcome:
-- Style Studio, Integrations, and Opportunities shells are staged.
-- Slack/Office 365, social scout, and copy-memory foundations are documented for future implementation.
+| ID | Status | Task |
+|---|---|---|
+| PREV-1 | ✅ DONE | Preview feed page with platform-realistic cards |
+| PREV-2 | OPEN | Preview adapter in adapter registry |
+| PREV-3 | OPEN | Wire publish pipeline → preview feed |
+| PREV-4 | ✅ DONE | Added to navigation, help keys, renderers, CSS |
 
-## Ready Intake
+### Lane 3 — Background Job API
+Status: IN PROGRESS (3/4 done)
+Owner: agent-5
 
-These are the next READY items on the board. Do not re-open completed lane work.
+| ID | Status | Task |
+|---|---|---|
+| JOB-1 | ✅ DONE | `/api/jobs/*` router in `server.ts` |
+| JOB-2 | ✅ DONE | Scheduler in `src/scheduler.ts` + `npm run scheduler` |
+| JOB-3 | ✅ DONE | Scout-scan job wired with mock data |
+| JOB-4 | OPEN | Job dashboard card (deferred to next batch) |
 
-1. `BACK-3` - Add page analytics and event instrumentation for the learning UI.
-2. `BACK-4` - Wire row-level comment actions so no reply controls are inert.
+### Lane 4 — Backlog Cleanup
+Status: IN PROGRESS (1/4 done)
+Owner: unassigned
 
-## Blocked Intake
+| ID | Status | Task |
+|---|---|---|
+| BACK-3 | OPEN | Page analytics and event instrumentation |
+| BACK-4 | OPEN | Wire comment row actions |
+| CLEAN-1 | OPEN | Update `board.md` with Sprint 2 |
+| CLEAN-2 | ✅ DONE | Updated `lanes.md` to mirror Sprint 2 |
 
-1. `BACK-1` - real outbound-channel adapter pilot (blocked by outbound-channel decision)
-2. `BACK-2` - approval notifications via Slack or Office test mode (blocked by `FUT-2` follow-through)
+### Lane 5 — Social Scout Foundation (FC-6)
+Status: IN PROGRESS (3/4 done)
+Owner: agent-5
+
+| ID | Status | Task |
+|---|---|---|
+| SCOUT-1 | ✅ DONE | Types and validation (`modules/social-scout/src/types.ts`) |
+| SCOUT-2 | ✅ DONE | Scoring engine (6 tests, `modules/social-scout/src/scorer.ts`) |
+| SCOUT-3 | OPEN | Opportunities Inbox UI with scored cards |
+| SCOUT-4 | ✅ DONE | Mock scanner pipeline (`modules/social-scout/src/scanner.ts`) |
 
 ## Validation Baseline
 
-The current repo baseline is:
-- `npm run check` -> PASS
-- `npm run test` -> PASS (`438/438`)
-- `npm run build` -> PASS
-
-Any new sprint should start from that baseline and add only net-new tasks.
+- `npm run test` → 458/458 PASS (40 test files)
+- `npm run build` → PASS (103.47 kB gzipped JS)

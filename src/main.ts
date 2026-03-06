@@ -12,8 +12,9 @@ import { renderStrategyWorkspacePage, bindStrategyWorkspaceEvents } from './page
 import { renderStyleStudioPage, bindStyleStudioEvents } from './pages/style-studio';
 import { renderIntegrationsPage, bindIntegrationsEvents } from './pages/integrations';
 import { renderOpportunitiesPage, bindOpportunitiesEvents } from './pages/opportunities';
+import { renderPreviewFeedPage, bindPreviewFeedEvents } from './pages/preview-feed';
 
-type PageId = 'discovery' | 'launcher' | 'review' | 'calendar' | 'comments' | 'dashboard' | 'strategy-workspace' | 'style-studio' | 'integrations' | 'opportunities';
+type PageId = 'discovery' | 'launcher' | 'review' | 'calendar' | 'comments' | 'dashboard' | 'strategy-workspace' | 'style-studio' | 'integrations' | 'opportunities' | 'preview-feed';
 const MOBILE_BREAKPOINT = 900;
 
 // Glossary keys shown in the help drawer for each page
@@ -28,6 +29,7 @@ const PAGE_HELP_KEYS: Record<PageId, string[]> = {
   'style-studio': ['copy', 'variant', 'channel'],
   integrations: [],
   opportunities: ['commentTriage', 'intentLead', 'approve'],
+  'preview-feed': ['publishing', 'channel', 'channelMeta', 'channelLinkedin', 'channelX', 'channelEmail'],
 };
 
 // Journey steps — used for the progress bar
@@ -59,6 +61,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'style-studio', icon: '🎨', label: 'Style Studio', tipKey: 'copy' },
   { id: 'integrations', icon: '🔗', label: 'Integrations', tipKey: 'attribution' },
   { id: 'opportunities', icon: '📡', label: 'Opportunities', tipKey: 'commentTriage' },
+  { id: 'preview-feed', icon: '📺', label: 'Preview Feed', tipKey: 'publishing' },
 ];
 
 let currentPage: PageId = 'discovery';
@@ -133,6 +136,7 @@ const PAGE_RENDERERS: Record<PageId, () => string> = {
   'style-studio': renderStyleStudioPage,
   integrations: renderIntegrationsPage,
   opportunities: renderOpportunitiesPage,
+  'preview-feed': renderPreviewFeedPage,
 };
 
 const PAGE_BINDERS: Record<PageId, () => void> = {
@@ -146,6 +150,7 @@ const PAGE_BINDERS: Record<PageId, () => void> = {
   'style-studio': bindStyleStudioEvents,
   integrations: bindIntegrationsEvents,
   opportunities: bindOpportunitiesEvents,
+  'preview-feed': bindPreviewFeedEvents,
 };
 
 function isMobileViewport(): boolean {

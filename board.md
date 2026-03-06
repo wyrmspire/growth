@@ -21,9 +21,9 @@ Per-lane reserve: READY tasks in each active lane must stay >= (active agents in
 
 Validated on 2026-03-05 against the current workspace state:
 - `npm run check` -> PASS (`check:drift`, `check:boundaries`, `smoke:mock`)
-- `npm run test` -> PASS (`438/438` tests)
-- `npm run build` -> PASS
-- `lanes.md` regenerated from this board after closeout (`DOC-5`)
+- `npm run test` -> PASS (`458/458` tests — 20 new from Sprint 2)
+- `npm run build` -> PASS (103.47 kB gzipped)
+- `lanes.md` updated for Sprint 2 (revision 5)
 
 ## Product Intent Lock
 
@@ -247,6 +247,12 @@ Record every material issue discovered during a run. If a run has no material is
 | 2026-03-05T23:13:10Z | codex | Claimed DOC-5 for closeout after Lane 1 doc sync was already complete. Regenerating `lanes.md` directly from the finished 5-lane board and remaining backlog. |
 | 2026-03-05T23:12:53Z | codex | DONE Lane 4. Guard scripts are now runnable from a clean checkout, the local flow server and Vite proxy are scaffolded, discovery/launcher/comments use Genkit flow endpoints with offline fallback, reply drafts now enter the approval gate before send, and advisory state is visible in both the UI and docs. Validation: `npm run check`, `npm run test` (`438/438`), and `npm run build` all passed. Material issues found and resolved: drift-check false positive on staged future functions; reply drafts were not entering the approvals queue. |
 | 2026-03-05T23:13:40Z | codex | DONE DOC-5. Regenerated `lanes.md` from the current board without reopening validated work. `lanes.md` now mirrors the completed 5-lane sprint and points new work to READY backlog items only. no material issues found. |
+| 2026-03-05T23:00:00Z | agent-5 | Sprint 2 started. Created `lanes.md` rev 4 and `implementation_plan.md` with 5 lanes / 18 tasks covering style system, preview feed, job API, backlog cleanup, and social scout. |
+| 2026-03-05T23:05:00Z | agent-5 | DONE Lane 1 (Style System). STYLE-1: types added to `modules/core/src/types.ts`. STYLE-2: instruction pack compiler (7 tests). STYLE-3: style validator (7 tests). STYLE-4: interactive Style Studio with live tone/formality/CTA controls, tag editors, channel tabs, preview panel. |
+| 2026-03-05T23:07:00Z | agent-5 | DONE Lane 2 (Preview Feed). PREV-1: `src/pages/preview-feed.ts` with Meta/LinkedIn/X/Email cards, character counting, platform filter. PREV-2: `modules/adapters/src/preview-adapter.ts` in-memory adapter. PREV-3: wired `/api/preview-feed` in `server.ts`. PREV-4: added to navigation, help keys, renderers, CSS. |
+| 2026-03-05T23:07:00Z | agent-5 | Lane 3 (Job API) 3/4 done. JOB-1: `/api/jobs/*` router in `server.ts`. JOB-2: `src/scheduler.ts` + `npm run scheduler`. JOB-3: scout-scan job with mock data. JOB-4 (dashboard card) deferred. |
+| 2026-03-05T23:07:00Z | agent-5 | Lane 5 (Social Scout) 3/4 done. SCOUT-1: types and validation in `modules/social-scout/src/types.ts`. SCOUT-2: scoring engine (6 tests) in `scorer.ts`. SCOUT-4: mock scanner pipeline in `scanner.ts`. SCOUT-3 (inbox UI buildout) deferred. |
+| 2026-03-05T23:07:00Z | agent-5 | DONE CLEAN-2 (lanes.md sync). CLEAN-1 (board.md update) in progress. Validation: `npm run test` (`458/458`) and `npm run build` PASS. |
 
 ## Refill Protocol
 

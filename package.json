@@ -14,7 +14,8 @@
     "smoke:mock": "tsx scripts/smoke-mock.ts",
     "check:drift": "tsx scripts/drift-check.ts",
     "check:boundaries": "tsx scripts/lint-boundaries.ts",
-    "check": "npm run check:drift && npm run check:boundaries && npm run smoke:mock"
+    "check": "npm run check:drift && npm run check:boundaries && npm run smoke:mock",
+    "scheduler": "tsx src/scheduler.ts"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",

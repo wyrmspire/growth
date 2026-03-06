@@ -69,6 +69,8 @@ body {
   /* Use dvh on browsers that support it so the app fills the visual viewport,
      not the layout viewport which can be clipped by mobile browser bars. */
   height: 100%;
+  overflow-x: hidden;
+  /* prevent any child from creating horizontal scroll */
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 14px;
   line-height: 1.6;
@@ -1342,9 +1344,17 @@ textarea.form-input {
 
   .main-content {
     padding: var(--space-lg) var(--space-md);
+    /* Extra bottom padding clears the iOS floating address bar */
+    padding-bottom: calc(var(--space-2xl) + env(safe-area-inset-bottom, 0px));
     /* Ensure main content is always scrollable; height is determined by .app-shell */
     overflow-y: auto;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
+  }
+
+  .main-content .card {
+    max-width: 100%;
+    overflow-x: auto;
   }
 
   .page-header {

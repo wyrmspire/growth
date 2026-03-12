@@ -50,9 +50,10 @@ Invariants:
 - `attribution` is always computed from the full event stream.
 - `funnel` is populated when `planId` is provided and matching events exist; otherwise returns an empty array.
 - `variants` are populated when variant-metric events are present; otherwise returns an empty array.
+- `learning` summarizes `LearningPageViewed` and `LearningActionTracked` events for the guided UI without mutating state.
 - Never mutates campaign state.
 
-Return type: `{ attribution: AttributionSnapshot; funnel: ConversionFunnelRow[]; variants: VariantPerformanceRow[] }`
+Return type: `{ attribution: AttributionSnapshot; funnel: ConversionFunnelRow[]; variants: VariantPerformanceRow[]; learning: LearningEngagementSummary }`
 
 Implementation: `modules/analytics/src/dashboard.ts` → `campaignDashboardReadModel`
 

@@ -79,6 +79,7 @@ export function bindCalendarEvents(): void {
   const publishBtn = document.getElementById('publish-now-btn');
   if (publishBtn) {
     publishBtn.addEventListener('click', () => {
+      engine.trackLearningAction('calendar.publish-all-now', 'calendar');
       engine.publishNow();
       window.dispatchEvent(new CustomEvent('navigate', { detail: 'calendar' }));
     });

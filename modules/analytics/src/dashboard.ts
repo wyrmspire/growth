@@ -11,13 +11,46 @@ import { projectVariantPerformance } from './variants';
 
 // ─── Read Model Type ──────────────────────────────────────────────
 
+export interface LearningEngagementSummary {
+    totalPageViews: number;
+    uniquePages: string[];
+    pageViews: Array<{ pageId: string; views: number }>;
+    actions: Array<{ action: string; count: number }>;
+}
+
 export interface CampaignDashboardReadModel {
     attribution: AttributionSnapshot;
     funnel: ConversionFunnelRow[];
     variants: VariantPerformanceRow[];
+    learning: LearningEngagementSummary;
 }
 
 // ─── Public API ───────────────────────────────────────────────────
+
+
+function projectLearningEngagement(events: DomainEvent[]): LearningEngagementSummary {
+    const pageCounts = new Map<string, number>();
+    const actionCounts = new Map<string, number>();
+
+    for (const event of events) {
+        if (event.name === 'LearningPageViewed') {
+            const pageId = typeof event.payload.pageId === 'string' ? event.payload.pageId : 'unknown';
+            pageCounts.set(pageId, (pageCounts.get(pageId) || 0) + 1);
+        }
+        if (event.name === 'LearningActionTracked') {
+            const action = typeof event.payload.action === 'string' ? event.payload.action : 'unknown';
+            actionCounts.set(action, (actionCounts.get(action) || 0) + 1);
+        }
+    }
+
+    return {
+        totalPageViews: [...pageCounts.values()].reduce((sum, count) => sum + count, 0),
+        uniquePages: [...pageCounts.keys()],
+        pageViews: [...pageCounts.entries()].map(([pageId, views]) => ({ pageId, views })).sort((a, b) => b.views - a.views || a.pageId.localeCompare(b.pageId)),
+        actions: [...actionCounts.entries()].map(([action, count]) => ({ action, count })).sort((a, b) => b.count - a.count || a.action.localeCompare(b.action)),
+    };
+}
+
 
 /**
  * Aggregate all analytics projections into a single campaign dashboard
@@ -50,6 +83,7 @@ export function campaignDashboardReadModel(
     }
 
     const variants = projectVariantPerformance(events);
+    const learning = projectLearningEngagement(events);
 
-    return { attribution, funnel, variants };
+    return { attribution, funnel, variants, learning };
 }

@@ -19,7 +19,7 @@ export function renderDashboardPage(): string {
     `;
   }
 
-  const { attribution, funnel, variants } = engine.getDashboard();
+  const { attribution, funnel, variants, learning } = engine.getDashboard();
 
   return `
     <div class="page-header">
@@ -94,6 +94,52 @@ export function renderDashboardPage(): string {
               </tr>
             `;
   }).join('')}
+        </tbody>
+      </table>
+    </div>
+
+
+    <hr class="section-divider" />
+
+    <h3 class="section-heading">🧭 Learning Journey Activity</h3>
+    <div class="metric-row">
+      <div class="metric-tile">
+        <div class="metric-label">Tracked page views</div>
+        <div class="metric-value">${learning.totalPageViews}</div>
+        <div class="metric-sub">across ${learning.uniquePages.length} page(s)</div>
+      </div>
+      <div class="metric-tile">
+        <div class="metric-label">Most visited page</div>
+        <div class="metric-value">${learning.pageViews[0]?.pageId || '—'}</div>
+        <div class="metric-sub">${learning.pageViews[0]?.views || 0} view(s)</div>
+      </div>
+      <div class="metric-tile">
+        <div class="metric-label">Top action</div>
+        <div class="metric-value">${learning.actions[0]?.action || '—'}</div>
+        <div class="metric-sub">${learning.actions[0]?.count || 0} trigger(s)</div>
+      </div>
+    </div>
+
+    <div class="card card-overflow">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Learning page</th>
+            <th>Views</th>
+            <th>Top tracked actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${(learning.pageViews.length ? learning.pageViews : [{ pageId: 'No learning telemetry yet', views: 0 }]).map((row) => {
+            const pageActions = learning.actions.filter((action) => action.action.startsWith(`${row.pageId.split(' ')[0]}.`)).slice(0, 2);
+            return `
+              <tr>
+                <td class="cell-capitalize">${row.pageId}</td>
+                <td>${row.views}</td>
+                <td>${pageActions.length ? pageActions.map((action) => `${action.action} (${action.count})`).join(' · ') : 'No tracked actions yet'}</td>
+              </tr>
+            `;
+          }).join('')}
         </tbody>
       </table>
     </div>

@@ -42,6 +42,7 @@ import * as adapters from '../modules/adapters/src/mock';
 import * as publishing from '../modules/publishing/src/mock';
 import * as comments from '../modules/comments/src/mock';
 import * as analytics from '../modules/analytics/src/mock';
+import { campaignDashboardReadModel } from '../modules/analytics/src/dashboard';
 
 const eventLog = new EventLog();
 
@@ -210,6 +211,9 @@ let replyCoachStates = new Map<EntityId, ReplyCoachState>();
 let pageNotices = new Map<PageKey, PageNotice>();
 let commentsLoading = false;
 let commentsAiAttempted = false;
+
+const trackedPageViews = new Set<string>();
+
 
 function advisorySource(mode: 'live' | 'mock-safe'): AdvisorySource {
     return mode === 'live' ? 'genkit-live' : 'genkit-mock';
@@ -488,6 +492,7 @@ function createCampaignBase(input: {
     sentReplyIds.clear();
     commentsLoading = false;
     commentsAiAttempted = false;
+    trackedPageViews.clear();
     replyCoachStates.clear();
     commentsAdvisory = null;
     launchAdvisory = null;
@@ -998,19 +1003,34 @@ export function sendReplies(): void {
     }
 }
 
+
+export function trackPageView(pageId: string): void {
+    if (trackedPageViews.has(pageId)) return;
+    trackedPageViews.add(pageId);
+    eventLog.append('LearningPageViewed', newEntityId('item'), { pageId });
+}
+
+export function trackLearningAction(action: string, pageId: string, detail: Record<string, unknown> = {}): void {
+    eventLog.append('LearningActionTracked', newEntityId('item'), { action, pageId, ...detail });
+}
+
 export function getDashboard(): {
     attribution: AttributionSnapshot;
     funnel: ConversionFunnelRow[];
     variants: VariantPerformanceRow[];
+    learning: ReturnType<typeof campaignDashboardReadModel>['learning'];
 } {
     const campaignId = currentBrief?.id || ('' as EntityId);
     const planId = currentPlan?.id || ('' as EntityId);
-    const events = eventLog.all();
+    const events = [...eventLog.all()];
+
+    const readModel = campaignDashboardReadModel(events, planId);
 
     return {
         attribution: analytics.projectAttribution(events, campaignId),
         funnel: analytics.projectFunnelConversion(events, planId),
         variants: analytics.projectVariantPerformance(events),
+        learning: readModel.learning,
     };
 }
 
@@ -1070,6 +1090,7 @@ export function resetAll(): void {
     pageNotices.clear();
     commentsLoading = false;
     commentsAiAttempted = false;
+    trackedPageViews.clear();
 }
 
 export function getStarterPresets(): StarterPreset[] {

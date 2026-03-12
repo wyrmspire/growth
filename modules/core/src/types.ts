@@ -416,7 +416,9 @@ export type DomainEventName =
     | 'ScoutScanCompleted'
     | 'OpportunityScored'
     | 'OpportunityDecided'
-    | 'PreviewPostPublished';
+    | 'PreviewPostPublished'
+    | 'LearningPageViewed'
+    | 'LearningActionTracked';
 
 export interface DomainEvent {
     id: EntityId;

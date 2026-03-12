@@ -100,7 +100,8 @@ event-log.stream(campaignId)
   -> analytics.projectFunnelConversion(events, planId)  -> ConversionFunnelRow[]
   -> analytics.projectVariantPerformance(events)        -> VariantPerformanceRow[]
   -> analytics.campaignDashboardReadModel(events, planId) -> CampaignDashboardReadModel
-  -> UI: dashboard page renders read model
+  -> UI telemetry appends LearningPageViewed / LearningActionTracked to the same mock event log
+  -> UI: dashboard page renders read model, including learning engagement summary
 ```
 
 Data crossing boundaries:

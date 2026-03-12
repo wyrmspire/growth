@@ -221,6 +221,7 @@ export function bindLauncherEvents(): void {
       const checkedChannels = Array.from(form.querySelectorAll('input[type=checkbox]:checked'))
         .map((checkbox) => (checkbox as HTMLInputElement).value) as ('meta' | 'linkedin' | 'x' | 'email')[];
 
+      engine.trackLearningAction('launch.generate-pack', 'launcher', { channelCount: checkedChannels.length });
       await engine.createCampaignWithAdvisory({
         offerName: val('launch-offer'),
         audience: val('launch-audience'),
@@ -235,6 +236,7 @@ export function bindLauncherEvents(): void {
   const reviewBtn = document.getElementById('send-to-review-btn');
   if (reviewBtn) {
     reviewBtn.addEventListener('click', () => {
+      engine.trackLearningAction('launch.send-to-review', 'launcher');
       engine.sendToReview();
       window.dispatchEvent(new CustomEvent('navigate', { detail: 'review' }));
     });

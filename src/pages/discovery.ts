@@ -207,6 +207,7 @@ export function bindDiscoveryEvents(): void {
       event.preventDefault();
       const val = (id: string) => (document.getElementById(id) as HTMLInputElement)?.value || '';
 
+      engine.trackLearningAction('discovery.submit-interview', 'discovery');
       await engine.runDiscoveryInterview({
         businessName: val('disc-name'),
         industry: val('disc-industry'),
@@ -223,6 +224,7 @@ export function bindDiscoveryEvents(): void {
   document.querySelectorAll('[data-preset-id]').forEach((button) => {
     button.addEventListener('click', () => {
       const presetId = (button as HTMLElement).dataset.presetId || '';
+      engine.trackLearningAction('discovery.choose-preset', 'discovery', { presetId });
       engine.loadStarterPreset(presetId);
       window.dispatchEvent(new CustomEvent('navigate', { detail: 'discovery' }));
     });
@@ -231,6 +233,7 @@ export function bindDiscoveryEvents(): void {
   document.querySelectorAll('.approve-offer-btn').forEach((button) => {
     button.addEventListener('click', () => {
       const index = parseInt((button as HTMLElement).dataset.index || '0', 10);
+      engine.trackLearningAction('discovery.approve-offer', 'discovery', { offerIndex: index });
       engine.approveOffer(index);
       window.dispatchEvent(new CustomEvent('navigate', { detail: 'discovery' }));
     });

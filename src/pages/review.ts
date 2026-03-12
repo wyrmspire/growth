@@ -82,6 +82,7 @@ export function bindReviewEvents(): void {
   document.querySelectorAll('.approve-btn').forEach((button) => {
     button.addEventListener('click', () => {
       const id = (button as HTMLElement).dataset.id || '';
+      engine.trackLearningAction('review.approve-item', 'review', { itemId: id });
       engine.approveItem(id as any);
       window.dispatchEvent(new CustomEvent('navigate', { detail: 'review' }));
     });
@@ -90,6 +91,7 @@ export function bindReviewEvents(): void {
   document.querySelectorAll('.reject-btn').forEach((button) => {
     button.addEventListener('click', () => {
       const id = (button as HTMLElement).dataset.id || '';
+      engine.trackLearningAction('review.reject-item', 'review', { itemId: id });
       engine.rejectItem(id as any);
       window.dispatchEvent(new CustomEvent('navigate', { detail: 'review' }));
     });
@@ -98,6 +100,7 @@ export function bindReviewEvents(): void {
   const approveAllBtn = document.getElementById('approve-all-btn');
   if (approveAllBtn) {
     approveAllBtn.addEventListener('click', () => {
+      engine.trackLearningAction('review.approve-all', 'review');
       engine.approveAll();
       window.dispatchEvent(new CustomEvent('navigate', { detail: 'review' }));
     });
@@ -106,6 +109,7 @@ export function bindReviewEvents(): void {
   const scheduleBtn = document.getElementById('schedule-all-btn');
   if (scheduleBtn) {
     scheduleBtn.addEventListener('click', () => {
+      engine.trackLearningAction('review.schedule-all', 'review');
       engine.scheduleAll();
       window.dispatchEvent(new CustomEvent('navigate', { detail: 'calendar' }));
     });

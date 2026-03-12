@@ -24,6 +24,17 @@ const ALL_EVENT_NAMES: DomainEventName[] = [
     'ReplyDrafted',
     'CommentReplied',
     'AttributionProjected',
+    'StyleProfileCreated',
+    'StyleProfileUpdated',
+    'InstructionPackCompiled',
+    'CopyAuditRun',
+    'ScoutScanStarted',
+    'ScoutScanCompleted',
+    'OpportunityScored',
+    'OpportunityDecided',
+    'PreviewPostPublished',
+    'LearningPageViewed',
+    'LearningActionTracked',
 ];
 
 const ENTITY_ID = 'camp_000001' as EntityId;
@@ -126,8 +137,8 @@ describe('EventLog', () => {
     });
 
     describe('DomainEventName coverage', () => {
-        test('all 17 domain event names are valid TypeScript values', () => {
-            expect(ALL_EVENT_NAMES).toHaveLength(17);
+        test('all 28 domain event names are valid TypeScript values', () => {
+            expect(ALL_EVENT_NAMES).toHaveLength(28);
         });
 
         test.each(ALL_EVENT_NAMES)('event "%s" can be appended to the log', (name) => {

@@ -112,7 +112,7 @@ A task is DONE only if:
 | agent-3 | Builder | Lane 3 - Beginner Guidance and Strategy Workspace | Complete |
 | agent-4 | Builder | unassigned | Standby |
 | agent-5 | Builder | Lane 5 - Future Foundations | Complete |
-| codex | Integrator | Lane 4 - Flow Wiring and Operational Guardrails | Complete |
+| codex | Integrator | Backlog - BACK-3 Page Analytics | Complete |
 
 ## Validated Baseline (Do Not Reopen Without Regression)
 
@@ -199,7 +199,7 @@ Goal: stage the next major capabilities from `future.md` as cleanly separable wo
 
 - [ ] BACK-1 [BLOCKED by outbound-channel decision] Add real provider adapter pilot for one outbound channel after integrations shell is accepted. Files: `modules/adapters/src/publish.ts`, `modules/adapters/src/registry.ts`, `modules/integrations/CONTRACT.md`, `PROJECT_RULES.md`
 - [ ] BACK-2 [BLOCKED by FUT-2] Add approval notification dispatch through Slack or Office test mode after `FUT-2` lands. Files: `modules/adapters/src/slack-notify.ts`, `modules/adapters/src/office-notify.ts`, `modules/approvals/src/queue.ts`, `src/pages/review.ts`
-- [ ] BACK-3 [READY] Add page analytics and event instrumentation for the learning UI after UX hardening lands. Files: `src/main.ts`, `src/pages/discovery.ts`, `src/pages/launcher.ts`, `src/pages/review.ts`, `src/pages/calendar.ts`, `src/pages/comments.ts`, `src/pages/dashboard.ts`, `modules/analytics/src/dashboard.ts`, `DATA_FLOW.md`
+- [x] BACK-3 [DONE] codex 2026-03-12T06:19:00Z Add page analytics and event instrumentation for the learning UI after UX hardening lands. Files: `src/main.ts`, `src/pages/discovery.ts`, `src/pages/launcher.ts`, `src/pages/review.ts`, `src/pages/calendar.ts`, `src/pages/comments.ts`, `src/pages/dashboard.ts`, `modules/analytics/src/dashboard.ts`, `DATA_FLOW.md` Acceptance: learning-page views and key guided-flow actions are appended to the mock event stream, the dashboard surfaces a learning engagement summary, and docs/tests reflect the read-model change.
 - [x] BACK-4 [DONE] codex 2026-03-12T05:46:47Z Wire row-level comment actions so no reply controls are inert. Files: `src/pages/comments.ts`, `src/mock-engine.ts`, `PRODUCT_DESIGN.md` Acceptance: comment-row approve/send, discard, and edit-placeholder actions either perform a real state transition or explicitly explain why they are unavailable.
 
 ## Icebox
@@ -255,6 +255,8 @@ Record every material issue discovered during a run. If a run has no material is
 | 2026-03-05T23:07:00Z | agent-5 | Lane 5 (Social Scout) 3/4 done. SCOUT-1: types and validation in `modules/social-scout/src/types.ts`. SCOUT-2: scoring engine (6 tests) in `scorer.ts`. SCOUT-4: mock scanner pipeline in `scanner.ts`. SCOUT-3 (inbox UI buildout) deferred. |
 | 2026-03-12T05:46:47Z | codex | Claimed BACK-4. Wiring row-level comment actions so approve/send and discard perform real state changes, while edit explains its current placeholder status instead of being inert. |
 | 2026-03-12T05:51:10Z | codex | DONE BACK-4. Row-level comment actions now work: approve/send is actionable per reply, discard keeps replies out of send actions, sent replies show delivered state, and edit now explains the placeholder honestly instead of doing nothing. Validation passed with `npm run check`, `npm run test`, and `npm run build`. Material issue found and resolved: this checkout was missing local npm dependencies (`tsx` unavailable) until `npm install` restored the lockfile-defined toolchain. |
+| 2026-03-12T06:19:00Z | codex | Claimed BACK-3. Adding lightweight learning-UI page/event instrumentation and dashboard surfacing so the guided flow can report engagement without changing the mock-safe runtime shape. |
+| 2026-03-12T06:22:00Z | codex | DONE BACK-3. Added mock-safe learning telemetry events (`LearningPageViewed`, `LearningActionTracked`), instrumented the core guided pages, extended the analytics dashboard read model with a learning engagement summary, and surfaced the summary on the dashboard page. Validation passed with `npm run check`, targeted `npm run test -- modules/analytics/src/__tests__/dashboard.test.ts modules/core/src/__tests__/events.test.ts`, and `npm run build`. no material issues found. |
 | 2026-03-05T23:07:00Z | agent-5 | DONE CLEAN-2 (lanes.md sync). CLEAN-1 (board.md update) in progress. Validation: `npm run test` (`458/458`) and `npm run build` PASS. |
 
 ## Refill Protocol

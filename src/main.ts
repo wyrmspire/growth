@@ -190,6 +190,7 @@ function navigate(page: PageId): void {
 
   updateMobileTitle();
   updateIntentBanner();
+  engine.trackPageView(page);
   PAGE_BINDERS[page]();
 
   if (isMobileViewport()) {

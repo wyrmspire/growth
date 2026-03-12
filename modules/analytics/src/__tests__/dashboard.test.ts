@@ -40,6 +40,27 @@ function makeStageEvent(stage: string, planId: EntityId = PLAN_ID): DomainEvent 
     };
 }
 
+
+function makeLearningPageView(pageId: string): DomainEvent {
+    return {
+        id: ITEM_ID,
+        name: 'LearningPageViewed',
+        entityId: CAMP_ID,
+        timestamp: new Date().toISOString(),
+        payload: { pageId },
+    };
+}
+
+function makeLearningAction(action: string, pageId: string): DomainEvent {
+    return {
+        id: ITEM_ID,
+        name: 'LearningActionTracked',
+        entityId: CAMP_ID,
+        timestamp: new Date().toISOString(),
+        payload: { action, pageId },
+    };
+}
+
 function makeVariantEvent(variantId: EntityId, channel: string): DomainEvent {
     return {
         id: ITEM_ID,
@@ -66,6 +87,7 @@ describe('campaignDashboardReadModel()', () => {
             expect(result).toHaveProperty('attribution');
             expect(result).toHaveProperty('funnel');
             expect(result).toHaveProperty('variants');
+            expect(result).toHaveProperty('learning');
         });
 
         test('attribution is an AttributionSnapshot', () => {
@@ -147,6 +169,25 @@ describe('campaignDashboardReadModel()', () => {
             expect(result.attribution.byChannel).toHaveLength(1);
             expect(result.funnel).toHaveLength(1);
             expect(result.variants).toHaveLength(1);
+        });
+    });
+
+
+    describe('learning engagement aggregation', () => {
+        test('counts page views and tracked actions from the UI event stream', () => {
+            const events = [
+                makeLearningPageView('discovery'),
+                makeLearningPageView('dashboard'),
+                makeLearningPageView('dashboard'),
+                makeLearningAction('launch.generate-pack', 'launcher'),
+                makeLearningAction('launch.generate-pack', 'launcher'),
+                makeLearningAction('review.approve-all', 'review'),
+            ];
+            const result = campaignDashboardReadModel(events);
+            expect(result.learning.totalPageViews).toBe(3);
+            expect(result.learning.uniquePages).toEqual(['discovery', 'dashboard']);
+            expect(result.learning.pageViews[0]).toEqual({ pageId: 'dashboard', views: 2 });
+            expect(result.learning.actions[0]).toEqual({ action: 'launch.generate-pack', count: 2 });
         });
     });
 

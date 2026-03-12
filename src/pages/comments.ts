@@ -191,6 +191,7 @@ export function bindCommentsEvents(): void {
   document.querySelectorAll('.comment-approve-send-btn').forEach((button) => {
     button.addEventListener('click', () => {
       const replyId = (button as HTMLElement).dataset.replyId || '';
+      engine.trackLearningAction('comments.approve-send-reply', 'comments', { replyId });
       engine.sendReply(replyId as any);
       window.dispatchEvent(new CustomEvent('navigate', { detail: 'comments' }));
     });
@@ -199,6 +200,7 @@ export function bindCommentsEvents(): void {
   document.querySelectorAll('.comment-discard-btn').forEach((button) => {
     button.addEventListener('click', () => {
       const replyId = (button as HTMLElement).dataset.replyId || '';
+      engine.trackLearningAction('comments.discard-reply', 'comments', { replyId });
       engine.discardReply(replyId as any);
       window.dispatchEvent(new CustomEvent('navigate', { detail: 'comments' }));
     });
@@ -207,6 +209,7 @@ export function bindCommentsEvents(): void {
   document.querySelectorAll('.comment-edit-btn').forEach((button) => {
     button.addEventListener('click', () => {
       const replyId = (button as HTMLElement).dataset.replyId || '';
+      engine.trackLearningAction('comments.edit-placeholder-clicked', 'comments', { replyId });
       engine.explainReplyEditUnavailable(replyId as any);
       window.dispatchEvent(new CustomEvent('navigate', { detail: 'comments' }));
     });
@@ -215,6 +218,7 @@ export function bindCommentsEvents(): void {
   const sendAllBtn = document.getElementById('send-all-replies-btn');
   if (sendAllBtn) {
     sendAllBtn.addEventListener('click', () => {
+      engine.trackLearningAction('comments.send-all-replies', 'comments');
       engine.sendReplies();
       window.dispatchEvent(new CustomEvent('navigate', { detail: 'comments' }));
     });

@@ -200,7 +200,7 @@ Goal: stage the next major capabilities from `future.md` as cleanly separable wo
 - [ ] BACK-1 [BLOCKED by outbound-channel decision] Add real provider adapter pilot for one outbound channel after integrations shell is accepted. Files: `modules/adapters/src/publish.ts`, `modules/adapters/src/registry.ts`, `modules/integrations/CONTRACT.md`, `PROJECT_RULES.md`
 - [ ] BACK-2 [BLOCKED by FUT-2] Add approval notification dispatch through Slack or Office test mode after `FUT-2` lands. Files: `modules/adapters/src/slack-notify.ts`, `modules/adapters/src/office-notify.ts`, `modules/approvals/src/queue.ts`, `src/pages/review.ts`
 - [ ] BACK-3 [READY] Add page analytics and event instrumentation for the learning UI after UX hardening lands. Files: `src/main.ts`, `src/pages/discovery.ts`, `src/pages/launcher.ts`, `src/pages/review.ts`, `src/pages/calendar.ts`, `src/pages/comments.ts`, `src/pages/dashboard.ts`, `modules/analytics/src/dashboard.ts`, `DATA_FLOW.md`
-- [ ] BACK-4 [READY] Wire row-level comment actions so no reply controls are inert. Files: `src/pages/comments.ts`, `src/mock-engine.ts`, `PRODUCT_DESIGN.md` Acceptance: comment-row approve/send, discard, and edit-placeholder actions either perform a real state transition or explicitly explain why they are unavailable.
+- [x] BACK-4 [DONE] codex 2026-03-12T05:46:47Z Wire row-level comment actions so no reply controls are inert. Files: `src/pages/comments.ts`, `src/mock-engine.ts`, `PRODUCT_DESIGN.md` Acceptance: comment-row approve/send, discard, and edit-placeholder actions either perform a real state transition or explicitly explain why they are unavailable.
 
 ## Icebox
 
@@ -222,6 +222,7 @@ Record every material issue discovered during a run. If a run has no material is
 | 2026-03-05T23:12:53Z | codex | OPS-1 | `check:drift` treated staged `## Future functions` contract notes as active exports, blocking the local guardrail even though those APIs were intentionally future-scoped. | Scope the checker to the active `## Exported Functions` section only. |
 | 2026-03-05T23:12:53Z | codex | OPS-3 | Reply drafts were not being registered in the approvals queue, so the comments send path could fail closed without the smoke test noticing. | Register reply drafts in a review batch and assert reply-send events in `scripts/smoke-mock.ts`. |
 | 2026-03-05T23:12:53Z | codex | OPS-3 audit | Comment-row reply controls in `src/pages/comments.ts` are still inert. | Track under `BACK-4`. |
+| 2026-03-12T05:49:12Z | codex | BACK-4 validation | Repo checkout was missing local dependencies, so `npm run check` initially failed with `tsx: not found` even though `package.json` declared it. | Ran `npm install` from the existing lockfile, then reran validation successfully. |
 
 ## Refill Log
 
@@ -252,6 +253,8 @@ Record every material issue discovered during a run. If a run has no material is
 | 2026-03-05T23:07:00Z | agent-5 | DONE Lane 2 (Preview Feed). PREV-1: `src/pages/preview-feed.ts` with Meta/LinkedIn/X/Email cards, character counting, platform filter. PREV-2: `modules/adapters/src/preview-adapter.ts` in-memory adapter. PREV-3: wired `/api/preview-feed` in `server.ts`. PREV-4: added to navigation, help keys, renderers, CSS. |
 | 2026-03-05T23:07:00Z | agent-5 | Lane 3 (Job API) 3/4 done. JOB-1: `/api/jobs/*` router in `server.ts`. JOB-2: `src/scheduler.ts` + `npm run scheduler`. JOB-3: scout-scan job with mock data. JOB-4 (dashboard card) deferred. |
 | 2026-03-05T23:07:00Z | agent-5 | Lane 5 (Social Scout) 3/4 done. SCOUT-1: types and validation in `modules/social-scout/src/types.ts`. SCOUT-2: scoring engine (6 tests) in `scorer.ts`. SCOUT-4: mock scanner pipeline in `scanner.ts`. SCOUT-3 (inbox UI buildout) deferred. |
+| 2026-03-12T05:46:47Z | codex | Claimed BACK-4. Wiring row-level comment actions so approve/send and discard perform real state changes, while edit explains its current placeholder status instead of being inert. |
+| 2026-03-12T05:51:10Z | codex | DONE BACK-4. Row-level comment actions now work: approve/send is actionable per reply, discard keeps replies out of send actions, sent replies show delivered state, and edit now explains the placeholder honestly instead of doing nothing. Validation passed with `npm run check`, `npm run test`, and `npm run build`. Material issue found and resolved: this checkout was missing local npm dependencies (`tsx` unavailable) until `npm install` restored the lockfile-defined toolchain. |
 | 2026-03-05T23:07:00Z | agent-5 | DONE CLEAN-2 (lanes.md sync). CLEAN-1 (board.md update) in progress. Validation: `npm run test` (`458/458`) and `npm run build` PASS. |
 
 ## Refill Protocol

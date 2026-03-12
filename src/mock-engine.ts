@@ -10,6 +10,7 @@ import {
     newEntityId,
 } from '../modules/core/src/index';
 import type {
+    ApprovalState,
     AttributionSnapshot,
     CampaignBrief,
     ChannelName,
@@ -54,6 +55,7 @@ let currentSignals: MarketSignal[] = [];
 let currentProfile: OfferProfile | null = null;
 let currentCommentItems: CommentQueueItem[] = [];
 let currentReplies: ReplyDraft[] = [];
+let sentReplyIds = new Set<EntityId>();
 
 export interface StarterPreset {
     id: string;
@@ -483,6 +485,7 @@ function createCampaignBase(input: {
     currentScores = [];
     currentCommentItems = [];
     currentReplies = [];
+    sentReplyIds.clear();
     commentsLoading = false;
     commentsAiAttempted = false;
     replyCoachStates.clear();
@@ -899,28 +902,99 @@ export function getReplyCoachState(commentId: EntityId): ReplyCoachState | null 
     return replyCoachStates.get(commentId) || null;
 }
 
+function getReplyReviewItem(replyId: EntityId) {
+    return approvals.getAllItems().find((entry) => entry.id === replyId && entry.kind === 'reply') || null;
+}
+
+export function getReplyReviewState(replyId: EntityId): ApprovalState | 'missing' {
+    return getReplyReviewItem(replyId)?.state || 'missing';
+}
+
+export function isReplySent(replyId: EntityId): boolean {
+    return sentReplyIds.has(replyId);
+}
+
+export function approveReply(replyId: EntityId): void {
+    approveItem(replyId);
+}
+
+export function discardReply(replyId: EntityId): void {
+    rejectItem(replyId);
+}
+
+export function explainReplyEditUnavailable(replyId: EntityId): void {
+    const reply = currentReplies.find((entry) => entry.id === replyId);
+    const item = reply ? currentCommentItems.find((entry) => entry.commentId === reply.commentId) : null;
+    setPageNotice(
+        'comments',
+        'info',
+        item
+            ? `Inline editing is not wired yet for ${item.comment.authorName}'s reply. Use the review queue for approve/reject decisions until the editor lands.`
+            : 'Inline editing is not wired yet. Use the review queue for approve/reject decisions until the editor lands.',
+    );
+}
+
+export function sendReply(replyId: EntityId, options: { autoApprove?: boolean } = {}): boolean {
+    const reply = currentReplies.find((entry) => entry.id === replyId);
+    if (!reply) {
+        setPageNotice('comments', 'error', `Reply ${replyId} was not found.`);
+        return false;
+    }
+
+    if (sentReplyIds.has(replyId)) {
+        setPageNotice('comments', 'info', 'That reply was already sent.');
+        return true;
+    }
+
+    const currentState = getReplyReviewState(replyId);
+    if (currentState === 'rejected') {
+        setPageNotice('comments', 'info', 'Discarded replies stay out of send actions until you re-approve them from the review queue.');
+        return false;
+    }
+
+    if (options.autoApprove !== false && currentState === 'pending') {
+        approveItem(replyId);
+    }
+
+    if (!approvals.isApproved(replyId)) {
+        setPageNotice('comments', 'error', 'This reply still needs approval before it can be sent.');
+        return false;
+    }
+
+    const result = comments.sendApprovedReply(replyId);
+    if (!result.success) {
+        setPageNotice('comments', 'error', 'A reply could not be sent because it was not approved.');
+        return false;
+    }
+
+    sentReplyIds.add(replyId);
+    commentsAdvisory = updateAdvisoryPhase(commentsAdvisory, 'approved');
+    setPageNotice('comments', 'info', 'Reply approved and sent.');
+    eventLog.append('CommentReplied', reply.id, { externalId: result.externalId });
+    return true;
+}
+
 export function sendReplies(): void {
     let sentCount = 0;
-    let failedCount = 0;
+    let skippedCount = 0;
 
     currentReplies.forEach((reply) => {
-        approveItem(reply.id);
-        const result = comments.sendApprovedReply(reply.id);
-        if (result.success) {
+        if (sendReply(reply.id)) {
             sentCount += 1;
-            eventLog.append('CommentReplied', reply.id, { externalId: result.externalId });
-        } else {
-            failedCount += 1;
-            setPageNotice('comments', 'error', 'A reply could not be sent because it was not approved.');
+        } else if (!sentReplyIds.has(reply.id)) {
+            skippedCount += 1;
         }
     });
 
-    if (failedCount === 0 && sentCount > 0) {
+    if (sentCount > 0 && skippedCount === 0) {
         commentsAdvisory = updateAdvisoryPhase(commentsAdvisory, 'approved');
         setPageNotice('comments', 'info', `${sentCount} reply(s) approved and sent.`);
     } else if (sentCount > 0) {
         commentsAdvisory = updateAdvisoryPhase(commentsAdvisory, 'in-review');
-        setPageNotice('comments', 'error', `${failedCount} reply(s) failed to send after approval checks.`);
+        setPageNotice('comments', 'info', `${sentCount} reply(s) sent. ${skippedCount} discarded or blocked reply(s) were left untouched.`);
+    } else if (skippedCount > 0) {
+        commentsAdvisory = updateAdvisoryPhase(commentsAdvisory, 'in-review');
+        setPageNotice('comments', 'info', `${skippedCount} reply(s) were left untouched because they are discarded, already sent, or still blocked.`);
     }
 }
 
@@ -987,6 +1061,7 @@ export function resetAll(): void {
     currentProfile = null;
     currentCommentItems = [];
     currentReplies = [];
+    sentReplyIds.clear();
     pendingPreset = null;
     discoveryAdvisory = null;
     launchAdvisory = null;

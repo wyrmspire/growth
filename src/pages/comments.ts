@@ -86,6 +86,9 @@ export function renderCommentsPage(): string {
       ${commentItems.map((item) => {
         const reply = replies.find((draft) => draft.commentId === item.commentId);
         const replyState = engine.getReplyCoachState(item.commentId);
+        const reviewState = reply ? engine.getReplyReviewState(reply.id) : 'missing';
+        const alreadySent = reply ? engine.isReplySent(reply.id) : false;
+        const sendLabel = reviewState === 'approved' ? 'Send Reply' : tip('approve', 'Approve & Send');
         return `
           <div class="comment-item">
             <div class="comment-avatar">${item.comment.authorName.charAt(0)}</div>
@@ -116,10 +119,11 @@ export function renderCommentsPage(): string {
                   </div>
                 ` : ''}
                 <div class="comment-actions">
-                  <button class="btn btn-success btn-sm">${tip('approve', 'Approve & Send')}</button>
-                  <button class="btn btn-ghost btn-sm">Edit</button>
-                  <button class="btn btn-danger btn-sm">${tip('reject', 'Discard')}</button>
+                  <button class="btn btn-success btn-sm comment-approve-send-btn" data-reply-id="${reply.id}" ${alreadySent ? 'disabled' : ''}>${alreadySent ? 'Sent' : sendLabel}</button>
+                  <button class="btn btn-ghost btn-sm comment-edit-btn" data-reply-id="${reply.id}">Edit</button>
+                  <button class="btn btn-danger btn-sm comment-discard-btn" data-reply-id="${reply.id}" ${reviewState === 'rejected' ? 'disabled' : ''}>${reviewState === 'rejected' ? 'Discarded' : tip('reject', 'Discard')}</button>
                 </div>
+                ${alreadySent ? '<div class="body-note">Reply already sent.</div>' : reviewState === 'rejected' ? '<div class="body-note">Reply discarded. It will stay out of send actions until re-approved from the review queue.</div>' : reviewState === 'approved' ? '<div class="body-note">Reply approved and ready to send.</div>' : ''}
               ` : item.intent === 'spam' ? `
                 <div class="body-note">${tip('intentSpam', 'Flagged as spam')} - no reply generated</div>
               ` : ''}
@@ -183,6 +187,30 @@ export function bindCommentsEvents(): void {
       window.dispatchEvent(new CustomEvent('navigate', { detail: 'comments' }));
     });
   }
+
+  document.querySelectorAll('.comment-approve-send-btn').forEach((button) => {
+    button.addEventListener('click', () => {
+      const replyId = (button as HTMLElement).dataset.replyId || '';
+      engine.sendReply(replyId as any);
+      window.dispatchEvent(new CustomEvent('navigate', { detail: 'comments' }));
+    });
+  });
+
+  document.querySelectorAll('.comment-discard-btn').forEach((button) => {
+    button.addEventListener('click', () => {
+      const replyId = (button as HTMLElement).dataset.replyId || '';
+      engine.discardReply(replyId as any);
+      window.dispatchEvent(new CustomEvent('navigate', { detail: 'comments' }));
+    });
+  });
+
+  document.querySelectorAll('.comment-edit-btn').forEach((button) => {
+    button.addEventListener('click', () => {
+      const replyId = (button as HTMLElement).dataset.replyId || '';
+      engine.explainReplyEditUnavailable(replyId as any);
+      window.dispatchEvent(new CustomEvent('navigate', { detail: 'comments' }));
+    });
+  });
 
   const sendAllBtn = document.getElementById('send-all-replies-btn');
   if (sendAllBtn) {

@@ -51,8 +51,9 @@ Users should feel:
 1. Ingest comments from channels.
 2. Classify comment intent (lead, objection, spam, support).
 3. Draft reply with brand-safe language.
-4. Human approve or edit.
+4. Human approve or discard from the row, or use the review queue for a fuller review pass.
 5. Publish reply and record event.
+6. If inline editing is not yet available, the UI must say so explicitly instead of leaving inert controls.
 
 ### Flow 3: Improve copy quality over time
 1. Compare variant performance by channel and funnel stage.

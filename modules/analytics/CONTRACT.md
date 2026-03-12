@@ -55,6 +55,20 @@ Invariants:
 
 Return type: `{ attribution: AttributionSnapshot; funnel: ConversionFunnelRow[]; variants: VariantPerformanceRow[]; learning: LearningEngagementSummary }`
 
+### ResearchOpportunityDashboardSummary (local page summary)
+Purpose: Summarize the manual research corpus into compact operator-facing signal tiles and a shortlist.
+Current source: `data/research/opportunities.seed.json`, rendered directly by the dashboard page while the workflow remains file-backed/local-first.
+Current summary fields:
+- `totalRecords: number`
+- `activeRecords: number` (`new` + `reviewing`)
+- `averageScore: number`
+- `highestScore: number`
+- `platformCounts: Array<{ platform: string; count: number }>`
+- `topOpportunities: Array<{ id: string; platform: string; status: string; total: number; painPoint: string; recommendedAction: string }>`
+
+Invariant:
+- Advisory only. This summary helps prioritize research follow-up; it does not trigger any outbound action or automatic product decision.
+
 Implementation: `modules/analytics/src/dashboard.ts` → `campaignDashboardReadModel`
 
 ## Module Invariants

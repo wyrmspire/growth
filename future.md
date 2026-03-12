@@ -218,6 +218,15 @@ Phase 0 capture should store:
 - suggested human next action or draft reply
 - risk flags and approval requirement
 
+Current first-pass scoring rubric:
+- urgency — 30%
+- repeat frequency — 25%
+- buyer clarity — 20%
+- local-first advantage — 15%
+- data availability — 10%
+
+This is intentionally a prioritization aid, not an automation trigger.
+
 ### Operating Model (Slow and Controlled)
 - Start with manual capture and review.
 - Add batch scanning only after the manual corpus proves useful (no aggressive real-time scraping loops).

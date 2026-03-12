@@ -46,6 +46,22 @@ Each manual record captures:
 - a suggested human next action or draft reply
 - risk flags and review requirements
 
+### First scoring rubric
+
+The current local-first rubric is weighted toward compound operator value instead of generic social virality:
+- urgency — 30%
+- repeat frequency — 25%
+- buyer clarity — 20%
+- local-first advantage — 15%
+- data availability — 10%
+
+`total` is stored as a `0–100` score so the inbox and dashboard can sort and summarize records consistently.
+
+Why this shape:
+- it mirrors the roadmap's weekly scoring loop
+- it biases toward repeated operator pain and real buyer signal
+- it keeps the system advisory instead of pretending one numeric score is strategy by itself
+
 ### Phase 1 — mock inbox shell
 The Opportunities Inbox page exists and remains mock-safe/offline. It should move toward loading from the local research corpus before any live source scanning is added.
 

@@ -45,6 +45,15 @@ This module owns the data model and business logic for slow-batch social opportu
   - `riskFlags: string[]`
   - `discoveredAt: string`
 
+- `ResearchOpportunityScoreRubric`
+  - `urgency: number` (0–10, weight 0.30)
+  - `repeatFrequency: number` (0–10, weight 0.25)
+  - `buyerClarity: number` (0–10, weight 0.20)
+  - `dataAvailability: number` (0–10, weight 0.10)
+  - `localFirstAdvantage: number` (0–10, weight 0.15)
+  - `total: number` (0–100, rounded from weighted score × 10)
+  - `notes: string`
+
 - `SuggestedEngagement`
   - `id: EntityId`
   - `opportunityId: EntityId`
@@ -131,13 +140,13 @@ Current `ResearchOpportunityRecord` shape for local capture:
   - `audience: string`
   - `workflow: string`
   - `whyNow: string`
-- `scoring`
+- `scoring` (`ResearchOpportunityScoreRubric`)
   - `urgency: number` (0–10)
   - `repeatFrequency: number` (0–10)
   - `buyerClarity: number` (0–10)
   - `dataAvailability: number` (0–10)
   - `localFirstAdvantage: number` (0–10)
-  - `total: number`
+  - `total: number` (0–100)
   - `notes: string`
 - `opportunity`
   - `recommendedAction: string`
@@ -146,6 +155,21 @@ Current `ResearchOpportunityRecord` shape for local capture:
   - `approvalRequired: boolean`
 - `tags: string[]`
 - `notes: string`
+
+### First scoring rubric (RESEARCH-3)
+
+The local manual-first research loop now uses one explicit first-pass rubric:
+
+`total = round(((urgency × 0.30) + (repeatFrequency × 0.25) + (buyerClarity × 0.20) + (dataAvailability × 0.10) + (localFirstAdvantage × 0.15)) × 10)`
+
+Interpretation:
+- `urgency` — how painful and immediate the problem sounds right now
+- `repeatFrequency` — how often this workflow/problem likely recurs
+- `buyerClarity` — how clearly the person sounds like a real operator/buyer rather than a vague observer
+- `dataAvailability` — how much concrete workflow/language detail is present for follow-up or prototyping
+- `localFirstAdvantage` — whether solving this likely benefits from privacy, local context, or on-machine workflow control
+
+This rubric is intentionally advisory. It ranks what deserves more attention; it does not auto-approve outreach, product direction, or implementation work.
 
 This file format is **not yet a runtime export**. It is the agreed local storage contract for the manual research loop and should remain backward-compatible unless a migration note is added in the same change set.
 

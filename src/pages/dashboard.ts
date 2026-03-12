@@ -1,5 +1,64 @@
 import { tip } from '../components/tooltip';
 import * as engine from '../mock-engine';
+import opportunitiesSeed from '../../data/research/opportunities.seed.json';
+
+type ResearchRecord = (typeof opportunitiesSeed.records)[number];
+
+type ResearchDashboardSummary = {
+  totalRecords: number;
+  activeRecords: number;
+  averageScore: number;
+  highestScore: number;
+  platformCounts: Array<{ platform: string; count: number }>;
+  topOpportunities: Array<{
+    id: string;
+    platform: string;
+    status: string;
+    total: number;
+    painPoint: string;
+    recommendedAction: string;
+  }>;
+};
+
+function sentenceCase(value: string): string {
+  return value
+    .split('-')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+function buildResearchSummary(records: ResearchRecord[]): ResearchDashboardSummary {
+  const activeRecords = records.filter((record) => record.status === 'new' || record.status === 'reviewing');
+  const totalScore = records.reduce((sum, record) => sum + record.scoring.total, 0);
+  const platformCounts = new Map<string, number>();
+
+  for (const record of records) {
+    platformCounts.set(record.source.platform, (platformCounts.get(record.source.platform) || 0) + 1);
+  }
+
+  return {
+    totalRecords: records.length,
+    activeRecords: activeRecords.length,
+    averageScore: records.length ? Math.round(totalScore / records.length) : 0,
+    highestScore: records.length ? Math.max(...records.map((record) => record.scoring.total)) : 0,
+    platformCounts: [...platformCounts.entries()]
+      .map(([platform, count]) => ({ platform, count }))
+      .sort((a, b) => b.count - a.count || a.platform.localeCompare(b.platform)),
+    topOpportunities: [...records]
+      .sort((a, b) => b.scoring.total - a.scoring.total || a.id.localeCompare(b.id))
+      .slice(0, 3)
+      .map((record) => ({
+        id: record.id,
+        platform: sentenceCase(record.source.platform),
+        status: sentenceCase(record.status),
+        total: record.scoring.total,
+        painPoint: record.painPoint,
+        recommendedAction: record.opportunity.recommendedAction,
+      })),
+  };
+}
+
+const researchSummary = buildResearchSummary(opportunitiesSeed.records);
 
 export function renderDashboardPage(): string {
   const brief = engine.getCurrentBrief();
@@ -98,6 +157,80 @@ export function renderDashboardPage(): string {
       </table>
     </div>
 
+
+    <hr class="section-divider" />
+
+    <h3 class="section-heading">📡 Research Opportunity Signals</h3>
+    <div class="metric-row">
+      <div class="metric-tile">
+        <div class="metric-label">Captured signals</div>
+        <div class="metric-value">${researchSummary.totalRecords}</div>
+        <div class="metric-sub">local research records in repo</div>
+      </div>
+      <div class="metric-tile">
+        <div class="metric-label">Active review queue</div>
+        <div class="metric-value metric-primary">${researchSummary.activeRecords}</div>
+        <div class="metric-sub">new + reviewing opportunities</div>
+      </div>
+      <div class="metric-tile">
+        <div class="metric-label">Average score</div>
+        <div class="metric-value">${researchSummary.averageScore}</div>
+        <div class="metric-sub">weighted advisory priority</div>
+      </div>
+      <div class="metric-tile">
+        <div class="metric-label">Top score</div>
+        <div class="metric-value metric-green">${researchSummary.highestScore}</div>
+        <div class="metric-sub">best current signal</div>
+      </div>
+    </div>
+
+    <div class="card card-overflow">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Platform mix</th>
+            <th>Records</th>
+            <th>What it tells you</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${researchSummary.platformCounts.map((row) => `
+            <tr>
+              <td class="cell-capitalize">${sentenceCase(row.platform)}</td>
+              <td>${row.count}</td>
+              <td>${row.count > 1 ? 'Enough repeated signal to compare language patterns.' : 'Only one captured signal so far — keep researching before overcommitting.'}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card card-overflow">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Top opportunity</th>
+            <th>Status</th>
+            <th>Score</th>
+            <th>Pain point</th>
+            <th>Suggested next move</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${researchSummary.topOpportunities.map((row) => `
+            <tr>
+              <td>${row.platform} · ${row.id}</td>
+              <td>${row.status}</td>
+              <td class="score-value score-${row.total >= 35 ? 'high' : 'mid'}">${row.total}</td>
+              <td>${row.painPoint}</td>
+              <td>${row.recommendedAction}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <p class="body-secondary">This research summary is advisory and local-only. It helps you decide what to study or test next; it does not approve outreach or trigger any outbound action.</p>
 
     <hr class="section-divider" />
 

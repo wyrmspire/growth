@@ -3,6 +3,10 @@
 Analytics projects campaign performance from event streams. All functions are
 pure read-only projections — no mutations, no side effects.
 
+The dashboard also includes a small local research-opportunity summary while the
+social-scout workflow is still file-backed. That summary is advisory UI state fed
+from `data/research/opportunities.seed.json`, not a live outbound or ingestion system.
+
 Depends on: core
 
 ## Key Files

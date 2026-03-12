@@ -150,3 +150,22 @@ are called directly in the production path.
 Human-review gate: Offer hypotheses are advisory outputs from the Genkit
 strategy agents. No offer profile is committed or published without an
 explicit `approvals.decideReview` decision from a human reviewer.
+
+---
+
+## Flow F: Manual Research Loop and Opportunity Prioritization
+
+```
+Analyst/operator captures a signal in data/research/opportunities.seed.json
+  -> social-scout rubric fields are filled (`urgency`, `repeatFrequency`, `buyerClarity`, `dataAvailability`, `localFirstAdvantage`)
+  -> total score is stored in the local record
+  -> UI: Opportunities Inbox renders repo-backed cards for manual review
+  -> UI: dashboard page summarizes active records, average score, platform mix, and top opportunities
+  -> human decides whether to keep researching, draft content, or move an item toward approvals
+```
+
+Data crossing boundaries:
+- `ResearchOpportunityRecord[]` (file-backed local corpus)
+- `ResearchOpportunityDashboardSummary` (dashboard UI summary)
+
+Guardrail note: this flow is still local-first and advisory. Summaries help Chris decide what deserves attention; they do not create outbound actions, queue replies automatically, or replace review.

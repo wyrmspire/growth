@@ -1,0 +1,132 @@
+{
+  "version": 1,
+  "capturedAt": "2026-03-12T07:20:00Z",
+  "records": [
+    {
+      "id": "research-001",
+      "status": "new",
+      "source": {
+        "platform": "reddit",
+        "sourceType": "thread",
+        "community": "r/smallbusiness",
+        "author": "u/ops-bottleneck-owner",
+        "url": "https://example.invalid/reddit/research-001",
+        "capturedBy": "manual"
+      },
+      "observedAt": "2026-03-11T18:30:00Z",
+      "summary": "Small business owner asks for help reducing repetitive manual data entry work that is eating weekly ops time.",
+      "painPoint": "Too much recurring admin work with no lightweight automation helper in place.",
+      "languageSignals": [
+        "spending 10 hours a week on manual data entry",
+        "there has to be a better way",
+        "looking for someone who can actually set this up"
+      ],
+      "operatorFit": {
+        "audience": "small business owner",
+        "workflow": "back-office operations and process cleanup",
+        "whyNow": "Clear active pain with service-buying intent and low abstraction."
+      },
+      "scoring": {
+        "urgency": 9,
+        "repeatFrequency": 8,
+        "buyerClarity": 9,
+        "dataAvailability": 7,
+        "localFirstAdvantage": 6,
+        "total": 39,
+        "notes": "Strong near-term service signal with concrete workflow pain and language that could inform both offers and copy."
+      },
+      "opportunity": {
+        "recommendedAction": "Draft a practical reply offering one small diagnostic step plus an invite to continue in DM.",
+        "suggestedReply": "That sounds like exactly the kind of ops drag worth fixing first. If helpful, I can share a simple way to map the repeat steps before automating anything.",
+        "riskFlags": [],
+        "approvalRequired": true
+      },
+      "tags": ["operations", "automation", "service-intent"],
+      "notes": "Good example of the roadmap's decision-helper/operator-sidecar direction."
+    },
+    {
+      "id": "research-002",
+      "status": "reviewing",
+      "source": {
+        "platform": "linkedin",
+        "sourceType": "post",
+        "community": "operations leaders",
+        "author": "Operations Lead at regional services firm",
+        "url": "https://example.invalid/linkedin/research-002",
+        "capturedBy": "manual"
+      },
+      "observedAt": "2026-03-11T21:00:00Z",
+      "summary": "Operations lead describes drowning in status-chasing across Slack, email, and spreadsheets, with no clear daily priority view.",
+      "painPoint": "Coordination overhead and fragmented visibility create repeated decision fatigue.",
+      "languageSignals": [
+        "half my day is just chasing updates",
+        "I need one place to see what's actually blocked",
+        "our tools don't talk to each other"
+      ],
+      "operatorFit": {
+        "audience": "operations lead",
+        "workflow": "daily coordination and blocker triage",
+        "whyNow": "Maps directly to a dashboard/sidecar hypothesis from the roadmap."
+      },
+      "scoring": {
+        "urgency": 8,
+        "repeatFrequency": 9,
+        "buyerClarity": 7,
+        "dataAvailability": 6,
+        "localFirstAdvantage": 8,
+        "total": 38,
+        "notes": "Excellent fit for an operator dashboard sidecar, especially where sensitive internal context argues for local-first storage."
+      },
+      "opportunity": {
+        "recommendedAction": "Capture this as a sidecar hypothesis and test a reply framed around blocker summaries rather than generic AI claims.",
+        "suggestedReply": "The status-chasing problem is brutal because the tools usually optimize for logging work, not helping you decide what matters next. Curious whether a blocker-first daily summary would be more useful than another dashboard.",
+        "riskFlags": [],
+        "approvalRequired": true
+      },
+      "tags": ["operator-sidecar", "dashboard", "coordination"],
+      "notes": "Useful product-language sample even if no direct outreach happens."
+    },
+    {
+      "id": "research-003",
+      "status": "parked",
+      "source": {
+        "platform": "facebook",
+        "sourceType": "post",
+        "community": "Local Business Owners Group",
+        "author": "group-member-anon",
+        "url": "https://example.invalid/facebook/research-003",
+        "capturedBy": "manual"
+      },
+      "observedAt": "2026-03-10T23:45:00Z",
+      "summary": "Business owner asks whether AI marketing tools are worth the money after mixed results from generic content tools.",
+      "painPoint": "Confusion about where AI helps versus where it becomes hype and wasted spend.",
+      "languageSignals": [
+        "mixed results",
+        "not sure it's worth the cost",
+        "everyone says use AI but nobody says where"
+      ],
+      "operatorFit": {
+        "audience": "small business owner",
+        "workflow": "marketing experimentation and tool evaluation",
+        "whyNow": "Strong content/research signal, but weaker immediate buyer clarity than the ops examples."
+      },
+      "scoring": {
+        "urgency": 6,
+        "repeatFrequency": 7,
+        "buyerClarity": 5,
+        "dataAvailability": 7,
+        "localFirstAdvantage": 5,
+        "total": 30,
+        "notes": "Good blog-language and objection research; weaker immediate actionability and higher group-context sensitivity."
+      },
+      "opportunity": {
+        "recommendedAction": "Use as a research/content signal, not an outreach priority.",
+        "suggestedReply": "A lot of the disappointment comes from using AI where judgment still matters most. The useful wins tend to come from narrow repeatable workflows, not generic 'do my marketing' promises.",
+        "riskFlags": ["third-party-group", "manual-review-only"],
+        "approvalRequired": true
+      },
+      "tags": ["content-angle", "ai-skepticism", "research-only"],
+      "notes": "Keep as a pattern-library example for objections and framing."
+    }
+  ]
+}

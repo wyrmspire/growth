@@ -24,14 +24,39 @@ ScoutSourceConfig (what to watch)
               → adapter sends reply
 ```
 
-## Current state (board.md FUT-3)
+## Current state
 
-Phase 1 is doc and contract only. The UI shell (Opportunities Inbox page) exists but uses mock data. No live API calls are made yet.
+There are now two local-first phases before any real platform integration:
+
+### Phase 0 — manual research capture
+The repo keeps a file-backed research corpus in `data/research/opportunities.seed.json`.
+
+This is the preferred starting point right now because it:
+- matches the roadmap's manual-first research loop
+- stays fully local/mock-safe
+- creates reusable examples for scoring, clustering, and inbox rendering
+- avoids premature scraping/integration work before the signal quality is proven
+
+Each manual record captures:
+- where the signal came from
+- the pain point observed
+- language worth reusing
+- operator/workflow fit
+- a first scoring pass
+- a suggested human next action or draft reply
+- risk flags and review requirements
+
+### Phase 1 — mock inbox shell
+The Opportunities Inbox page exists and remains mock-safe/offline. It should move toward loading from the local research corpus before any live source scanning is added.
+
+### Later phases
+Only after manual capture proves useful should the module grow into source configs, scheduled scans, scoring pipelines, and adapter-backed ingestion.
 
 ## Platforms
 
-Phase 1 allowlist: Reddit, X (formerly Twitter), Facebook, Instagram
-All platforms require explicit `ScoutSourceConfig` with `enabled: true` before scanning.
+Current manual-capture corpus may include: Reddit, X, Facebook, Instagram, LinkedIn, YouTube, newsletters, forums, and plain manual notes.
+
+Future scan allowlist for automated social-scout work remains narrower and must be explicitly configured in code/contracts before use.
 
 ## Guardrails
 

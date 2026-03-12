@@ -200,11 +200,30 @@ Create offline eval set for:
 ### Goal
 Help a beginner operator find high-value places to engage by surfacing scored conversation opportunities and suggested comments.
 
+### Phase 0 first: manual research corpus
+Before adding live scanning, the preferred starting point is a local manual-capture corpus in `data/research/`.
+
+Why:
+- the roadmap explicitly calls for manual-first research before infra heroics
+- it keeps the workflow local-only and mock-safe
+- it creates a reusable pattern library of pains, language, and opportunity hypotheses
+- it lets the Opportunities Inbox evolve from durable repo data instead of hard-coded examples
+
+Phase 0 capture should store:
+- source and audience context
+- observed pain point
+- language worth reusing
+- operator/workflow fit
+- first-pass scoring
+- suggested human next action or draft reply
+- risk flags and approval requirement
+
 ### Operating Model (Slow and Controlled)
-- Batch scanning only (no aggressive real-time scraping loops).
-- Runs on a fixed cadence (for example every 15-30 minutes per source).
-- Uses per-platform request budgets and cooldowns.
-- Produces recommendations for review, not automatic posting.
+- Start with manual capture and review.
+- Add batch scanning only after the manual corpus proves useful (no aggressive real-time scraping loops).
+- When scanning exists, run it on a fixed cadence (for example every 15-30 minutes per source).
+- Use per-platform request budgets and cooldowns.
+- Produce recommendations for review, not automatic posting.
 
 ### Product Requirements
 - User defines watchlists:

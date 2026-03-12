@@ -197,6 +197,12 @@ Goal: stage the next major capabilities from `future.md` as cleanly separable wo
 
 ## Backlog
 
+### Research loop refill — 2026-03-12
+
+- [ ] RESEARCH-1 [READY] Add a local-first research capture schema and seed dataset for manually collected opportunities/signals. Files: `modules/social-scout/CONTRACT.md`, `modules/social-scout/README.md`, `data/research/opportunities.seed.json`, `data/research/README.md`, `future.md` Acceptance: the repo defines one durable local capture format, includes seeded example records tied to operator/research use cases, and documents why manual-first capture is the current preferred path.
+- [ ] RESEARCH-2 [READY] Replace hard-coded Opportunities Inbox cards with a local loader backed by the seed research dataset. Files: `src/pages/opportunities.ts`, `src/main.ts`, `src/index.css`, `data/research/opportunities.seed.json` Acceptance: the page renders from local repo data instead of in-file mocks, remains fully mock-safe/offline, and still makes the review boundary explicit.
+- [ ] RESEARCH-3 [READY] Add a first opportunity-scoring rubric and a tiny dashboard/read-model summary for captured research items. Files: `modules/social-scout/CONTRACT.md`, `modules/social-scout/README.md`, `modules/analytics/CONTRACT.md`, `modules/analytics/README.md`, `src/pages/dashboard.ts`, `DATA_FLOW.md`, `future.md` Acceptance: docs define the first scoring rubric, the dashboard can surface a compact opportunity/research summary, and all language stays advisory rather than autonomous.
+
 - [ ] BACK-1 [BLOCKED by outbound-channel decision] Add real provider adapter pilot for one outbound channel after integrations shell is accepted. Files: `modules/adapters/src/publish.ts`, `modules/adapters/src/registry.ts`, `modules/integrations/CONTRACT.md`, `PROJECT_RULES.md`
 - [ ] BACK-2 [BLOCKED by FUT-2] Add approval notification dispatch through Slack or Office test mode after `FUT-2` lands. Files: `modules/adapters/src/slack-notify.ts`, `modules/adapters/src/office-notify.ts`, `modules/approvals/src/queue.ts`, `src/pages/review.ts`
 - [x] BACK-3 [DONE] codex 2026-03-12T06:19:00Z Add page analytics and event instrumentation for the learning UI after UX hardening lands. Files: `src/main.ts`, `src/pages/discovery.ts`, `src/pages/launcher.ts`, `src/pages/review.ts`, `src/pages/calendar.ts`, `src/pages/comments.ts`, `src/pages/dashboard.ts`, `modules/analytics/src/dashboard.ts`, `DATA_FLOW.md` Acceptance: learning-page views and key guided-flow actions are appended to the mock event stream, the dashboard surfaces a learning engagement summary, and docs/tests reflect the read-model change.
@@ -230,12 +236,14 @@ Record every material issue discovered during a run. If a run has no material is
 |---|---|---|---|---|
 | 2026-03-05 | codex | 17 | current codebase, `lanes.md`, `future.md`, test/build validation | Reset board to 5 active lanes around real remaining work |
 | 2026-03-05 | codex | 1 | Lane 4 validation audit | Added `BACK-4` after finding inert comment-row actions during final flow reconciliation. |
+| 2026-03-12 | codex | 3 | `/home/devpc/dev/roadmap/00-brain-dump.md`, `future.md`, `src/pages/opportunities.ts`, `modules/social-scout/*` | Refilled the board with local-first research-loop tasks so Growth can progress without premature live integrations or outbound work. |
 
 ## Coordination Log
 
 | UTC Timestamp | Agent | Note |
 |---|---|---|
 | 2026-03-05T22:05:00Z | codex | Reconciled board against current `C:\growth` workspace, `lanes.md`, recent merges, and `future.md`. Verified `npm run test` and `npm run build` pass. Reset active work into 5 lanes: docs, UX, beginner guidance, flow wiring, and future foundations. |
+| 2026-03-12T06:44:00Z | codex | Planning-only refill pass. Reviewed `/home/devpc/dev/roadmap/00-brain-dump.md`, `future.md`, `modules/social-scout/*`, and the mock Opportunities Inbox, then added `RESEARCH-1` through `RESEARCH-3` plus `docs/2026-03-12-backlog-refill.md` so the next safe work can focus on local-first research capture and scoring. no material issues found. |
 | 2026-03-05T22:25:18Z | agent-1 | Claimed Lane 1 (DOC-1 through DOC-4). Read board.md, all module source files, and existing CONTRACT.md docs. Beginning doc reconciliation in order: DOC-1 -> DOC-2 -> DOC-3 -> DOC-4. |
 | 2026-03-05T22:45:00Z | agent-1 | DONE Lane 1 (DOC-1 through DOC-4). Updated approvals and analytics contracts, refreshed DATA_FLOW.md to current APIs, aligned SYSTEM_ARCHITECTURE.md, PROJECT_RULES.md, and AGENTS.md to the actual runtime shape, and audited remaining mismatch notes. no material issues found. |
 | 2026-03-05T22:30:00Z | agent-2 | Claimed Lane 2 (UX-1 through UX-4). Starting tooltip/mobile fixes first, then shared layout cleanup and the UI QA checklist. |

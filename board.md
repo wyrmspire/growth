@@ -112,7 +112,7 @@ A task is DONE only if:
 | agent-3 | Builder | Lane 3 - Beginner Guidance and Strategy Workspace | Complete |
 | agent-4 | Builder | unassigned | Standby |
 | agent-5 | Builder | Lane 5 - Future Foundations | Complete |
-| codex | Integrator | Backlog - BACK-3 Page Analytics | Complete |
+| codex | Integrator | Backlog - RESEARCH-4 Shared research store | Complete |
 
 ## Validated Baseline (Do Not Reopen Without Regression)
 
@@ -202,6 +202,7 @@ Goal: stage the next major capabilities from `future.md` as cleanly separable wo
 - [x] RESEARCH-1 [DONE] codex 2026-03-12T07:20:00Z Add a local-first research capture schema and seed dataset for manually collected opportunities/signals. Files: `modules/social-scout/CONTRACT.md`, `modules/social-scout/README.md`, `data/research/opportunities.seed.json`, `data/research/README.md`, `future.md` Acceptance: the repo defines one durable local capture format, includes seeded example records tied to operator/research use cases, and documents why manual-first capture is the current preferred path.
 - [x] RESEARCH-2 [DONE] codex 2026-03-12T07:41:00Z Replace hard-coded Opportunities Inbox cards with a local loader backed by the seed research dataset. Files: `src/pages/opportunities.ts`, `src/main.ts`, `src/index.css`, `data/research/opportunities.seed.json` Acceptance: the page renders from local repo data instead of in-file mocks, remains fully mock-safe/offline, and still makes the review boundary explicit.
 - [x] RESEARCH-3 [DONE] codex 2026-03-12T10:50:00Z Add a first opportunity-scoring rubric and a tiny dashboard/read-model summary for captured research items. Files: `modules/social-scout/CONTRACT.md`, `modules/social-scout/README.md`, `modules/analytics/CONTRACT.md`, `modules/analytics/README.md`, `src/pages/dashboard.ts`, `DATA_FLOW.md`, `future.md` Acceptance: docs define the first scoring rubric, the dashboard can surface a compact opportunity/research summary, and all language stays advisory rather than autonomous.
+- [x] RESEARCH-4 [DONE] codex 2026-03-12T11:45:00Z Move file-backed research loading and summary helpers into the `social-scout` module so the inbox/dashboard reuse one local data path. Files: `modules/social-scout/src/research-store.ts`, `modules/social-scout/src/__tests__/research-store.test.ts`, `modules/social-scout/CONTRACT.md`, `modules/social-scout/README.md`, `src/pages/opportunities.ts`, `src/pages/dashboard.ts` Acceptance: repo-backed research records and summary helpers live behind module exports, the inbox/dashboard import the shared helpers instead of hand-rolling seed parsing, and tests cover the shared loader/summary behavior.
 
 - [ ] BACK-1 [BLOCKED by outbound-channel decision] Add real provider adapter pilot for one outbound channel after integrations shell is accepted. Files: `modules/adapters/src/publish.ts`, `modules/adapters/src/registry.ts`, `modules/integrations/CONTRACT.md`, `PROJECT_RULES.md`
 - [ ] BACK-2 [BLOCKED by FUT-2] Add approval notification dispatch through Slack or Office test mode after `FUT-2` lands. Files: `modules/adapters/src/slack-notify.ts`, `modules/adapters/src/office-notify.ts`, `modules/approvals/src/queue.ts`, `src/pages/review.ts`
@@ -270,6 +271,8 @@ Record every material issue discovered during a run. If a run has no material is
 | 2026-03-12T07:31:00Z | codex | Claimed RESEARCH-2. Replacing in-file opportunity mocks with a local loader built from `data/research/opportunities.seed.json`, keeping the inbox offline/local-only and the approval boundary explicit. |
 | 2026-03-12T07:41:00Z | codex | DONE RESEARCH-2. Opportunities Inbox now renders from the local research seed dataset, exposes platform filters from repo data, keeps advisory/review language explicit, and stays fully mock-safe/offline. Validation passed with `npm run check` and `npm run build`. no material issues found. |
 | 2026-03-12T10:50:00Z | codex | DONE RESEARCH-3. Added the first weighted opportunity-scoring rubric to the social-scout docs, documented the local advisory research summary in analytics docs, and surfaced a compact research-signals summary on the dashboard page from the repo-backed seed dataset. Validation passed with `npm run check` and `npm run build`. no material issues found. |
+| 2026-03-12T11:45:00Z | codex | Claimed RESEARCH-4. Moving repo-backed research loading and dashboard-summary helpers into the social-scout module so the inbox/dashboard share one local data path instead of duplicating seed parsing in UI code. |
+| 2026-03-12T11:53:00Z | codex | DONE RESEARCH-4. Added `modules/social-scout/src/research-store.ts` plus tests, moved the seed-record/dashboard-summary helpers behind the module boundary, and updated the Opportunities Inbox and Dashboard pages to reuse the shared local data path. Validation passed with targeted social-scout tests, `npm run build`, and `npm run check`. no material issues found. |
 | 2026-03-05T23:07:00Z | agent-5 | DONE CLEAN-2 (lanes.md sync). CLEAN-1 (board.md update) in progress. Validation: `npm run test` (`458/458`) and `npm run build` PASS. |
 
 ## Refill Protocol

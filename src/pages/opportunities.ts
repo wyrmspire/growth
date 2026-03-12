@@ -1,4 +1,7 @@
-import opportunitiesSeed from '../../data/research/opportunities.seed.json';
+import {
+  getSeedResearchRecords,
+  sentenceCase,
+} from '../../modules/social-scout/src/research-store';
 
 /**
  * Opportunities Inbox — FUT-3 / RESEARCH-2
@@ -6,7 +9,7 @@ import opportunitiesSeed from '../../data/research/opportunities.seed.json';
  * No live scanning or auto-sending in this phase — all actions require explicit decision.
  */
 
-type SeedRecord = (typeof opportunitiesSeed.records)[number];
+type SeedRecord = ReturnType<typeof getSeedResearchRecords>[number];
 
 type OpportunityView = {
   id: string;
@@ -34,13 +37,6 @@ const PLATFORM_META: Record<string, { label: string; icon: string }> = {
   youtube: { label: 'YouTube', icon: '▶️' },
 };
 
-function sentenceCase(value: string): string {
-  return value
-    .split('-')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
-}
-
 function mapRecordToOpportunity(record: SeedRecord): OpportunityView {
   const platformMeta = PLATFORM_META[record.source.platform] ?? {
     label: sentenceCase(record.source.platform),
@@ -65,7 +61,7 @@ function mapRecordToOpportunity(record: SeedRecord): OpportunityView {
   };
 }
 
-const OPPORTUNITIES: OpportunityView[] = opportunitiesSeed.records.map(mapRecordToOpportunity);
+const OPPORTUNITIES: OpportunityView[] = getSeedResearchRecords().map(mapRecordToOpportunity);
 const PLATFORM_FILTERS = ['All platforms', ...new Set(OPPORTUNITIES.map((opp) => opp.platform))];
 
 function renderOpportunityCard(opp: OpportunityView): string {

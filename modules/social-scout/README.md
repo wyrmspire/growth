@@ -30,6 +30,7 @@ There are now two local-first phases before any real platform integration:
 
 ### Phase 0 — manual research capture
 The repo keeps a file-backed research corpus in `data/research/opportunities.seed.json`.
+A shared helper layer now lives in `modules/social-scout/src/research-store.ts` so UI pages can load records and build advisory summaries through the module instead of duplicating seed parsing logic.
 
 This is the preferred starting point right now because it:
 - matches the roadmap's manual-first research loop

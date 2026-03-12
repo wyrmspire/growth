@@ -107,6 +107,35 @@ Invariants:
 - Score must stay in the `0–100` range.
 - Platform must be in the explicit allowlist.
 
+### getSeedResearchDataset(): ResearchOpportunityDataset
+Purpose: Return the repo-backed manual research dataset from `data/research/opportunities.seed.json`.
+Errors: none.
+Invariants:
+- Returns the checked-in local seed dataset only; no network access or live scanning occurs.
+- Keeps the Phase 0 research loop offline/local-first.
+
+### getSeedResearchRecords(): ResearchOpportunityRecord[]
+Purpose: Return the current array of manual research records for inbox/dashboard use.
+Errors: none.
+Invariants:
+- Preserves record order from the seed file.
+- Returns only repo-backed local records.
+
+### buildResearchDashboardSummary(records: ResearchOpportunityRecord[]): ResearchDashboardSummary
+Purpose: Build the compact advisory research summary used by dashboard-style read models.
+Errors: none.
+Invariants:
+- Empty input returns zeroed counts and empty lists instead of `NaN`/errors.
+- Active records are currently `new` + `reviewing`.
+- Top opportunities are sorted by highest `scoring.total`, then `id` for stable ties.
+
+### sentenceCase(value: string): string
+Purpose: Convert kebab-style enum/status strings into UI labels.
+Errors: none.
+Invariants:
+- Intended only for presentation labels.
+- Replaces dashes with spaces and capitalizes each segment.
+
 ## File-backed capture format (RESEARCH-1)
 
 The repo now also defines a **manual-first local research capture format** in `data/research/opportunities.seed.json`.

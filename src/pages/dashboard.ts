@@ -1,64 +1,12 @@
 import { tip } from '../components/tooltip';
 import * as engine from '../mock-engine';
-import opportunitiesSeed from '../../data/research/opportunities.seed.json';
+import {
+  buildResearchDashboardSummary,
+  getSeedResearchRecords,
+  sentenceCase,
+} from '../../modules/social-scout/src/research-store';
 
-type ResearchRecord = (typeof opportunitiesSeed.records)[number];
-
-type ResearchDashboardSummary = {
-  totalRecords: number;
-  activeRecords: number;
-  averageScore: number;
-  highestScore: number;
-  platformCounts: Array<{ platform: string; count: number }>;
-  topOpportunities: Array<{
-    id: string;
-    platform: string;
-    status: string;
-    total: number;
-    painPoint: string;
-    recommendedAction: string;
-  }>;
-};
-
-function sentenceCase(value: string): string {
-  return value
-    .split('-')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
-}
-
-function buildResearchSummary(records: ResearchRecord[]): ResearchDashboardSummary {
-  const activeRecords = records.filter((record) => record.status === 'new' || record.status === 'reviewing');
-  const totalScore = records.reduce((sum, record) => sum + record.scoring.total, 0);
-  const platformCounts = new Map<string, number>();
-
-  for (const record of records) {
-    platformCounts.set(record.source.platform, (platformCounts.get(record.source.platform) || 0) + 1);
-  }
-
-  return {
-    totalRecords: records.length,
-    activeRecords: activeRecords.length,
-    averageScore: records.length ? Math.round(totalScore / records.length) : 0,
-    highestScore: records.length ? Math.max(...records.map((record) => record.scoring.total)) : 0,
-    platformCounts: [...platformCounts.entries()]
-      .map(([platform, count]) => ({ platform, count }))
-      .sort((a, b) => b.count - a.count || a.platform.localeCompare(b.platform)),
-    topOpportunities: [...records]
-      .sort((a, b) => b.scoring.total - a.scoring.total || a.id.localeCompare(b.id))
-      .slice(0, 3)
-      .map((record) => ({
-        id: record.id,
-        platform: sentenceCase(record.source.platform),
-        status: sentenceCase(record.status),
-        total: record.scoring.total,
-        painPoint: record.painPoint,
-        recommendedAction: record.opportunity.recommendedAction,
-      })),
-  };
-}
-
-const researchSummary = buildResearchSummary(opportunitiesSeed.records);
+const researchSummary = buildResearchDashboardSummary(getSeedResearchRecords());
 
 export function renderDashboardPage(): string {
   const brief = engine.getCurrentBrief();

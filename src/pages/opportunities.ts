@@ -1,70 +1,103 @@
+import opportunitiesSeed from '../../data/research/opportunities.seed.json';
+
 /**
- * Opportunities Inbox — FUT-3
- * Mock-safe shell for the social-scout opportunities discovery surface.
- * Shows scored opportunity cards from social sources for human review.
+ * Opportunities Inbox — FUT-3 / RESEARCH-2
+ * Local-first inbox backed by the repo research seed dataset.
  * No live scanning or auto-sending in this phase — all actions require explicit decision.
  */
 
-const MOCK_OPPORTUNITIES = [
-    {
-        id: 'opp-001',
-        platform: 'Reddit',
-        platformIcon: '🟠',
-        sourceUrl: '#',
-        author: 'u/smallbiz_owner',
-        contentSnippet: '"Does anyone have a good recommendation for a local automation consultant? We\'re spending 10 hrs/week on manual data entry."',
-        score: 87,
-        riskFlags: [],
-        suggestedComment: 'This is exactly the kind of problem we solve. Happy to share how we approach it — would a quick DM help?',
-        reason: 'High intent service inquiry in a relevant community with no competing replies yet.',
-    },
-    {
-        id: 'opp-002',
-        platform: 'X',
-        platformIcon: '🐦',
-        sourceUrl: '#',
-        author: '@designstudio_co',
-        contentSnippet: '"Spent 3 days on a proposal nobody read. There has to be a better way to qualify clients before writing full briefs."',
-        score: 72,
-        riskFlags: [],
-        suggestedComment: 'Proposal fatigue is real. We\'ve been experimenting with a 3-question qualifier that cuts pre-work in half — worth sharing if you\'re open to it.',
-        reason: 'Relevant pain point, medium engagement potential, well within policy.',
-    },
-    {
-        id: 'opp-003',
-        platform: 'Facebook',
-        platformIcon: '🔵',
-        sourceUrl: '#',
-        author: 'Local Business Owners Group',
-        contentSnippet: '"Anyone tried using AI tools for marketing? Getting mixed results and not sure if it\'s worth the cost."',
-        score: 61,
-        riskFlags: ['third-party-group'],
-        suggestedComment: 'It depends a lot on what you\'re trying to do. Happy to share what\'s worked for us vs what\'s been overhyped.',
-        reason: 'Moderate relevance; risk flag for third-party group — routed to manual review only.',
-    },
-];
+type SeedRecord = (typeof opportunitiesSeed.records)[number];
 
-function renderOpportunityCard(opp: typeof MOCK_OPPORTUNITIES[0]): string {
-    const riskTag = opp.riskFlags.length > 0
-        ? `<span class="risk-flag">⚠ ${opp.riskFlags.join(', ')}</span>`
-        : '';
-    return `
-    <div class="opportunity-card card" data-opp-id="${opp.id}">
+type OpportunityView = {
+  id: string;
+  platform: string;
+  platformIcon: string;
+  sourceUrl: string;
+  author: string;
+  community: string;
+  contentSnippet: string;
+  score: number;
+  riskFlags: string[];
+  suggestedComment: string;
+  reason: string;
+  status: string;
+  workflow: string;
+  whyNow: string;
+};
+
+const PLATFORM_META: Record<string, { label: string; icon: string }> = {
+  reddit: { label: 'Reddit', icon: '🟠' },
+  linkedin: { label: 'LinkedIn', icon: '💼' },
+  facebook: { label: 'Facebook', icon: '🔵' },
+  x: { label: 'X', icon: '🐦' },
+  instagram: { label: 'Instagram', icon: '📸' },
+  youtube: { label: 'YouTube', icon: '▶️' },
+};
+
+function sentenceCase(value: string): string {
+  return value
+    .split('-')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+function mapRecordToOpportunity(record: SeedRecord): OpportunityView {
+  const platformMeta = PLATFORM_META[record.source.platform] ?? {
+    label: sentenceCase(record.source.platform),
+    icon: '📡',
+  };
+
+  return {
+    id: record.id,
+    platform: platformMeta.label,
+    platformIcon: platformMeta.icon,
+    sourceUrl: record.source.url,
+    author: record.source.author,
+    community: record.source.community,
+    contentSnippet: `“${record.summary}”`,
+    score: record.scoring.total,
+    riskFlags: record.opportunity.riskFlags,
+    suggestedComment: record.opportunity.suggestedReply,
+    reason: record.opportunity.recommendedAction,
+    status: record.status,
+    workflow: record.operatorFit.workflow,
+    whyNow: record.operatorFit.whyNow,
+  };
+}
+
+const OPPORTUNITIES: OpportunityView[] = opportunitiesSeed.records.map(mapRecordToOpportunity);
+const PLATFORM_FILTERS = ['All platforms', ...new Set(OPPORTUNITIES.map((opp) => opp.platform))];
+
+function renderOpportunityCard(opp: OpportunityView): string {
+  const riskTag = opp.riskFlags.length > 0
+    ? `<span class="risk-flag">⚠ ${opp.riskFlags.join(', ')}</span>`
+    : '';
+
+  return `
+    <div class="opportunity-card card" data-opp-id="${opp.id}" data-opp-platform="${opp.platform}">
       <div class="opp-header">
         <span class="opp-platform">${opp.platformIcon} ${opp.platform}</span>
         <span class="opp-score score-badge">Score: ${opp.score}</span>
+        <span class="opp-status">${sentenceCase(opp.status)}</span>
         ${riskTag}
       </div>
       <div class="opp-source">
         <span class="opp-author">${opp.author}</span>
+        <span class="opp-source-sep">•</span>
+        <span>${opp.community}</span>
       </div>
       <blockquote class="opp-snippet">${opp.contentSnippet}</blockquote>
+      <div class="opp-context">
+        <div><strong>Workflow:</strong> ${opp.workflow}</div>
+        <div><strong>Why now:</strong> ${opp.whyNow}</div>
+      </div>
       <div class="opp-suggestion">
         <label class="field-label">Suggested reply <span class="advisory-tag">— Advisory · Edit before using</span></label>
         <div class="opp-draft">${opp.suggestedComment}</div>
         <div class="opp-reason field-hint">${opp.reason}</div>
       </div>
       <div class="opp-actions">
+        <a class="btn btn--ghost btn--sm" href="${opp.sourceUrl}" target="_blank" rel="noreferrer">View source</a>
         <button class="btn btn--primary btn--sm" data-opp-action="approve" data-opp-id="${opp.id}" ${opp.riskFlags.length ? 'disabled' : ''}>
           Approve for reply
         </button>
@@ -83,8 +116,26 @@ function renderOpportunityCard(opp: typeof MOCK_OPPORTUNITIES[0]): string {
   `;
 }
 
-export function renderOpportunitiesPage(): string {
+function renderOpportunitiesList(platformFilter = 'All platforms'): string {
+  const visibleOpportunities = platformFilter === 'All platforms'
+    ? OPPORTUNITIES
+    : OPPORTUNITIES.filter((opp) => opp.platform === platformFilter);
+
+  if (visibleOpportunities.length === 0) {
     return `
+      <div class="card opp-empty-state">
+        <div class="empty-icon">🗂️</div>
+        <h3>No local research items match this filter</h3>
+        <p>Keep the workflow manual-first for now: add or update records in <code>data/research/opportunities.seed.json</code> and review them here before doing anything outbound.</p>
+      </div>
+    `;
+  }
+
+  return visibleOpportunities.map(renderOpportunityCard).join('');
+}
+
+export function renderOpportunitiesPage(): string {
+  return `
     <div class="page-shell">
       <div class="page-heading">
         <h1 class="page-title">Opportunities Inbox</h1>
@@ -98,52 +149,75 @@ export function renderOpportunitiesPage(): string {
         <div class="coach-block-icon">📡</div>
         <div class="coach-block-body">
           <strong>What you do here</strong>
-          <p>Review scored conversation opportunities from social platforms. Each card shows you why a thread is worth engaging with and a suggested comment to get started.</p>
+          <p>Review locally captured research opportunities before deciding whether they are worth engaging with. Each card shows the pain point, workflow context, and an advisory draft reply.</p>
           <strong>Why it matters</strong>
-          <p>Showing up in the right conversations builds trust and generates leads without paid ads — but only if you engage authentically. These suggestions are a starting point, not a script.</p>
+          <p>This keeps the research loop grounded in durable repo data instead of brittle live scanning. It is a pattern library first, not an autonomous outreach engine.</p>
           <strong>What comes next</strong>
           <p>Approved replies enter your Review Queue before sending. Nothing goes out automatically.</p>
         </div>
       </div>
 
       <div class="mock-notice">
-        <span class="mock-badge">MOCK DATA</span>
-        This inbox shows example opportunities. Live social scanning starts after integrations are configured.
+        <span class="mock-badge">LOCAL DATA</span>
+        This inbox is rendered from the repo research seed file so you can review opportunities offline before any future integrations exist.
       </div>
 
-      <div class="opp-filters">
-        <button class="chip chip--active">All platforms</button>
-        <button class="chip">Reddit</button>
-        <button class="chip">X</button>
-        <button class="chip">Facebook</button>
-        <button class="chip">Instagram</button>
+      <div class="opp-filters" id="opportunities-filters">
+        ${PLATFORM_FILTERS.map((filter, index) => `
+          <button class="chip ${index === 0 ? 'chip--active' : ''}" data-opp-filter="${filter}">${filter}</button>
+        `).join('')}
       </div>
 
       <div class="opportunities-list" id="opportunities-list">
-        ${MOCK_OPPORTUNITIES.map(renderOpportunityCard).join('')}
+        ${renderOpportunitiesList()}
       </div>
     </div>
   `;
 }
 
 export function bindOpportunitiesEvents(): void {
-    document.addEventListener('click', (e) => {
-        const target = (e.target as HTMLElement).closest('[data-opp-action]') as HTMLElement | null;
-        if (!target) return;
-        const action = target.dataset.oppAction;
-        const oppId = target.dataset.oppId;
-        if (!action || !oppId) return;
+  document.addEventListener('click', (e) => {
+    const filterTarget = (e.target as HTMLElement).closest('[data-opp-filter]') as HTMLElement | null;
+    if (filterTarget) {
+      const nextFilter = filterTarget.dataset.oppFilter;
+      if (!nextFilter) return;
 
-        const card = document.querySelector(`[data-opp-id="${oppId}"].opportunity-card`) as HTMLElement | null;
+      const filterButtons = Array.from(document.querySelectorAll('[data-opp-filter]')) as HTMLElement[];
+      for (const button of filterButtons) {
+        button.classList.toggle('chip--active', button.dataset.oppFilter === nextFilter);
+      }
 
-        if (action === 'approve') {
-            if (card) {
-                card.classList.add('opp-card--done');
-                card.querySelector('.opp-actions')!.innerHTML =
-                    '<span class="status-badge status-badge--green">✓ Sent to Review Queue</span>';
-            }
-        } else if (action === 'skip' || action === 'mute') {
-            if (card) card.remove();
+      const list = document.getElementById('opportunities-list');
+      if (list) {
+        list.innerHTML = renderOpportunitiesList(nextFilter);
+      }
+      return;
+    }
+
+    const target = (e.target as HTMLElement).closest('[data-opp-action]') as HTMLElement | null;
+    if (!target) return;
+    const action = target.dataset.oppAction;
+    const oppId = target.dataset.oppId;
+    if (!action || !oppId) return;
+
+    const card = document.querySelector(`[data-opp-id="${oppId}"].opportunity-card`) as HTMLElement | null;
+
+    if (action === 'approve') {
+      if (card) {
+        card.classList.add('opp-card--done');
+        const actions = card.querySelector('.opp-actions');
+        if (actions) {
+          actions.innerHTML = '<span class="status-badge status-badge--green">✓ Sent to Review Queue</span>';
         }
-    });
+      }
+    } else if (action === 'edit') {
+      const draft = card?.querySelector('.opp-draft');
+      if (draft) {
+        draft.insertAdjacentHTML('afterend', '<p class="body-note">Draft editing stays manual for now — update the local research record or future approval flow before sending.</p>');
+        target.setAttribute('disabled', 'true');
+      }
+    } else if (action === 'skip' || action === 'mute') {
+      if (card) card.remove();
+    }
+  });
 }

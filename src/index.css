@@ -322,12 +322,14 @@ a:hover {
   transition: all .2s var(--ease-out);
 }
 
-.btn-primary {
+.btn-primary,
+.btn--primary {
   background: var(--accent-primary);
   color: var(--text-on-accent);
 }
 
-.btn-primary:hover {
+.btn-primary:hover,
+.btn--primary:hover {
   background: #7c6ef0;
   box-shadow: 0 0 20px var(--accent-primary-glow);
 }
@@ -350,18 +352,21 @@ a:hover {
   background: #e8826e;
 }
 
-.btn-ghost {
+.btn-ghost,
+.btn--ghost {
   background: transparent;
   color: var(--text-secondary);
   border: 1px solid var(--border-card);
 }
 
-.btn-ghost:hover {
+.btn-ghost:hover,
+.btn--ghost:hover {
   background: rgba(255, 255, 255, .04);
   color: var(--text-primary);
 }
 
-.btn-sm {
+.btn-sm,
+.btn--sm {
   padding: var(--space-xs) var(--space-sm);
   font-size: 11.5px;
 }
@@ -2184,6 +2189,45 @@ textarea.form-input {
 
 .btn--muted {
   color: var(--text-muted);
+}
+
+.opp-status {
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, .05);
+  color: var(--text-secondary);
+}
+
+.opp-source-sep {
+  margin: 0 6px;
+}
+
+.opp-context {
+  display: grid;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.opp-empty-state {
+  text-align: center;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge--green {
+  background: var(--accent-green-soft);
+  color: var(--accent-green);
 }
 
 /* ─── Preview Feed ─────────────────────────────────────────────── */

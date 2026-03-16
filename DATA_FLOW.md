@@ -169,3 +169,21 @@ Data crossing boundaries:
 - `ResearchOpportunityDashboardSummary` (dashboard UI summary)
 
 Guardrail note: this flow is still local-first and advisory. Summaries help Chris decide what deserves attention; they do not create outbound actions, queue replies automatically, or replace review.
+
+---
+
+## Flow G: Credential Flow
+
+```
+Environment Variables / UI Setup Store
+  -> server.ts (startup seed or runtime POST /api/credentials/:platform)
+  -> adapters.credentials (in-memory, server-side store)
+  -> adapters.resolveAdapter(channel)
+  -> <platform-adapter>.publish()
+```
+
+Data crossing boundaries:
+- `PlatformCredential` (core) – ONLY available in `adapters` layer.
+- `PlatformAvailability` (core) – Valid status flag safely crossing to UI/health endpoints.
+
+Guardrail note: The UI and business flow NEVER sees raw credentials. `credentials.ts` guarantees values do not cross into domain modules or UI.

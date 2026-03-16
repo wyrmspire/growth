@@ -16,6 +16,18 @@ export const glossary: Record<string, GlossaryEntry> = {
         label: 'Ideal Customer Profile',
         tooltip: 'A description of the exact type of person most likely to buy from you — their job, problems, and goals.',
     },
+    project: {
+        label: 'Project',
+        tooltip: 'A group of related tasks required to achieve a specific setup goal — like preparing brand assets or deploying a tracking pixel.',
+    },
+    task: {
+        label: 'Task',
+        tooltip: 'An individual step of work that needs to be done. It moves through stages of completion.',
+    },
+    kanban: {
+        label: 'Kanban Board',
+        tooltip: 'A visual way to manage work by moving task cards through columns representing stages of completion.',
+    },
     campaign: {
         label: 'Campaign',
         tooltip: 'A coordinated set of ads, posts, and messages designed to attract customers over a specific time period.',
@@ -175,6 +187,22 @@ export const glossary: Record<string, GlossaryEntry> = {
     approvalGate: {
         label: 'Approval Gate',
         tooltip: 'The required review checkpoint that blocks sending, scheduling, or publishing until you explicitly approve the item.',
+    },
+    apiKey: {
+        label: 'API Key',
+        tooltip: 'A secret credential issued by a social platform that lets GrowthOps publish and read data on your behalf. Never share it — treat it like a password.',
+    },
+    setupAccounts: {
+        label: 'Account Setup',
+        tooltip: 'The process of connecting your social media accounts by entering platform credentials so GrowthOps can publish content to them.',
+    },
+    oauthToken: {
+        label: 'OAuth Token',
+        tooltip: 'A short-lived credential that proves you authorised an app to act on your behalf. Tokens expire and must be refreshed periodically.',
+    },
+    platformCredentials: {
+        label: 'Platform Credentials',
+        tooltip: 'The combination of App ID, App Secret, and Access Token required to authenticate with a social platform API.',
     },
 };
 

@@ -11,12 +11,14 @@ const STAGE_HEADLINES: Record<'awareness' | 'consideration' | 'decision', string
 
 interface GenerateVariantsOptions {
     policyVersion?: string;
+    channelOverrides?: import('@core/types').ChannelStyleOverride[];
 }
 
 export interface CopyRequest {
     brief: CampaignBrief;
     plan: FunnelPlan;
     policyVersion?: string;
+    channelOverrides?: import('@core/types').ChannelStyleOverride[];
 }
 
 export function generateVariants(request: CopyRequest): ChannelVariantSet;
@@ -28,7 +30,9 @@ export function generateVariants(
 ): ChannelVariantSet {
     const brief = 'brief' in arg1 ? arg1.brief : arg1;
     const plan = 'plan' in arg1 ? arg1.plan : arg2;
-    const options = 'policyVersion' in arg1 ? { policyVersion: arg1.policyVersion } : arg3;
+    const options = 'policyVersion' in arg1 
+        ? { policyVersion: arg1.policyVersion, channelOverrides: arg1.channelOverrides } 
+        : arg3;
 
     if (!plan) {
         throw new Error('COPY_INPUT_INVALID');
@@ -59,7 +63,7 @@ export function generateVariants(
                 policyVersion: policy.version,
             };
 
-            variants.push(formatVariantForChannel(draft, policy));
+            variants.push(formatVariantForChannel(draft, policy, options.channelOverrides));
         }
     }
 

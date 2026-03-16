@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Mock Engine - Translation layer between product UI and module code.
  * This is the ONLY file that imports module mock functions.
  * The UI only sees product-shaped data returned from here.
@@ -24,11 +24,15 @@ import type {
     MarketSignal,
     OfferHypothesis,
     OfferProfile,
+    Project,
     PublishCalendarEntry,
     PublishDispatchResult,
     ReplyDraft,
     ReviewBatch,
     ReviewDecision,
+    ReviewDecisionAudit,
+    Task,
+    TaskStatus,
     VariantPerformanceRow,
     VariantScore,
 } from '../modules/core/src/types';
@@ -57,6 +61,92 @@ let currentProfile: OfferProfile | null = null;
 let currentCommentItems: CommentQueueItem[] = [];
 let currentReplies: ReplyDraft[] = [];
 let sentReplyIds = new Set<EntityId>();
+
+// ── Review notes & audit trail (REV-3, REV-5) ───────────────────────
+let reviewNotes = new Map<string, string>();
+let decisionAuditLog = new Map<string, ReviewDecisionAudit>();
+
+// ── Projects & Planning state ──────────────────────────────────────
+let _projects: Project[] = [];
+let _tasks: Task[] = [];
+
+function seedProjects(): void {
+    if (_projects.length) return;
+    _projects = [
+        { id: 'P-1', name: 'Facebook Page Setup',   status: 'active', description: 'Create and configure business Facebook page' },
+        { id: 'P-2', name: 'Brand Asset Prep',      status: 'active', description: 'Logo, cover photo, profile image, bio copy' },
+        { id: 'P-3', name: 'Ad Account Config',     status: 'active', description: 'Set up Meta Business Suite, payment, pixel' },
+    ];
+    _tasks = [
+        { id: 'T-1', title: 'Create Facebook Business Page',      status: 'todo',        projectId: 'P-1', description: 'Go to facebook.com/pages/create and follow the wizard' },
+        { id: 'T-2', title: 'Set profile picture & cover photo',  status: 'todo',        projectId: 'P-1', assignee: 'operator' },
+        { id: 'T-3', title: 'Write page About section',           status: 'todo',        projectId: 'P-1', description: 'Use brand voice from discovery interview' },
+        { id: 'T-4', title: 'Prepare logo (1024×1024 PNG)',       status: 'in_progress', projectId: 'P-2', assignee: 'operator' },
+        { id: 'T-5', title: 'Create cover image (1640×856)',      status: 'todo',        projectId: 'P-2' },
+        { id: 'T-6', title: 'Write one-line bio',                 status: 'completed',   projectId: 'P-2' },
+        { id: 'T-7', title: 'Create Meta Business Suite account', status: 'todo',        projectId: 'P-3' },
+        { id: 'T-8', title: 'Connect payment method',             status: 'todo',        projectId: 'P-3' },
+        { id: 'T-9', title: 'Install Meta Pixel on website',      status: 'todo',        projectId: 'P-3', description: 'Copy pixel code into site header, verify with Pixel Helper extension' },
+    ];
+}
+
+export function getProjects(): Project[] {
+    seedProjects();
+    return _projects;
+}
+
+export function getTasks(): Task[] {
+    seedProjects();
+    return _tasks;
+}
+
+export function getTasksByProject(projectId: string): Task[] {
+    return getTasks().filter((t) => t.projectId === projectId);
+}
+
+export function getTasksByStatus(status: TaskStatus): Task[] {
+    return getTasks().filter((t) => t.status === status);
+}
+
+export function createProject(name: string, description?: string): Project {
+    const project: Project = {
+        id: newEntityId('plan'),
+        name,
+        status: 'active',
+        description,
+    };
+    _projects.push(project);
+    eventLog.append('ProjectCreated', project.id as EntityId);
+    return project;
+}
+
+export function createTask(
+    projectId: string,
+    title: string,
+    description?: string,
+    assignee?: string,
+    dueDate?: string,
+): Task {
+    const task: Task = {
+        id: newEntityId('task'),
+        title,
+        status: 'todo',
+        projectId,
+        description,
+        assignee,
+        dueDate,
+    };
+    _tasks.push(task);
+    eventLog.append('TaskCreated', task.id as EntityId);
+    return task;
+}
+
+export function updateTaskStatus(taskId: string, newStatus: TaskStatus): void {
+    const task = _tasks.find((t) => t.id === taskId);
+    if (!task) throw new Error(`Task ${taskId} not found`);
+    task.status = newStatus;
+    eventLog.append('TaskStatusUpdated', task.id as EntityId, { status: newStatus });
+}
 
 export interface StarterPreset {
     id: string;
@@ -656,6 +746,7 @@ export function approveItem(itemId: EntityId): void {
         decision: 'approved',
         reviewerId: 'operator',
         timestamp: new Date().toISOString(),
+        note: reviewNotes.get(itemId),
     };
     approvals.decideReview(decision);
     if (!approvals.isApproved(itemId)) {
@@ -667,6 +758,7 @@ export function approveItem(itemId: EntityId): void {
         return;
     }
 
+    appendAuditEntry(itemId, 'approved', reviewNotes.get(itemId));
     syncApprovalPhase(itemId);
     setPageNotice('review', 'info', 'Item approved. It can now move to the next step.');
     if (item.kind === 'reply') {
@@ -702,6 +794,7 @@ export function rejectItem(itemId: EntityId): void {
         decision: 'rejected',
         reviewerId: 'operator',
         timestamp: new Date().toISOString(),
+        note: reviewNotes.get(itemId),
     };
     approvals.decideReview(decision);
     if (approvals.isApproved(itemId)) {
@@ -713,6 +806,7 @@ export function rejectItem(itemId: EntityId): void {
         return;
     }
 
+    appendAuditEntry(itemId, 'rejected', reviewNotes.get(itemId));
     syncApprovalPhase(itemId);
     setPageNotice('review', 'info', 'Item rejected. It will stay out of publishing until revised.');
     if (item.kind === 'reply') {
@@ -738,8 +832,61 @@ export function approveAll(): void {
     setPageNotice('review', 'info', `${pending.length} item(s) approved.`);
 }
 
+export function rejectAll(): void {
+    const pending = approvals.getPendingItems();
+    pending.forEach((item) => rejectItem(item.id));
+    setPageNotice('review', 'info', `${pending.length} item(s) rejected.`);
+}
+
 export function getReviewItems() {
     return approvals.getAllItems();
+}
+
+// ── Review Notes API (REV-3) ────────────────────────────────────────────────
+export function setReviewNote(itemId: string, note: string): void {
+    if (note.trim()) {
+        reviewNotes.set(itemId, note.trim());
+    } else {
+        reviewNotes.delete(itemId);
+    }
+}
+
+export function getReviewNote(itemId: string): string {
+    return reviewNotes.get(itemId) || '';
+}
+
+// ── Decision Audit Trail API (REV-5) ────────────────────────────────────────
+function appendAuditEntry(
+    itemId: EntityId,
+    decision: 'approved' | 'rejected',
+    note?: string,
+): void {
+    const existing = decisionAuditLog.get(itemId);
+    const entry = {
+        decision,
+        reviewerId: 'operator',
+        decidedAt: new Date().toISOString(),
+        notes: note || reviewNotes.get(itemId),
+    };
+    if (existing) {
+        existing.decision = decision;
+        existing.decidedAt = entry.decidedAt;
+        existing.notes = entry.notes;
+        existing.auditEntries.push(entry);
+    } else {
+        decisionAuditLog.set(itemId, {
+            itemId,
+            reviewerId: 'operator',
+            decision,
+            decidedAt: entry.decidedAt,
+            notes: entry.notes,
+            auditEntries: [entry],
+        });
+    }
+}
+
+export function getDecisionAudit(itemId: string): ReviewDecisionAudit | null {
+    return decisionAuditLog.get(itemId) || null;
 }
 
 export function scheduleAll(): PublishCalendarEntry[] {
@@ -763,6 +910,13 @@ export function publishNow(): PublishDispatchResult[] {
 
 export function getCalendar() {
     return publishing.getCalendar();
+}
+
+export function getPublishHistory() {
+    return publishing.getCalendar()
+        .slice()
+        .sort((a, b) => new Date(b.runAt).getTime() - new Date(a.runAt).getTime())
+        .slice(0, 10);
 }
 
 function loadMockComments(): CommentQueueItem[] {
@@ -1034,6 +1188,31 @@ export function getDashboard(): {
     };
 }
 
+/**
+ * getDashboardTrends — DASH-2
+ * Returns 7 deterministic mock data points (one per day for the past week)
+ * for each key campaign metric. Used to render sparklines on the dashboard.
+ * Values are intentionally static so the UI is stable in mock mode.
+ */
+export function getDashboardTrends(): {
+    cpl: number[];
+    roas: number[];
+    spend: number[];
+    revenue: number[];
+} {
+    return {
+        // CPL: downward trend is good (cost per lead decreasing)
+        cpl: [18.40, 17.20, 16.80, 15.50, 14.90, 14.10, 13.50],
+        // ROAS: upward trend (revenue multiplier improving)
+        roas: [2.2, 2.5, 2.8, 2.9, 3.1, 3.0, 3.2],
+        // Spend: steady ramp-up over the week
+        spend: [160, 175, 185, 190, 200, 195, 210],
+        // Revenue: growing faster than spend (improving efficiency)
+        revenue: [352, 437, 518, 551, 620, 585, 672],
+    };
+}
+
+
 export function getDiscoveryAdvisory(): AdvisoryState | null {
     return discoveryAdvisory;
 }
@@ -1066,6 +1245,7 @@ export function getCurrentInterview() { return currentInterview; }
 export function getCurrentHypotheses() { return currentHypotheses; }
 export function getCurrentProfile() { return currentProfile; }
 
+
 export function resetAll(): void {
     resetIdCounter();
     eventLog.clear();
@@ -1091,6 +1271,10 @@ export function resetAll(): void {
     commentsLoading = false;
     commentsAiAttempted = false;
     trackedPageViews.clear();
+    _projects = [];
+    _tasks = [];
+    reviewNotes.clear();
+    decisionAuditLog.clear();
 }
 
 export function getStarterPresets(): StarterPreset[] {
@@ -1109,4 +1293,121 @@ export function getPendingPreset(): StarterPreset | null {
 
 export function clearPendingPreset(): void {
     pendingPreset = null;
+}
+
+
+// ── Style Profile State (PP-9) ────────────────────────────────────────────
+let _selectedStyleProfile: string | null = null;
+
+export function getStyleProfiles(): Array<{ id: string; name: string; description: string }> {
+    return [
+        { id: 'professional', name: 'Professional', description: 'Clear, credible, results-focused' },
+        { id: 'casual',       name: 'Casual',       description: 'Friendly, approachable, conversational' },
+        { id: 'urgent',       name: 'Urgent',       description: 'Action-oriented, time-sensitive' },
+    ];
+}
+
+export function setSelectedStyleProfile(profileId: string | null): void {
+    _selectedStyleProfile = profileId;
+}
+
+export function getSelectedStyleProfile(): string | null {
+    return _selectedStyleProfile;
+}
+
+// Aliases matching projects.ts call sites (PP-9)
+export const getCurrentStyleProfile = getSelectedStyleProfile;
+export const setCurrentStyleProfile = setSelectedStyleProfile;
+
+// ── Generate Project Plan (PP-5) ─────────────────────────────────────────────
+/**
+ * Creates a set of ready-to-use projects and tasks based on the current
+ * discovery interview (or generic defaults if no interview is available).
+ * Each project/task is created via createProject()/createTask() so domain
+ * events fire and the Kanban board updates immediately.
+ */
+export function generateProjectPlan(): { projects: number; tasks: number } {
+    seedProjects(); // ensure state is initialised
+
+    const businessName = currentInterview?.data.businessName || null;
+    const prefix       = businessName ? `${businessName} — ` : '';
+
+    const plan: Array<{ name: string; description: string; tasks: string[] }> = businessName
+        ? [
+            {
+                name:        `${prefix}Facebook Page Setup`,
+                description: 'Create and configure the business Facebook page end-to-end.',
+                tasks: [
+                    'Create Facebook Business Page',
+                    'Upload profile photo and cover image',
+                    'Write the About section using brand voice',
+                    'Add contact details and business hours',
+                    'Enable page messaging',
+                ],
+            },
+            {
+                name:        `${prefix}Brand Assets`,
+                description: 'Prepare all visual assets needed for campaign launch.',
+                tasks: [
+                    'Finalise logo (1024×1024 PNG)',
+                    'Create cover image (1640×856 px)',
+                    'Write one-line bio for each channel',
+                    'Export brand colour hex values and fonts',
+                ],
+            },
+            {
+                name:        `${prefix}Ad Account Setup`,
+                description: 'Configure Meta Business Suite, payment, and tracking.',
+                tasks: [
+                    'Create Meta Business Suite account',
+                    'Connect payment method',
+                    'Install Meta Pixel on website',
+                    'Verify Pixel with Meta Pixel Helper',
+                    'Grant ad account access to agency (if applicable)',
+                ],
+            },
+        ]
+        : [
+            {
+                name:        'Social Media Setup',
+                description: 'Create and configure all required social accounts.',
+                tasks: [
+                    'Create Facebook Business Page',
+                    'Set up LinkedIn Company Page',
+                    'Create X (Twitter) business account',
+                ],
+            },
+            {
+                name:        'Content Pipeline',
+                description: 'Build the content production system for the campaign.',
+                tasks: [
+                    'Define content calendar structure',
+                    'Create post templates for each channel',
+                    'Set up approval workflow',
+                ],
+            },
+            {
+                name:        'Analytics Setup',
+                description: 'Install and verify tracking before campaign launches.',
+                tasks: [
+                    'Install tracking pixels',
+                    'Set up UTM parameter structure',
+                    'Configure dashboard reporting',
+                ],
+            },
+        ];
+
+    let projectCount = 0;
+    let taskCount    = 0;
+
+    for (const item of plan) {
+        const project = createProject(item.name, item.description);
+        projectCount++;
+        for (const title of item.tasks) {
+            createTask(project.id, title);
+            taskCount++;
+        }
+    }
+
+    return { projects: projectCount, tasks: taskCount };
 }

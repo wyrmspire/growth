@@ -7,6 +7,7 @@ Depended on by: all modules
 ## Exported Types
 
 - EntityId
+- IdPrefix (`camp | offer | brief | copy | var | batch | item | job | reply | comment | plan | task | hyp | sig | prof | int | style | srun | opp | eng | dec | prev`)
 - CampaignBrief
 - CopyVariant
 - ApprovalState
@@ -15,13 +16,27 @@ Depended on by: all modules
 - CommentIntent
 - CampaignMetricRow
 - AppError
+- Project — `{ id, name, status, description? }` (FW-1, P3)
+- Task — `{ id, title, status: TaskStatus, projectId, description?, dueDate?, assignee? }` (FW-1, P3)
+- TaskStatus — `'todo' | 'in_progress' | 'review' | 'completed' | 'done'` (FW-1, P3)
+- DomainEventName — now includes `ProjectCreated`, `TaskCreated`, `TaskStatusUpdated` (FW-2, P3), `CredentialSet`, `PlatformAvailabilityChecked` (ADAPT-1, Sprint 4)
 
-### Future types (staged in FUT-1, FUT-4 — not yet implemented)
+### Platform Credential types (ADAPT-1, Sprint 4 — adapters-layer only)
 
-- `StyleProfile` — `{ id, name, tone, formality, clarity, ctaIntensity, readingLevel, bannedTerms[], requiredPhrases[], allowedClaims[] }`
-- `ChannelStyleOverride` — `{ channel, maxLength, emojiPolicy, hashtagPolicy, lineBreakPolicy }`
-- `CampaignInstructionPack` — `{ campaignId, styleProfileId, channelOverrides[], complianceRules[] }`
-- `GeneratedCopyAudit` — `{ variantId, styleProfileId, policyVersion, violations[], score }`
+- `PlatformName` — `'meta' | 'linkedin' | 'x' | 'email'`
+- `PlatformCredential` — holds one platform credential value; **ONLY readable in `modules/adapters/src/`**
+- `CredentialStore` — interface for the in-memory credential Map; **ONLY used in `credentials.ts`**
+- `PlatformAvailability` — **SAFE cross-layer type**: boolean status per platform, NO token values; allowed in health endpoint and UI read-models
+
+### Staged future types (not yet wired into handlers)
+
+- `ReviewAssignment` — `{ itemId, assigneeId, assignedAt, slaMinutes }` (FW-5, P5)
+- `ReviewComment` — `{ id, itemId, reviewerId, createdAt, body, revisionNotes? }` (FW-5, P5)
+- `ReviewDecisionAudit` — `{ itemId, reviewerId, decision, decidedAt, notes?, auditEntries[] }` (FW-5, P5)
+- `StyleProfile` — `{ id, name, tone, formality, clarity, ctaIntensity, readingLevel, bannedTerms[], requiredPhrases[], allowedClaims[] }` (FUT-1)
+- `ChannelStyleOverride` — `{ channel, maxLength, emojiPolicy, hashtagPolicy, lineBreakPolicy }` (FUT-1)
+- `CampaignInstructionPack` — `{ campaignId, styleProfileId, channelOverrides[], complianceRules[] }` (FUT-1)
+- `GeneratedCopyAudit` — `{ variantId, styleProfileId, policyVersion, violations[], score }` (FUT-1)
 - `ApprovedCopySnippet` — `{ id, variantId, campaignId, channel, text, approvedAt, styleProfileId }` (copy-memory, FUT-4)
 - `ScoutSourceConfig`, `ScoutRun`, `OpportunityItem`, `SuggestedEngagement`, `OpportunityDecision` — see `modules/social-scout/CONTRACT.md` (FUT-3)
 

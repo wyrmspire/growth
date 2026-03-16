@@ -1,5 +1,7 @@
-﻿import { tip } from '../components/tooltip';
+import { tip } from '../components/tooltip';
 import * as engine from '../mock-engine';
+import { toastSuccess } from '../components/toast';
+import { getPlatformStatuses as setupStatuses, type PlatformId } from '../setup-store';
 
 export function renderLauncherPage(): string {
   const brief = engine.getCurrentBrief();
@@ -117,6 +119,35 @@ function renderAdvisory(advisory: NonNullable<ReturnType<typeof engine.getLaunch
 }
 
 function renderLaunchForm(profile: NonNullable<ReturnType<typeof engine.getCurrentProfile>>): string {
+  // Build platform list with connected status from setup-store
+  const statuses = setupStatuses();
+  const statusMap = new Map(statuses.map(s => [s.id, s.isConnected]));
+
+  // Core channels (always present) + extended channels
+  const coreChannels: { value: string; label: string; platformId: PlatformId | null; checked: boolean }[] = [
+    { value: 'meta', label: 'Meta', platformId: 'facebook', checked: true },
+    { value: 'linkedin', label: 'LinkedIn', platformId: 'linkedin', checked: true },
+    { value: 'x', label: 'X', platformId: 'twitter', checked: true },
+    { value: 'email', label: 'Email', platformId: null, checked: false },
+  ];
+  const extendedChannels: { value: string; label: string; platformId: PlatformId }[] = [
+    { value: 'instagram', label: 'Instagram', platformId: 'instagram' },
+    { value: 'reddit', label: 'Reddit', platformId: 'reddit' },
+    { value: 'tiktok', label: 'TikTok', platformId: 'tiktok' },
+    { value: 'youtube', label: 'YouTube', platformId: 'youtube' },
+    { value: 'substack', label: 'Substack', platformId: 'substack' },
+    { value: 'threads', label: 'Threads', platformId: null as unknown as PlatformId },
+  ];
+
+  function channelCheckbox(ch: { value: string; label: string; platformId: PlatformId | null; checked?: boolean }): string {
+    const connected = ch.platformId ? (statusMap.get(ch.platformId) ?? false) : false;
+    const dot = connected
+      ? '<span class="channel-dot channel-dot--connected" title="Connected"></span>'
+      : '<span class="channel-dot channel-dot--disconnected" title="Not set up"></span>';
+    const hint = connected ? '' : ' <span class="channel-hint">(not set up)</span>';
+    return `<label class="channel-label"><input type="checkbox" value="${ch.value}" ${ch.checked ? 'checked' : ''} />${dot} ${tip('channel' + ch.label, ch.label)}${hint}</label>`;
+  }
+
   return `
     <div class="card card-narrow">
       <div class="card-header">
@@ -134,10 +165,10 @@ function renderLaunchForm(profile: NonNullable<ReturnType<typeof engine.getCurre
         <div class="form-group">
           <label>${tip('channel', 'Channels')} (select which platforms to post on)</label>
           <div class="channel-row">
-            <label class="channel-label"><input type="checkbox" value="meta" checked /> ${tip('channelMeta', 'Meta')}</label>
-            <label class="channel-label"><input type="checkbox" value="linkedin" checked /> ${tip('channelLinkedin', 'LinkedIn')}</label>
-            <label class="channel-label"><input type="checkbox" value="x" checked /> ${tip('channelX', 'X')}</label>
-            <label class="channel-label"><input type="checkbox" value="email" /> ${tip('channelEmail', 'Email')}</label>
+            ${coreChannels.map(ch => channelCheckbox(ch)).join('\n            ')}
+          </div>
+          <div class="channel-row channel-row--extended">
+            ${extendedChannels.map(ch => channelCheckbox({ ...ch, checked: false })).join('\n            ')}
           </div>
         </div>
         <div class="form-group">
@@ -219,7 +250,7 @@ export function bindLauncherEvents(): void {
       event.preventDefault();
       const val = (id: string) => (document.getElementById(id) as HTMLInputElement)?.value || '';
       const checkedChannels = Array.from(form.querySelectorAll('input[type=checkbox]:checked'))
-        .map((checkbox) => (checkbox as HTMLInputElement).value) as ('meta' | 'linkedin' | 'x' | 'email')[];
+        .map((checkbox) => (checkbox as HTMLInputElement).value) as import('@core/types').ChannelName[];
 
       engine.trackLearningAction('launch.generate-pack', 'launcher', { channelCount: checkedChannels.length });
       await engine.createCampaignWithAdvisory({
@@ -229,6 +260,7 @@ export function bindLauncherEvents(): void {
         goals: val('launch-goals').split(',').map((goal) => goal.trim()).filter(Boolean),
       });
 
+      toastSuccess('Launch pack generated — copy variants are ready for review.');
       window.dispatchEvent(new CustomEvent('navigate', { detail: 'launcher' }));
     });
   }
@@ -238,6 +270,7 @@ export function bindLauncherEvents(): void {
     reviewBtn.addEventListener('click', () => {
       engine.trackLearningAction('launch.send-to-review', 'launcher');
       engine.sendToReview();
+      toastSuccess('Copy variants sent to the Review Queue.');
       window.dispatchEvent(new CustomEvent('navigate', { detail: 'review' }));
     });
   }

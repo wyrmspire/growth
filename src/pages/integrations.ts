@@ -5,6 +5,8 @@
  * No live API calls are made in this phase.
  */
 
+import { iconLink } from '../icons';
+
 export function renderIntegrationsPage(): string {
     return `
     <div class="page-shell">
@@ -17,7 +19,7 @@ export function renderIntegrationsPage(): string {
       </div>
 
       <div class="coach-block">
-        <div class="coach-block-icon">🔗</div>
+        <div class="coach-block-icon">${iconLink()}</div>
         <div class="coach-block-body">
           <strong>What you do here</strong>
           <p>Connect your Slack workspace or Office 365 account so review notifications go directly to where your team already works.</p>

@@ -20,6 +20,7 @@ export function scheduleAsset(
 
     const entry: PublishCalendarEntry = {
         jobId: newEntityId('job'),
+        assetId,
         assetLabel,
         channel,
         runAt,

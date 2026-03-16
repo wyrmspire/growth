@@ -1,12 +1,16 @@
 #!/usr/bin/env node
 /**
- * MCK-A3 — End-to-End Mock Flow Smoke Script
+ * MCK-A3 — End-to-End Mock Flow Smoke Script (TEST-7 EXPANDED)
  *
  * Exercises the full mock flow through the mock-engine translation layer:
- * discovery → launch → review → calendar → comments → dashboard
+ * discovery → launch → review → calendar → P&P → comments → dashboard
  *
- * Each step asserts at least one success condition (IDs, non-empty arrays,
- * or state transitions). Exits non-zero on any failure.
+ * TEST-7 additions:
+ *  - P&P: createProject, createTask, updateTaskStatus, getTasksByStatus,
+ *    generateProjectPlan (project/task counts verified)
+ *  - Calendar: scheduledAt timestamp + job_ prefix assertions on every entry
+ *
+ * Each step asserts at least one success condition. Exits non-zero on failure.
  *
  * Usage:
  *   npx tsx scripts/smoke-mock.ts
@@ -29,6 +33,14 @@ import {
     getDashboard,
     getEventLog,
     resetAll,
+    // P&P additions
+    getProjects,
+    getTasks,
+    createProject,
+    createTask,
+    updateTaskStatus,
+    generateProjectPlan,
+    getTasksByStatus,
 } from '../src/mock-engine';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
@@ -48,7 +60,7 @@ function logOk(message: string): void {
     console.log(`  ✓ ${message}`);
 }
 
-// ─── Main Flow ────────────────────────────────────────────────────────────
+// ─── Main Flow ────────────────────────────────────────────────────────────────
 
 try {
     // Start fresh
@@ -123,7 +135,11 @@ try {
     logStep('Calendar: Verify calendar');
     const calendar = getCalendar();
     assert(calendar.length > 0, 'Calendar has entries');
+    // TEST-7 enhanced assertions
+    assert(calendar.every(e => typeof e.runAt === 'string'), 'All entries have runAt timestamps');
+    assert(calendar.every(e => e.jobId.startsWith('job_')), 'All calendar entries have job_ prefix');
     logOk(`Calendar contains ${calendar.length} entries`);
+    logOk(`All entries have runAt timestamps and job_ IDs ✓`);
 
     logStep('Calendar: Publish now');
     const dispatched = publishNow();
@@ -131,6 +147,46 @@ try {
     assert(dispatched.length > 0, 'At least one dispatch result');
     assert(dispatched.every(d => d.success), 'All dispatches succeeded');
     logOk(`Dispatched ${dispatched.length} jobs`);
+
+    // ─── P&P Flow (TEST-7) ────────────────────────────────────────────────
+    logStep('P&P: Create a project manually');
+    const project = createProject('Smoke Campaign Setup', 'Pre-launch checklist');
+    assert(project.id.startsWith('plan_'), 'Project ID has plan_ prefix');
+    assert(project.name === 'Smoke Campaign Setup', 'Project name saved');
+    logOk(`Project created: ${project.id}`);
+
+    logStep('P&P: Create tasks and verify status transitions');
+    const task1 = createTask(project.id, 'Write ad copy');
+    const task2 = createTask(project.id, 'Set up tracking');
+    const task3 = createTask(project.id, 'Design landing page');
+    assert(task1.id.startsWith('task_'), 'Task ID has task_ prefix');
+    assert(task1.status === 'todo', 'New task starts as todo');
+    logOk(`Created 3 tasks under ${project.id}`);
+
+    updateTaskStatus(task1.id, 'in_progress');
+    updateTaskStatus(task2.id, 'in_progress');
+    updateTaskStatus(task2.id, 'review');
+    updateTaskStatus(task3.id, 'in_progress');
+    updateTaskStatus(task3.id, 'review');
+    updateTaskStatus(task3.id, 'completed');
+
+    const inProgress = getTasksByStatus('in_progress');
+    const inReview   = getTasksByStatus('review');
+    const done       = getTasksByStatus('completed');
+    assert(inProgress.some(t => t.id === task1.id), 'task1 transitions to in_progress');
+    assert(inReview.some(t => t.id === task2.id), 'task2 transitions to review');
+    assert(done.some(t => t.id === task3.id), 'task3 transitions to completed');
+    logOk(`Status transitions: in_progress=${inProgress.length}, review=${inReview.length}, done=${done.length}`);
+
+    logStep('P&P: Generate project plan from interview');
+    const projectsBefore = getProjects().length;
+    const tasksBefore    = getTasks().length;
+    generateProjectPlan();
+    const projectsAfter  = getProjects().length;
+    const tasksAfter     = getTasks().length;
+    assert(projectsAfter > projectsBefore, 'generateProjectPlan adds projects');
+    assert(tasksAfter > tasksBefore, 'generateProjectPlan adds tasks');
+    logOk(`Plan generated: +${projectsAfter - projectsBefore} projects, +${tasksAfter - tasksBefore} tasks`);
 
     // ─── Comments Flow ────────────────────────────────────────────────────
     logStep('Comments: Pull comments');
@@ -183,9 +239,10 @@ try {
     console.log('  1. Discovery: interview → hypotheses → profile approval');
     console.log('  2. Launch: campaign → funnel plan → variants → scores');
     console.log('  3. Review: batch creation → approval');
-    console.log('  4. Calendar: scheduling → dispatch');
-    console.log('  5. Comments: pull → triage → reply drafts → send');
-    console.log('  6. Dashboard: attribution, funnel, variant metrics');
+    console.log('  4. Calendar: scheduling → dispatch (timestamps + job_ assertions)');
+    console.log('  5. P&P: manual project + tasks + status transitions + generateProjectPlan');
+    console.log('  6. Comments: pull → triage → reply drafts → send');
+    console.log('  7. Dashboard: attribution, funnel, variant metrics');
     console.log();
 
     process.exit(0);

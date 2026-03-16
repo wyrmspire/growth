@@ -14,7 +14,7 @@ export function resetIdCounter(): void {
 
 const VALID_PREFIXES: Set<string> = new Set<string>([
     'camp', 'offer', 'brief', 'copy', 'var', 'batch', 'item',
-    'job', 'reply', 'comment', 'plan', 'hyp', 'sig', 'prof', 'int',
+    'job', 'reply', 'comment', 'plan', 'task', 'hyp', 'sig', 'prof', 'int',
 ]);
 
 export function isValidPrefix(prefix: string): prefix is IdPrefix {

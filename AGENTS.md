@@ -1,97 +1,117 @@
 # AGENTS.md — GrowthOps OS
 
-## Source of Truth
+## Repo Map
 
-1. `board.md` is the execution source of truth.
-2. Module contracts in `modules/*/CONTRACT.md` are the interface source of truth.
-3. Scope lock is `MVP_SCOPE.md`.
-4. `SYSTEM_ARCHITECTURE.md` describes the runtime shape and layer boundaries.
-5. `PROJECT_RULES.md` defines commandments, issue logging requirements, guard
-   script expectations, and the non-autonomous AI boundary.
+- **Server**: `server.ts` (Express routes, Genkit flow endpoints, job API, credential seeding)
+- **Database**: Not yet — Supabase scaffold in `src/supabase-client.ts` (returns null when env vars missing)
+- **UI Pages**: `src/pages/*.ts` — 13 pages (discovery, launcher, review, calendar, comments, dashboard, strategy-workspace, style-studio, integrations, opportunities, preview-feed, projects, setup)
+- **UI App Shell**: `src/main.ts` (routing, sidebar, breadcrumb, nav, error boundaries)
+- **Components**: `src/components/*.ts` (tooltip, toast, help-drawer, error-boundary, sparkline, counter)
+- **Icons**: `src/icons.ts` (30+ SVG icon functions + navIcon router)
+- **Mock Engine**: `src/mock-engine.ts` (translates UI actions into module mock.ts calls)
+- **Setup Store**: `src/setup-store.ts` (localStorage credential management, 8 platforms)
+- **CSS**: `src/index.css` (HSL tokens, glassmorphism, animations, all page/component styles)
+- **Domain Modules**: `modules/{core,funnel,strategy,copylab,approvals,publishing,comments,analytics,adapters,integrations,social-scout}/`
+- **Adapter Layer**: `modules/adapters/src/` — registry, credentials, platform adapters (meta, linkedin, x, email)
+- **Glossary**: `src/glossary.ts`
+- **Config**: `.env.local` (GEMINI_API_KEY, PORT, platform credential env vars)
+- **Tests**: `src/__tests/*.ts`, `modules/*/src/__tests__/*.ts`, `src/components/__tests__/*.ts`
+- **Scripts**: `scripts/` (smoke-mock.ts, check scripts)
 
-## Start Protocol
+## Ownership Zones
 
-1. Read `board.md` **in full** before coding.
-2. Pick only tasks in READY state.
-3. Claim task with agent id + UTC timestamp (all three claim steps required — see
-   Agent Workflow in board.md). Incomplete claims are invalid.
-4. Do not work on a task already claimed by another agent.
-5. Read the relevant `CONTRACT.md` files and source files before editing.
+| Zone | Files | Lane |
+|------|-------|------|
+| Publishing pipeline | `modules/publishing/src/*`, `modules/publishing/CONTRACT.md` | Lane 3 |
+| Launcher page | `src/pages/launcher.ts` | Lane 3 |
+| Review page | `src/pages/review.ts` | Lane 3 |
+| Calendar page | `src/pages/calendar.ts` | Lane 3 |
+| Dashboard page | `src/pages/dashboard.ts` | Lane 3 |
+| Server core | `server.ts` | Lane 4 |
+| Adapter credentials | `modules/adapters/src/credentials.ts` | Lane 4 |
+| Adapter registry | `modules/adapters/src/registry.ts` | Lane 4 |
+| Security scripts | `scripts/audit-secrets.ts` (NEW) | Lane 4 |
+| .env.local.example | `.env.local.example` | Lane 4 |
+| Root docs | `SYSTEM_ARCHITECTURE.md`, `DATA_FLOW.md`, `MVP_SCOPE.md` | Lane 4 |
+| Module contracts | `modules/*/CONTRACT.md` | Whoever modifies the module |
 
-## Ownership Rules
+**Shared file rule**: If both lanes need to touch the same file, Lane 3 goes first for UI-layer files, Lane 4 goes first for server-layer files. Add a note to the Coordination Log before editing.
 
-1. One owner per module at a time.
-2. One agent per file per task — coordinate in the Coordination Log if two tasks
-   touch the same file.
-3. Cross-module changes require either:
-   - a paired task in the target module, or
-   - integrator approval and a board note.
+## Patterns
 
-## Runtime Shape
+- All server endpoints go under Express routes in `server.ts`
+- All pages export `renderXxxPage(): string` + `bindXxxEvents(): void`
+- Pages are registered in `src/main.ts`: PageId type, NAV_ITEMS, PAGE_RENDERERS, PAGE_BINDERS, PAGE_HELP_KEYS
+- Toast notifications via `import { toastSuccess, toastError, toastInfo } from '../components/toast'`
+- Error boundaries: all page renderers wrapped by `safePage()` in main.ts
+- Adapters follow the factory pattern: `makeXxxAdapter(): ProviderAdapter` (see `x-adapter.ts` as reference)
+- Credentials are stored in-memory on the server via `modules/adapters/src/credentials.ts` — seeded from env vars at startup
+- Client-side setup credentials are in localStorage via `src/setup-store.ts` — these are separate from server credentials
+- Module contracts live in `modules/<name>/CONTRACT.md` — update them when adding/changing exports
+- Mock-safe mode: everything works without real credentials. Adapters fall back to deterministic mock responses
+- Style Studio channel overrides already define per-platform character limits (meta: 2200, linkedin: 3000, x: 280, email: 5000)
 
-In mock mode (current default):
+## Commands
 
-```
-ui -> mock-engine -> modules/*/src/mock.ts
-```
+- **Dev server (Vite UI)**: `npm run dev`
+- **Flow server**: `npm run server`
+- **Both together**: `npm run dev:full`
+- **Type check**: `npx tsc --noEmit`
+- **Tests**: `npm run test`
+- **Guard scripts**: `npm run check` (runs `check:drift`, `check:boundaries`, `smoke:mock`)
+- **Build**: `npm run build`
 
-In local advisory mode (optional when `npm run server` is running):
+## Pitfalls
 
-```
-ui -> mock-engine -> /api/flows/* -> Genkit flows
-```
+- `board.md` is over 250 lines from Sprint 3 — it has been compacted for Sprint 4
+- The launcher page already has 4-channel checkboxes (meta, linkedin, x, email) — extend, don't replace
+- Adapter registry only has 4 platforms (meta, linkedin, x, email) — the setup-store has 8 (reddit, instagram, tiktok, facebook, linkedin, substack, youtube, twitter)
+- `PlatformName` type in core/types.ts is `'meta' | 'linkedin' | 'x' | 'email'` — needs expansion if new adapters register
+- Credentials module uses `PlatformName` from core — any new platform must be added there first
+- `src/setup-store.ts` uses `PlatformId` which is different from core's `PlatformName` — do NOT conflate them
+- Server reads credentials from env vars only at startup (`seedCredentialsFromEnv`) — runtime credential updates require a restart or new endpoint
+- Publishing module's `scheduleAsset` has an extra `assetLabel` parameter in mock-engine that doesn't match the contract signature
 
-In production mode (future):
+## SOPs
 
-```
-ui -> workflows -> domain modules -> adapters
-```
+### SOP-1: Module boundary — adapters own credentials
+**Learned from**: SYSTEM_ARCHITECTURE.md §Secrets Boundary (universal rule)
 
-Agents must not assume provider-backed workflow automation is live unless a
-later workflow layer is explicitly documented as active.
+- ❌ Importing `credentials.ts` from UI or domain modules
+- ✅ Only files inside `modules/adapters/src/` import `credentials.ts`
+- Only `PlatformAvailability` (boolean status, no token data) may cross into UI/server
 
-## Doc Sync Rules
+### SOP-2: Mock-safe fallback is mandatory
+**Learned from**: Sprint 1 — design constraint, not a bug
 
-When code changes contract behavior, update in the same change set:
-- `modules/<module>/CONTRACT.md`
-- `modules/<module>/ANTI_PATTERNS.md` if a new failure mode appears
-- `board.md` status, Coordination Log, and Run Issues Log
+- ❌ Throwing errors when credentials are absent
+- ✅ Return deterministic mock responses and `console.info()` the mode
+- Every adapter must work without credentials. Never error on missing keys.
 
-## Issue Logging Rules
+### SOP-3: Update CONTRACT.md when changing module exports
+**Learned from**: Sprint 2 backlog cleanup — drift between code and docs
 
-- Record every **material issue** in the Run Issues Log the moment it is found.
-- A material issue is any contract divergence, test failure, build regression,
-  approval bypass, or missing event emission.
-- If a run has **no** material issues, explicitly write `no material issues found`
-  in the Coordination Log. Do not leave this silent.
+- ❌ Adding a new exported function and not touching CONTRACT.md
+- ✅ Export change + CONTRACT.md update in the same work item
+- `npm run check:drift` will catch missed updates
 
-## Guard Script Expectations
+### SOP-4: No autonomous outbound actions
+**Learned from**: Universal rule from PROJECT_RULES.md
 
-Before marking a task DONE, verify:
-- `npm run check:drift` — no contract-code divergence
-- `npm run check:boundaries` — no disallowed cross-module imports
-- `npm run smoke:mock` — mock-engine round-trip passes
+- ❌ Auto-publishing, auto-commenting, auto-sending without `approvals.isApproved() === true`
+- ✅ Every publish/send action checks approval state first
+- The approval gate is visible in UI language: "You approve, then it sends"
 
-Preferred local gate: `npm run check`
+### SOP-5: Test text changes
+**Learned from**: Sprint 3 — page render tests check for specific HTML markers
 
-## Definition of Done
+- ❌ Changing a page heading/section title and not updating page-render.test.ts
+- ✅ `grep -rn "old text" src/__tests__/` before changing visible text
+- Update any test assertions that match on the old text
 
-- Acceptance tests pass.
-- No boundary violations.
-- Board task marked DONE with completion note.
-- Relevant docs updated with concrete changes in same change set.
-- Material issues entered in Run Issues Log or `no material issues found`
-  noted in Coordination Log.
+## Lessons Learned (Changelog)
 
-## Safety Rules
-
-- No autonomous posting without approval state (`approvals.isApproved()` === true).
-- No autonomous comment sending without review state.
-- No instructions that encourage platform policy violations.
-- Market research collection must use source allowlists and API-first strategy;
-  Playwright fallback only for permitted public pages.
-- Genkit strategy agents are advisory and must route all outputs through
-  `approvals.createReviewBatch` + `approvals.decideReview` before any offer
-  or copy is acted upon.
-- Every AI-assisted output shown in the UI must be labeled as advisory and
-  pending human review.
+- **2026-03-14**: Sprint 3 found 9 tasks already done from a prior session — audit code before building the board
+- **2026-03-14**: `src/index.css` appeared in 2 lanes and caused a merge conflict — assign clear CSS zone ownership
+- **2026-03-15**: Lanes 1+2 of Sprint 4 completed — Setup page and adapter layer are in place
+- **2026-03-15**: Adapter registry has 4 platforms but setup-store has 8 — the mapping is intentionally different (setup-store is client-side, registry is server-side)

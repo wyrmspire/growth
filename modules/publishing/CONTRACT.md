@@ -19,8 +19,15 @@ Errors: APPROVAL_REQUIRED, SCHEDULE_TIME_INVALID
 - `src/mock-engine.ts` and `modules/publishing/src/mock.ts` currently call `scheduleAsset(assetId, assetLabel, runAt, channel)`.
 - The extra `assetLabel` parameter is mock-layer metadata used for calendar readability in the UI.
 
+### dispatchToChannel(jobId: EntityId, assetId: EntityId, channel: ChannelName, content: string, scheduledAt: string): DispatchResponse
+Purpose: Core router mapping a publish job to the target adapter while enforcing the approval gate.
+Errors: APPROVAL_MISSING, PUBLISH_FAILED, PUBLISH_ERROR, ADAPTER_NOT_CONFIGURED
+Invariants:
+- Uses `Registry.getAdapter()` to dispatch.
+- Halts with `APPROVAL_MISSING` if `approvals.isApproved(assetId)` fails.
+
 ### dispatchDue(now: string): PublishDispatchResult[]
-Purpose: Dispatch all due approved jobs.
+Purpose: Wrapper that scans the calendar and fires `dispatchToChannel` for all due approved jobs.
 Errors: DISPATCH_FAILED
 Invariants:
 - Only approved jobs are dispatched.

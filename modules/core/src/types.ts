@@ -13,6 +13,7 @@ export type IdPrefix =
     | 'reply'
     | 'comment'
     | 'plan'
+    | 'task'
     | 'hyp'
     | 'sig'
     | 'prof'
@@ -22,7 +23,8 @@ export type IdPrefix =
     | 'opp'
     | 'eng'
     | 'dec'
-    | 'prev';
+    | 'prev'
+    | 'cred';
 
 // ─── Campaign Brief ──────────────────────────────────────────────
 export interface CampaignBriefInput {
@@ -41,7 +43,7 @@ export interface CampaignBrief {
     createdAt: string;
 }
 
-export type ChannelName = 'meta' | 'linkedin' | 'x' | 'email';
+export type ChannelName = 'meta' | 'linkedin' | 'x' | 'email' | 'instagram' | 'reddit' | 'tiktok' | 'youtube' | 'substack' | 'threads' | 'facebook' | 'pinterest';
 
 // ─── Funnel ──────────────────────────────────────────────────────
 export type FunnelStageName = 'awareness' | 'consideration' | 'decision';
@@ -67,6 +69,7 @@ export interface CopyVariant {
     body: string;
     cta: string;
     policyVersion: string;
+    warnings?: string[];
 }
 
 export interface CopyPolicy {
@@ -86,6 +89,26 @@ export interface VariantScore {
     variantId: EntityId;
     score: number;
     reasons: string[];
+}
+
+// ─── Projects & Planning ─────────────────────────────────────────
+export interface Project {
+    id: string;            // UUID in prod, prefixed in mock
+    name: string;
+    status: 'active' | 'completed' | 'on_hold';
+    description?: string;
+}
+
+export type TaskStatus = 'todo' | 'in_progress' | 'review' | 'completed' | 'done';
+
+export interface Task {
+    id: string;
+    title: string;
+    status: TaskStatus;
+    projectId: string;     // FK → Project.id
+    description?: string;
+    dueDate?: string;      // ISO 8601
+    assignee?: string;
 }
 
 // ─── Approvals ───────────────────────────────────────────────────
@@ -123,6 +146,7 @@ export interface PublishJob {
 
 export interface PublishCalendarEntry {
     jobId: EntityId;
+    assetId: EntityId;
     assetLabel: string;
     channel: ChannelName;
     runAt: string;
@@ -418,7 +442,12 @@ export type DomainEventName =
     | 'OpportunityDecided'
     | 'PreviewPostPublished'
     | 'LearningPageViewed'
-    | 'LearningActionTracked';
+    | 'LearningActionTracked'
+    | 'ProjectCreated'
+    | 'TaskCreated'
+    | 'TaskStatusUpdated'
+    | 'CredentialSet'
+    | 'PlatformAvailabilityChecked';
 
 export interface DomainEvent {
     id: EntityId;
@@ -426,6 +455,114 @@ export interface DomainEvent {
     entityId: EntityId;
     timestamp: string;
     payload: Record<string, unknown>;
+}
+
+// ─── Future Approval Workflow (P5) ───────────────────────────────
+
+/**
+ * ReviewAssignment — associates a reviewer with a review batch item and
+ * tracks SLA compliance. Part of the P5 approval workflow overhaul.
+ * DO NOT modify existing approval logic to use this type yet.
+ */
+export interface ReviewAssignment {
+    /** ID of the ReviewItem this assignment belongs to. */
+    itemId: EntityId;
+    /** User identifier of the assigned reviewer. */
+    assigneeId: string;
+    /** ISO 8601 timestamp when the assignment was created. */
+    assignedAt: string;
+    /** SLA budget in minutes from assignedAt before the review is considered overdue. */
+    slaMinutes: number;
+}
+
+/**
+ * ReviewComment — a structured annotation left by a reviewer on a review item.
+ * Part of the P5 approval workflow overhaul.
+ */
+export interface ReviewComment {
+    /** Stable ID for this comment record. */
+    id: EntityId;
+    /** The item being commented on. */
+    itemId: EntityId;
+    /** User identifier of the commenter. */
+    reviewerId: string;
+    /** ISO 8601 timestamp the comment was created. */
+    createdAt: string;
+    /** Free-text body of the comment or revision instruction. */
+    body: string;
+    /** Optional revision notes providing specific change guidance. */
+    revisionNotes?: string;
+}
+
+/**
+ * ReviewDecisionAudit — immutable audit trail entry for every approval decision.
+ * Part of the P5 approval workflow overhaul.
+ */
+export interface ReviewDecisionAudit {
+    /** The item whose decision is being recorded. */
+    itemId: EntityId;
+    /** Reviewer who made the decision. */
+    reviewerId: string;
+    /** The decision that was made. */
+    decision: 'approved' | 'rejected' | 'reopened';
+    /** ISO 8601 timestamp of the decision. */
+    decidedAt: string;
+    /** Optional notes attached to this decision. */
+    notes?: string;
+    /** All audit entries for this item, ordered oldest-first. */
+    auditEntries: Array<{
+        decision: 'approved' | 'rejected' | 'reopened';
+        reviewerId: string;
+        decidedAt: string;
+        notes?: string;
+    }>;
+}
+
+// ─── Platform Credentials ───────────────────────────────────────
+/**
+ * PlatformCredential — holds a single platform API credential.
+ * SECURITY: Values NEVER leave the adapters layer. The UI and domain
+ * modules only ever see PlatformAvailability (boolean status), not tokens.
+ * Adapter layer is the ONLY layer that reads .value.
+ */
+export type PlatformName = 'meta' | 'linkedin' | 'x' | 'email' | 'instagram' | 'reddit' | 'tiktok' | 'facebook' | 'youtube' | 'substack' | 'pinterest' | 'threads';
+
+export interface PlatformCredential {
+    /** Which platform this credential belongs to. */
+    platform: PlatformName;
+    /** Credential kind — controls which fields are expected. */
+    kind: 'oauth_token' | 'api_key' | 'smtp';
+    /** Opaque credential value. NEVER expose to UI or domain modules. */
+    value: string;
+    /** Optional secondary secret (e.g. OAuth token secret for X). */
+    secret?: string;
+    /** ISO 8601 expiry for OAuth tokens; absence means non-expiring. */
+    expiresAt?: string;
+}
+
+/**
+ * CredentialStore — a thin wrapper around a Map kept in the adapter layer.
+ * Returned by getCredentialStore(); never serialised or returned to UI.
+ */
+export interface CredentialStore {
+    get(platform: PlatformName): PlatformCredential | undefined;
+    set(platform: PlatformName, cred: PlatformCredential): void;
+    has(platform: PlatformName): boolean;
+    clear(platform: PlatformName): void;
+    clearAll(): void;
+}
+
+/**
+ * PlatformAvailability — safe cross-layer status report.
+ * This is the ONLY credential-related type allowed to cross into UI or mock-engine.
+ * It carries NO token values, just boolean readiness per platform.
+ */
+export interface PlatformAvailability {
+    platform: PlatformName;
+    /** True when a valid credential is stored and not expired. */
+    available: boolean;
+    /** Human-readable reason for unavailability ("missing", "expired", "mock-safe"). */
+    reason?: string;
 }
 
 // ─── Errors ──────────────────────────────────────────────────────

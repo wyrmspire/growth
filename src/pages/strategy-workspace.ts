@@ -1,6 +1,7 @@
 import { tip } from '../components/tooltip';
 import * as engine from '../mock-engine';
 import type { StarterPreset } from '../mock-engine';
+import { iconMap, iconSearch, iconClipboard, iconLightbulb, iconFlask, iconHelpCircle } from '../icons';
 
 export function renderStrategyWorkspacePage(): string {
     const interview = engine.getCurrentInterview();
@@ -10,12 +11,12 @@ export function renderStrategyWorkspacePage(): string {
 
     return `
     <div class="page-header">
-      <h1>${tip('strategyWorkspace', '🗺️ Strategy Workspace')}</h1>
+      <h1>${tip('strategyWorkspace', `${iconMap()} Strategy Workspace`)}</h1>
       <p>Review your business profile, compare offer ideas, and decide what to promote — before writing a single word of copy.</p>
     </div>
 
     <div class="coach-block" id="sw-coach-block">
-      <div class="coach-block-icon">🎓</div>
+      <div class="coach-block-icon">${iconHelpCircle()}</div>
       <div class="coach-block-body">
         <div class="coach-what"><strong>What you do here:</strong> Look at your approved business profile and offer side-by-side. Compare options, refine your thinking, and confirm you're promoting the right thing to the right people.</div>
         <div class="coach-why"><strong>Why it matters:</strong> Campaigns built on a weak or vague offer waste money. Spending a few minutes here sharpens your positioning before you spend time generating copy.</div>
@@ -30,7 +31,7 @@ export function renderStrategyWorkspacePage(): string {
 function renderNoProfileState(presets: StarterPreset[]): string {
     return `
     <div class="sw-empty-state">
-      <div class="sw-empty-icon">🔍</div>
+      <div class="sw-empty-icon">${iconSearch()}</div>
       <h2>Start with Business Discovery</h2>
       <p>You haven't completed a business interview yet. The Strategy Workspace shows your profile and offer options once you do.</p>
       <a href="#" data-nav="discovery" class="btn btn-primary" style="margin-top: var(--space-md)">Go to Business Discovery →</a>
@@ -52,7 +53,7 @@ function renderWorkspaceContent(
       <!-- Business Profile Card -->
       <div class="sw-panel">
         <div class="sw-panel-header">
-          <span class="sw-panel-title">📋 Business Profile</span>
+          <span class="sw-panel-title"><span class="nav-icon">${iconClipboard()}</span> Business Profile</span>
           <a href="#" data-nav="discovery" class="btn btn-ghost btn-sm">Edit →</a>
         </div>
         <div class="sw-field-row">
@@ -85,7 +86,7 @@ function renderWorkspaceContent(
       <div class="sw-panel ${profile ? 'sw-panel--approved' : ''}">
         <div class="sw-panel-header">
           <span class="sw-panel-title">
-            ${profile ? '✅ Approved Offer' : `${tip('offerHypothesis', '💡 Offer Status')}`}
+            ${profile ? '✅ Approved Offer' : `${tip('offerHypothesis', `${iconLightbulb()} Offer Status`)}`}
           </span>
           ${profile ? '<span class="badge badge-approved">Ready to Launch</span>' : '<span class="badge badge-pending">Pending Selection</span>'}
         </div>
@@ -122,7 +123,7 @@ function renderOfferComparison(
 
     return `
     <hr class="section-divider" />
-    <h2 style="margin-bottom: var(--space-sm)">${tip('offerHypothesis', '💡 All Offer Options')}</h2>
+    <h2 style="margin-bottom: var(--space-sm)">${tip('offerHypothesis', `${iconLightbulb()} All Offer Options`)}</h2>
     <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: var(--space-lg)">
       These were generated from your business interview. Compare them here before committing to one.
     </p>
@@ -156,7 +157,7 @@ function renderPresetPanel(presets: StarterPreset[], context: 'discovery' | 'str
     <hr class="section-divider" />
     <div class="preset-panel">
       <div class="preset-panel-header">
-        <span class="preset-panel-title">🧪 Try a Starter Example Business</span>
+        <span class="preset-panel-title"><span class="nav-icon" style="vertical-align:middle">${iconFlask()}</span> Try a Starter Example Business</span>
         <span class="preset-panel-sub">New here? Load a realistic example to see how the system works — no real data needed.</span>
       </div>
       <div class="preset-grid">

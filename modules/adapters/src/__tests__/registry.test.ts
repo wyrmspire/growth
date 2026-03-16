@@ -2,6 +2,7 @@
  * ADP-A1 — Registry Tests
  */
 
+import { describe, test, expect } from 'vitest';
 import {
     getAdapter,
     listAdapters,
@@ -11,7 +12,11 @@ import {
 } from '../registry';
 import type { AdapterName, EntityId, AdapterPublishRequest, ReplyPayload } from '../../../core/src/types';
 
-const ALL_CHANNELS: AdapterName[] = ['meta', 'linkedin', 'x', 'email'];
+const ALL_CHANNELS: AdapterName[] = [
+    'meta', 'linkedin', 'x', 'email', 
+    'instagram', 'reddit', 'tiktok', 'facebook', 
+    'youtube', 'substack', 'pinterest', 'threads'
+];
 
 describe('Provider Registry', () => {
     describe('listAdapters()', () => {
@@ -31,7 +36,7 @@ describe('Provider Registry', () => {
         });
 
         test('returns false for unknown channel', () => {
-            expect(isAdapterRegistered('tiktok' as AdapterName)).toBe(false);
+            expect(isAdapterRegistered('unknown_channel' as AdapterName)).toBe(false);
         });
     });
 
@@ -39,21 +44,27 @@ describe('Provider Registry', () => {
         test.each(ALL_CHANNELS)('returns ok=true for "%s"', (name) => {
             const result = getAdapter(name);
             expect(result.ok).toBe(true);
-            expect(result.result).toBeDefined();
-            expect(result.result?.name).toBe(name);
+            if (result.ok) {
+                expect(result.result).toBeDefined();
+                expect(result.result.name).toBe(name);
+            }
         });
 
         test('returns ADAPTER_NOT_CONFIGURED for unknown provider', () => {
-            const result = getAdapter('tiktok' as AdapterName);
+            const result = getAdapter('unknown_channel' as AdapterName);
             expect(result.ok).toBe(false);
-            expect(result.error?.code).toBe('ADAPTER_NOT_CONFIGURED');
-            expect(result.error?.module).toBe('adapters');
+            if (!result.ok) {
+                expect(result.error.code).toBe('ADAPTER_NOT_CONFIGURED');
+                expect(result.error.module).toBe('adapters');
+            }
         });
     });
 
     describe('mock adapter — publish()', () => {
         test.each(ALL_CHANNELS)('%s adapter publish returns success response', (ch) => {
-            const adapter = getAdapter(ch).result!;
+            const result = getAdapter(ch);
+            if (!result.ok) throw new Error(result.error.message);
+            const adapter = result.result;
             const req: AdapterPublishRequest = {
                 jobId: `job_000001` as EntityId,
                 channel: ch,
@@ -70,7 +81,9 @@ describe('Provider Registry', () => {
 
     describe('mock adapter — ingestComments()', () => {
         test.each(ALL_CHANNELS)('%s adapter returns comment events', (ch) => {
-            const adapter = getAdapter(ch).result!;
+            const result = getAdapter(ch);
+            if (!result.ok) throw new Error(result.error.message);
+            const adapter = result.result;
             const events = adapter.ingestComments('camp_000001' as EntityId);
             expect(events.length).toBeGreaterThan(0);
             for (const ev of events) {
@@ -83,7 +96,9 @@ describe('Provider Registry', () => {
 
     describe('mock adapter — sendReply()', () => {
         test.each(ALL_CHANNELS)('%s adapter sendReply returns success', (ch) => {
-            const adapter = getAdapter(ch).result!;
+            const result = getAdapter(ch);
+            if (!result.ok) throw new Error(result.error.message);
+            const adapter = result.result;
             const payload: ReplyPayload = {
                 replyId: 'reply_000001' as EntityId,
                 channel: ch,

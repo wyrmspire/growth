@@ -1,6 +1,6 @@
-﻿# lanes.md - Sprint Mirror (Revision 5 — Sprint 2 Progress)
+# lanes.md - Sprint Mirror (Revision 6 — Sprint 3)
 
-Updated: 2026-03-05
+Updated: 2026-03-14
 Source of truth: `board.md`
 
 This file mirrors the current board state. It does not reopen finished work.
@@ -9,66 +9,60 @@ This file mirrors the current board state. It does not reopen finished work.
 
 All 5 lanes complete (17 tasks). See board.md coordination log for details.
 
-## Sprint 2 — Automation Foundations
+## Sprint 2 Status: CLOSED
 
-Started: 2026-03-05
-Goal: Build the automation backbone — style compiler, preview feed, background job API, and social scout pipeline.
+All 5 lanes complete (18 tasks). Style system, preview feed, background jobs, social scout foundation, backlog cleanup.
 
-### Lane 1 — Style System (FC-1) ✅ COMPLETE
-Owner: agent-5
+## Sprint 3 — Visual Identity & UX Overhaul
 
-| ID | Status | Task |
-|---|---|---|
-| STYLE-1 | ✅ DONE | Core types added (`StyleProfile`, `ChannelStyleOverride`, `CampaignInstructionPack`, `GeneratedCopyAudit`) |
-| STYLE-2 | ✅ DONE | Instruction pack compiler (7 tests, `modules/copylab/src/instructions.ts`) |
-| STYLE-3 | ✅ DONE | Style validator (7 tests, `modules/copylab/src/validate-style.ts`) |
-| STYLE-4 | ✅ DONE | Interactive Style Studio UI (live controls, tag editors, channel tabs, preview) |
+Started: 2026-03-14
+Goal: Phase 1 (Visual Identity & Design System) + Phase 2 (UX Flow & Navigation) from the 10-phase roadmap. Plus side-work prepping future phases.
 
-### Lane 2 — Preview Feed (Sandbox Publishing)
-Status: IN PROGRESS (2/4 done)
-Owner: agent-5
-
-| ID | Status | Task |
-|---|---|---|
-| PREV-1 | ✅ DONE | Preview feed page with platform-realistic cards |
-| PREV-2 | OPEN | Preview adapter in adapter registry |
-| PREV-3 | OPEN | Wire publish pipeline → preview feed |
-| PREV-4 | ✅ DONE | Added to navigation, help keys, renderers, CSS |
-
-### Lane 3 — Background Job API
-Status: IN PROGRESS (3/4 done)
-Owner: agent-5
-
-| ID | Status | Task |
-|---|---|---|
-| JOB-1 | ✅ DONE | `/api/jobs/*` router in `server.ts` |
-| JOB-2 | ✅ DONE | Scheduler in `src/scheduler.ts` + `npm run scheduler` |
-| JOB-3 | ✅ DONE | Scout-scan job wired with mock data |
-| JOB-4 | OPEN | Job dashboard card (deferred to next batch) |
-
-### Lane 4 — Backlog Cleanup
-Status: IN PROGRESS (1/4 done)
+### Lane 1 — Visual Identity & Design System (Phase 1)
 Owner: unassigned
+Note: `src/icons.ts` already exists (19 SVG icons). CSS rewrite WIP in `src/index.css` (+324/-83 uncommitted).
 
 | ID | Status | Task |
 |---|---|---|
-| BACK-3 | OPEN | Page analytics and event instrumentation |
-| BACK-4 | OPEN | Wire comment row actions |
-| CLEAN-1 | OPEN | Update `board.md` with Sprint 2 |
-| CLEAN-2 | ✅ DONE | Updated `lanes.md` to mirror Sprint 2 |
+| VIS-1 | READY | HSL color token system — replace hex/rgb with HSL tokens, add `--accent-secondary` |
+| VIS-2 | READY | Typography upgrade — Outfit headings, Inter body, variable weights |
+| VIS-3 | READY | Glassmorphism surfaces — glass panels on cards, sidebar, modals (depends: VIS-1) |
+| VIS-4 | READY | SVG icon wiring — connect `icons.ts` → `main.ts`, remove all emoji nav |
+| VIS-5 | READY | Micro-animations — page transitions, button ripple, skeleton states, shimmer (depends: VIS-1) |
+| VIS-6 | READY | Dark-mode polish — noise texture, tinted glass, glow nav dot (depends: VIS-1, VIS-3) |
+| VIS-7 | READY | Scrollbar & scroll polish — custom colors, smooth scroll (depends: VIS-1) |
 
-### Lane 5 — Social Scout Foundation (FC-6)
-Status: IN PROGRESS (3/4 done)
-Owner: agent-5
+### Lane 2 — UX Flow & Navigation (Phase 2)
+Owner: unassigned
+Note: `src/components/toast.ts` already exists (complete toast system). Nav structure changes in `src/main.ts` WIP.
 
 | ID | Status | Task |
 |---|---|---|
-| SCOUT-1 | ✅ DONE | Types and validation (`modules/social-scout/src/types.ts`) |
-| SCOUT-2 | ✅ DONE | Scoring engine (6 tests, `modules/social-scout/src/scorer.ts`) |
-| SCOUT-3 | OPEN | Opportunities Inbox UI with scored cards |
-| SCOUT-4 | ✅ DONE | Mock scanner pipeline (`modules/social-scout/src/scanner.ts`) |
+| NAV-1 | READY | Collapsible sidebar sections — Journey / Tools / Research groups (depends: VIS-4) |
+| NAV-2 | READY | Wire toast system into page actions — replace alert() calls (depends: VIS-1) |
+| NAV-3 | READY | Mobile nav drawer animation — slide + backdrop blur (depends: VIS-3) |
+| NAV-4 | READY | Global polish pass — spacing, hovers, focus rings, border-radius (depends: VIS-1, VIS-3) |
+| NAV-5 | READY | Progress breadcrumb bar — campaign journey steps with click-to-jump (depends: NAV-1) |
+
+### Lane 3 — Future Lay-Down (Side Work)
+Owner: unassigned
+Protocol: Add types, CSS, stubs only. Do NOT wire into existing pages.
+
+| ID | Status | Task | Target Phase |
+|---|---|---|---|
+| FW-1 | READY | Add `Project`, `Task`, `TaskStatus` types to core | P3 |
+| FW-2 | READY | Add project/task domain events | P3 (depends: FW-1) |
+| FW-3 | READY | Add project/task mock-engine state & CRUD API | P3 (depends: FW-1, FW-2) |
+| FW-4 | READY | Add P&P CSS classes (project-grid, kanban) | P3 (depends: VIS-1) |
+| FW-5 | READY | Add `ReviewAssignment`, `ReviewComment`, `ReviewDecisionAudit` types | P5 |
+| FW-6 | READY | Add calendar view toggle CSS (day/week/list) | P6 (depends: VIS-1) |
+| FW-7 | READY | Create sparkline component shell | P7 |
+| FW-8 | READY | Create animated counter utility | P7 |
+| FW-9 | READY | Create error boundary wrapper | P10 |
+| FW-10 | READY | Create Supabase client scaffold | P10 |
 
 ## Validation Baseline
 
 - `npm run test` → 458/458 PASS (40 test files)
 - `npm run build` → PASS (103.47 kB gzipped JS)
+- Uncommitted WIP: `src/icons.ts`, `src/components/toast.ts`, `src/index.css`, `src/main.ts`

@@ -1,6 +1,7 @@
-﻿import { tip } from '../components/tooltip';
+import { tip } from '../components/tooltip';
 import * as engine from '../mock-engine';
 import type { StarterPreset } from '../mock-engine';
+import { toastSuccess, toastInfo } from '../components/toast';
 
 export function renderDiscoveryPage(): string {
   const interview = engine.getCurrentInterview();
@@ -217,6 +218,7 @@ export function bindDiscoveryEvents(): void {
         competitiveAdvantage: val('disc-advantage'),
       });
       engine.clearPendingPreset();
+      toastSuccess('Interview complete — offer suggestions are ready.');
       window.dispatchEvent(new CustomEvent('navigate', { detail: 'discovery' }));
     });
   }
@@ -226,6 +228,7 @@ export function bindDiscoveryEvents(): void {
       const presetId = (button as HTMLElement).dataset.presetId || '';
       engine.trackLearningAction('discovery.choose-preset', 'discovery', { presetId });
       engine.loadStarterPreset(presetId);
+      toastInfo('Starter preset loaded — review the form below and submit.');
       window.dispatchEvent(new CustomEvent('navigate', { detail: 'discovery' }));
     });
   });
@@ -235,6 +238,7 @@ export function bindDiscoveryEvents(): void {
       const index = parseInt((button as HTMLElement).dataset.index || '0', 10);
       engine.trackLearningAction('discovery.approve-offer', 'discovery', { offerIndex: index });
       engine.approveOffer(index);
+      toastSuccess('Offer approved — head to Campaign Launcher to generate copy.');
       window.dispatchEvent(new CustomEvent('navigate', { detail: 'discovery' }));
     });
   });

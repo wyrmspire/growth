@@ -2,6 +2,7 @@ import {
   getSeedResearchRecords,
   sentenceCase,
 } from '../../modules/social-scout/src/research-store';
+import { iconBroadcast } from '../icons';
 
 /**
  * Opportunities Inbox — FUT-3 / RESEARCH-2
@@ -40,7 +41,7 @@ const PLATFORM_META: Record<string, { label: string; icon: string }> = {
 function mapRecordToOpportunity(record: SeedRecord): OpportunityView {
   const platformMeta = PLATFORM_META[record.source.platform] ?? {
     label: sentenceCase(record.source.platform),
-    icon: '📡',
+    icon: iconBroadcast(),
   };
 
   return {
@@ -142,7 +143,7 @@ export function renderOpportunitiesPage(): string {
       </div>
 
       <div class="coach-block">
-        <div class="coach-block-icon">📡</div>
+        <div class="coach-block-icon">${iconBroadcast()}</div>
         <div class="coach-block-body">
           <strong>What you do here</strong>
           <p>Review locally captured research opportunities before deciding whether they are worth engaging with. Each card shows the pain point, workflow context, and an advisory draft reply.</p>

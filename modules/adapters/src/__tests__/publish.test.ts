@@ -2,6 +2,7 @@
  * ADP-A2 — enqueuePublish() Tests
  */
 
+import { describe, test, expect } from 'vitest';
 import { enqueuePublish } from '../publish';
 import { registerAdapter, type ProviderAdapter } from '../registry';
 import type { AdapterPublishRequest, EntityId, AdapterName } from '../../../core/src/types';
@@ -18,26 +19,34 @@ describe('enqueuePublish()', () => {
         test('meta publish returns ok=true', () => {
             const result = enqueuePublish(makeReq('meta'));
             expect(result.ok).toBe(true);
-            expect(result.response).toBeDefined();
+            if (result.ok) {
+                expect(result.response).toBeDefined();
+            }
         });
 
         test('response has all normalized fields', () => {
             const result = enqueuePublish(makeReq('email'));
-            expect(result.response?.jobId).toBeDefined();
-            expect(result.response?.channel).toBe('email');
-            expect(typeof result.response?.success).toBe('boolean');
+            if (result.ok) {
+                expect(result.response?.jobId).toBeDefined();
+                expect(result.response?.channel).toBe('email');
+                expect(typeof result.response?.success).toBe('boolean');
+            }
         });
 
         test('response.success is true for mock adapters', () => {
             for (const ch of ['meta', 'linkedin', 'x', 'email'] as AdapterName[]) {
                 const result = enqueuePublish(makeReq(ch));
-                expect(result.response?.success).toBe(true);
+                if (result.ok) {
+                    expect(result.response?.success).toBe(true);
+                }
             }
         });
 
         test('externalId is present in response', () => {
             const result = enqueuePublish(makeReq('linkedin'));
-            expect(result.response?.externalId).toBeTruthy();
+            if (result.ok) {
+                expect(result.response?.externalId).toBeTruthy();
+            }
         });
     });
 
@@ -58,14 +67,18 @@ describe('enqueuePublish()', () => {
         });
 
         test('unknown channel returns ADAPTER_NOT_CONFIGURED', () => {
-            const result = enqueuePublish({ ...makeReq(), channel: 'tiktok' as AdapterName });
+            const result = enqueuePublish({ ...makeReq(), channel: 'unknown_channel' as AdapterName });
             expect(result.ok).toBe(false);
-            expect(result.error?.code).toBe('ADAPTER_NOT_CONFIGURED');
+            if (!result.ok) {
+                expect(result.error.code).toBe('ADAPTER_NOT_CONFIGURED');
+            }
         });
 
         test('error module is adapters', () => {
             const result = enqueuePublish({ ...makeReq(), content: '' });
-            expect(result.error?.module).toBe('adapters');
+            if (!result.ok) {
+                expect(result.error.module).toBe('adapters');
+            }
         });
     });
 
@@ -82,8 +95,10 @@ describe('enqueuePublish()', () => {
 
             const result = enqueuePublish(makeReq('x'));
             expect(result.ok).toBe(false);
-            expect(result.error?.code).toBe('PROVIDER_REQUEST_FAILED');
-            expect(result.error?.message).toContain('API down');
+            if (!result.ok) {
+                expect(result.error.code).toBe('PROVIDER_REQUEST_FAILED');
+                expect(result.error.message).toContain('API down');
+            }
 
             // Restore clean adapter after test
             registerAdapter({

@@ -1,5 +1,6 @@
-﻿import { tip } from '../components/tooltip';
+import { tip } from '../components/tooltip';
 import * as engine from '../mock-engine';
+import { toastSuccess, toastWarning, toastInfo } from '../components/toast';
 
 export function renderCommentsPage(): string {
   const brief = engine.getCurrentBrief();
@@ -193,6 +194,7 @@ export function bindCommentsEvents(): void {
       const replyId = (button as HTMLElement).dataset.replyId || '';
       engine.trackLearningAction('comments.approve-send-reply', 'comments', { replyId });
       engine.sendReply(replyId as any);
+      toastSuccess('Reply sent.');
       window.dispatchEvent(new CustomEvent('navigate', { detail: 'comments' }));
     });
   });
@@ -202,6 +204,7 @@ export function bindCommentsEvents(): void {
       const replyId = (button as HTMLElement).dataset.replyId || '';
       engine.trackLearningAction('comments.discard-reply', 'comments', { replyId });
       engine.discardReply(replyId as any);
+      toastWarning('Reply discarded.');
       window.dispatchEvent(new CustomEvent('navigate', { detail: 'comments' }));
     });
   });
@@ -211,6 +214,7 @@ export function bindCommentsEvents(): void {
       const replyId = (button as HTMLElement).dataset.replyId || '';
       engine.trackLearningAction('comments.edit-placeholder-clicked', 'comments', { replyId });
       engine.explainReplyEditUnavailable(replyId as any);
+      toastInfo('Inline edit is not available yet. Use Discard and re-generate from the Review Queue.');
       window.dispatchEvent(new CustomEvent('navigate', { detail: 'comments' }));
     });
   });
@@ -220,6 +224,7 @@ export function bindCommentsEvents(): void {
     sendAllBtn.addEventListener('click', () => {
       engine.trackLearningAction('comments.send-all-replies', 'comments');
       engine.sendReplies();
+      toastSuccess('All approved replies sent.');
       window.dispatchEvent(new CustomEvent('navigate', { detail: 'comments' }));
     });
   }

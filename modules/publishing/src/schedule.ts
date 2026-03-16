@@ -111,6 +111,7 @@ export function scheduleAsset(
 
     const entry: PublishCalendarEntry = {
         jobId: newEntityId('job'),
+        assetId: assetId,
         assetLabel: assetLabel.trim() || 'Untitled Asset',
         channel: channel as ChannelName,
         runAt,

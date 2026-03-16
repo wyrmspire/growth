@@ -21,8 +21,18 @@ function trimBodyToLimit(variant: CopyVariant, maxLength: number): string {
     return `${normalizedBody.slice(0, remaining - 3).trimEnd()}...`;
 }
 
-export function formatVariantForChannel(variant: CopyVariant, policy: CopyPolicy): CopyVariant {
-    const maxLength = policy.maxLength[variant.channel];
+export function formatVariantForChannel(
+    variant: CopyVariant,
+    policy: CopyPolicy,
+    overrides?: import('@core/types').ChannelStyleOverride[]
+): CopyVariant {
+    let maxLength = policy.maxLength[variant.channel];
+    
+    // W5: Use Style Studio channel overrides if they exist
+    const override = overrides?.find(o => o.channel === variant.channel);
+    if (override && typeof override.maxLength === 'number') {
+        maxLength = override.maxLength;
+    }
 
     if (typeof maxLength !== 'number') {
         throw new Error('CHANNEL_UNSUPPORTED');
@@ -33,11 +43,14 @@ export function formatVariantForChannel(variant: CopyVariant, policy: CopyPolicy
         headline: normalizeSpaces(variant.headline),
         body: normalizeSpaces(variant.body),
         cta: normalizeSpaces(variant.cta),
+        warnings: variant.warnings ? [...variant.warnings] : [],
     };
 
     if (countVariantCharacters(normalized) <= maxLength) {
         return normalized;
     }
+
+    normalized.warnings!.push(`Truncated: Exceeded channel max length of ${maxLength}.`);
 
     return {
         ...normalized,
@@ -45,10 +58,14 @@ export function formatVariantForChannel(variant: CopyVariant, policy: CopyPolicy
     };
 }
 
-export function formatChannelVariantSet(set: ChannelVariantSet, policy: CopyPolicy): ChannelVariantSet {
+export function formatChannelVariantSet(
+    set: ChannelVariantSet,
+    policy: CopyPolicy,
+    overrides?: import('@core/types').ChannelStyleOverride[]
+): ChannelVariantSet {
     return {
         ...set,
-        variants: set.variants.map((variant) => formatVariantForChannel(variant, policy)),
+        variants: set.variants.map((variant) => formatVariantForChannel(variant, policy, overrides)),
     };
 }
 

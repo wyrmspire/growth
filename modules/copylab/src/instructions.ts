@@ -37,6 +37,14 @@ const DEFAULT_CHANNEL_OVERRIDES: Record<ChannelName, ChannelStyleOverride> = {
         hashtagPolicy: 'none',
         lineBreakPolicy: 'short-paragraphs',
     },
+    instagram: { channel: 'instagram', maxLength: 2200, emojiPolicy: 'liberal', hashtagPolicy: 'open', lineBreakPolicy: 'short-paragraphs' },
+    reddit: { channel: 'reddit', maxLength: 10000, emojiPolicy: 'none', hashtagPolicy: 'none', lineBreakPolicy: 'short-paragraphs' },
+    tiktok: { channel: 'tiktok', maxLength: 2200, emojiPolicy: 'liberal', hashtagPolicy: 'open', lineBreakPolicy: 'single-block' },
+    youtube: { channel: 'youtube', maxLength: 5000, emojiPolicy: 'sparse', hashtagPolicy: 'branded-only', lineBreakPolicy: 'short-paragraphs' },
+    substack: { channel: 'substack', maxLength: 50000, emojiPolicy: 'sparse', hashtagPolicy: 'none', lineBreakPolicy: 'short-paragraphs' },
+    threads: { channel: 'threads', maxLength: 500, emojiPolicy: 'sparse', hashtagPolicy: 'open', lineBreakPolicy: 'short-paragraphs' },
+    facebook: { channel: 'facebook', maxLength: 2200, emojiPolicy: 'sparse', hashtagPolicy: 'open', lineBreakPolicy: 'short-paragraphs' },
+    pinterest: { channel: 'pinterest', maxLength: 500, emojiPolicy: 'sparse', hashtagPolicy: 'open', lineBreakPolicy: 'short-paragraphs' },
 };
 
 // ─── Compiler ────────────────────────────────────────────────────

@@ -18,6 +18,9 @@ Errors: COPY_POLICY_VIOLATION, CHANNEL_UNSUPPORTED
 Invariants:
 - Returns at least one variant per requested channel.
 - Tags output with policy version.
+- Enforces platform-specific character limits configured via `CopyPolicy` or `ChannelStyleOverride`.
+- Truncates oversized copy with an ellipsis string ('...') resulting in a maximum length less than or equal to the channel's allowed limit.
+- Pushes string explanations of any truncation to the `warnings` array of the respective `CopyVariant`.
 
 ### Mock-engine note (verified current, DOC-4 audit 2026-03-05)
 - `src/mock-engine.ts` currently imports `modules/copylab/src/mock.ts` and calls `generateVariants(brief, plan)`.

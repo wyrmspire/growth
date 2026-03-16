@@ -31,7 +31,7 @@
 
 ## Exit Criteria
 
-1. A user can complete Launch flow end-to-end with mock adapters.
+1. A user can complete Launch flow end-to-end with the publishing pipeline routing to real adapter configurations (mock-safe fallback applies when credentials are absent).
 2. A user can complete Offer Discovery flow and save a reviewed offer profile.
 3. A beginner can complete a guided learning walkthrough across all core pages.
 4. Every publish action requires approved artifact state.

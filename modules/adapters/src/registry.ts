@@ -3,6 +3,19 @@ import type {
     AdapterCommentEvent, ReplyPayload, EntityId, AppError, CommentRecord,
 } from '@core/types';
 import { newEntityId } from '@core/id';
+import { makeMetaAdapter } from './meta-adapter';
+import { makeLinkedInAdapter } from './linkedin-adapter';
+import { makeXAdapter } from './x-adapter';
+import { makeEmailAdapter } from './email-adapter';
+import { makeRedditAdapter } from './reddit-adapter';
+import { makeTikTokAdapter } from './tiktok-adapter';
+import { makeInstagramAdapter } from './instagram-adapter';
+import { makeFacebookAdapter } from './facebook-adapter';
+import { makeYouTubeAdapter } from './youtube-adapter';
+import { makeSubstackAdapter } from './substack-adapter';
+import { makePinterestAdapter } from './pinterest-adapter';
+import { makeThreadsAdapter } from './threads-adapter';
+export { getPlatformAvailability, getAllPlatformAvailability } from './credentials';
 
 // ─── ProviderAdapter interface ─────────────────────────────────────
 export interface ProviderAdapter {
@@ -83,11 +96,21 @@ function makeMockAdapter(channel: ChannelName): ProviderAdapter {
 }
 
 // ─── Registry ─────────────────────────────────────────────────────
+// Initialise with the real platform adapters (all mock-safe by default;
+// they degrade gracefully when credentials are absent).
 const _registry = new Map<AdapterName, ProviderAdapter>([
-    ['meta', makeMockAdapter('meta')],
-    ['linkedin', makeMockAdapter('linkedin')],
-    ['x', makeMockAdapter('x')],
-    ['email', makeMockAdapter('email')],
+    ['meta', makeMetaAdapter()],
+    ['linkedin', makeLinkedInAdapter()],
+    ['x', makeXAdapter()],
+    ['email', makeEmailAdapter()],
+    ['reddit', makeRedditAdapter()],
+    ['tiktok', makeTikTokAdapter()],
+    ['instagram', makeInstagramAdapter()],
+    ['facebook', makeFacebookAdapter()],
+    ['youtube', makeYouTubeAdapter()],
+    ['substack', makeSubstackAdapter()],
+    ['pinterest', makePinterestAdapter()],
+    ['threads', makeThreadsAdapter()],
 ]);
 
 /**
@@ -138,14 +161,23 @@ export function removeAdapter(name: AdapterName): void {
 }
 
 /**
- * Reset the registry to the 4 default mock adapters.
- * Called between tests.
+ * Reset the registry to the 4 real platform adapters (mock-safe).
+ * Called between tests to avoid cross-test state from registerAdapter() calls.
  */
 export function _resetRegistry(): void {
     _registry.clear();
-    for (const ch of ['meta', 'linkedin', 'x', 'email'] as ChannelName[]) {
-        _registry.set(ch, makeMockAdapter(ch));
-    }
+    _registry.set('meta', makeMetaAdapter());
+    _registry.set('linkedin', makeLinkedInAdapter());
+    _registry.set('x', makeXAdapter());
+    _registry.set('email', makeEmailAdapter());
+    _registry.set('reddit', makeRedditAdapter());
+    _registry.set('tiktok', makeTikTokAdapter());
+    _registry.set('instagram', makeInstagramAdapter());
+    _registry.set('facebook', makeFacebookAdapter());
+    _registry.set('youtube', makeYouTubeAdapter());
+    _registry.set('substack', makeSubstackAdapter());
+    _registry.set('pinterest', makePinterestAdapter());
+    _registry.set('threads', makeThreadsAdapter());
 }
 
 /**

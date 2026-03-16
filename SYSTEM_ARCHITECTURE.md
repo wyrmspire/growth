@@ -187,7 +187,7 @@ checkout. `npm run check` executes all three guard scripts in sequence.
 - OAuth tokens for Slack and Office 365 are encrypted at rest at the infrastructure level.
 - The `integrations` module stores connection status and scope metadata only — never tokens.
 - Token values never cross into UI page state or browser storage.
-- `adapters` is the only layer that makes API calls using credentials.
+- `adapters` is the only layer that makes API calls using credentials. It supports 8+ platforms via a unified credential store seeded from `server.ts` or `src/setup-store.ts`.
 - Mock-engine drift: if `mock.ts` implementations diverge from `src/index.ts`, the
   UI will behave differently in mock mode vs production. Guard scripts detect this.
 
